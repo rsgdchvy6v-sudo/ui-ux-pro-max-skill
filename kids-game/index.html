@@ -228,6 +228,10 @@
     .r-btn-inner   { display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .r-btn-inner .ar { font-family: var(--fa); font-size: .8em; }
 
+    /* ===== LANGUAGE ISOLATION ===== */
+    body.lang-en .ar-only { display: none !important; }
+    body.lang-ar .en-only { display: none !important; }
+
     /* ===== CONFETTI ===== */
     #confetti-overlay { position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; }
     .confetti-bit { position:absolute; top:-16px; border-radius:2px; animation: fall linear forwards; }
@@ -308,8 +312,8 @@
   <div class="menu-top" id="menu-top"><!-- JS --></div>
   <div class="menu-level-bar" id="menu-level-bar"><!-- JS --></div>
   <div class="menu-subtitle">
-    <span class="en">Choose a Game 🎮</span>
-    <span class="ar">اختر لعبة</span>
+    <span class="en-only">Choose a Game 🎮</span>
+    <span class="ar-only ar">اختر لعبة 🎮</span>
   </div>
   <div class="subjects-grid" id="subjects-grid"><!-- JS --></div>
 </div>
@@ -350,10 +354,12 @@
     <div class="levelup-badge" id="levelup-badge">🎉 Level Up!</div>
     <div class="results-btns">
       <button class="btn btn-primary" onclick="playAgain()">
-        <div class="r-btn-inner"><span>Play Again</span><span class="ar">العب مجدداً</span></div>
+        <span class="en-only">Play Again</span>
+        <span class="ar-only ar">العب مجدداً</span>
       </button>
       <button class="btn btn-green" onclick="goMenu()">
-        <div class="r-btn-inner"><span>Menu</span><span class="ar">القائمة</span></div>
+        <span class="en-only">Menu</span>
+        <span class="ar-only ar">القائمة</span>
       </button>
     </div>
   </div>
@@ -594,21 +600,29 @@ function _pickVoice(lang) {
   return pool.find(v => prefs.some(n => v.name.toLowerCase().includes(n))) || pool[0];
 }
 
+function _cleanText(text) {
+  // Remove characters that cause TTS to mispronounce (?, !, ·, emojis, slash combos)
+  return text
+    .replace(/[?؟!·\/]/g, '')
+    .replace(/\p{Emoji}/gu, '')
+    .trim();
+}
+
 function speakSeq(parts) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   let i = 0;
   function next() {
     if (i >= parts.length) return;
-    const p   = parts[i++];
-    const utt = new SpeechSynthesisUtterance(p.text);
+    const p    = parts[i++];
+    const utt  = new SpeechSynthesisUtterance(_cleanText(p.text));
     utt.lang   = p.lang  || 'en-US';
-    utt.rate   = p.rate  || 0.80;   // slow & clear for kids
-    utt.pitch  = p.pitch || 1.35;   // higher = warmer, less robotic
+    utt.rate   = p.rate  || 0.80;
+    utt.pitch  = p.pitch || 1.35;
     utt.volume = 1;
     const voice = _pickVoice(utt.lang);
     if (voice) utt.voice = voice;
-    utt.onend  = () => setTimeout(next, 220);
+    utt.onend   = () => setTimeout(next, 220);
     utt.onerror = () => setTimeout(next, 220);
     window.speechSynthesis.speak(utt);
   }
@@ -668,6 +682,7 @@ function selectProfile(id) {
 
 function selectLang(lang) {
   gameLang = lang;
+  document.body.className = 'lang-' + lang;
   goMenu();
 }
 
@@ -690,8 +705,9 @@ function renderMenu() {
     <div class="menu-profile-info">
       <span class="m-avatar">${activeProfile.avatar}</span>
       <div>
-        <div class="m-name-en">${activeProfile.nameEn}</div>
-        <div class="m-name-ar">${activeProfile.nameAr}</div>
+        <div class="m-name-en" style="font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
+          ${gameLang === 'en' ? activeProfile.nameEn : activeProfile.nameAr}
+        </div>
       </div>
     </div>
     <div class="m-lang-badge" onclick="showScreen('screen-lang')">${langLabel}</div>`;
@@ -699,8 +715,8 @@ function renderMenu() {
   $('menu-level-bar').innerHTML = `
     <div class="level-card">
       <div class="level-left">
-        <div class="level-title">${lv[3]} Level ${lvIdx + 1}</div>
-        <div class="level-sub">${lv[2]} · ${lv[1]}</div>
+        <div class="level-title">${lv[3]} ${gameLang === 'en' ? 'Level ' + (lvIdx+1) : 'المستوى ' + (lvIdx+1)}</div>
+        <div class="level-sub">${gameLang === 'en' ? lv[1] : lv[2]}</div>
       </div>
       <div class="level-prog-wrap">
         <div class="level-prog-fill" style="width:${pct}%"></div>
@@ -712,8 +728,9 @@ function renderMenu() {
     <div class="subject-card" onclick="startGame('${s.id}')"
       style="border-color:${SUBJECT_COLORS[i]}44;background:linear-gradient(135deg,#fff 55%,${SUBJECT_COLORS[i]}18)">
       <div class="s-icon">${s.emoji}</div>
-      <div class="s-name-en" style="color:${SUBJECT_COLORS[i]}">${s.en}</div>
-      <div class="s-name-ar">${s.ar}</div>
+      <div class="s-name-en" style="color:${SUBJECT_COLORS[i]};font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
+        ${gameLang === 'en' ? s.en : s.ar}
+      </div>
     </div>`).join('');
 }
 
@@ -733,7 +750,7 @@ function makeMathQ(age) {
     const wrongs = uniqueWrongs(count, 1, 5, 4);
     const pool   = shuffle([count, ...wrongs]);
     return {
-      html: `<div class="q-instr">How many? / كم عدد؟</div>
+      html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?'How many?':'كم عدد؟'}</div>
              <div class="q-count">${objs}</div>`,
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(count),
@@ -751,8 +768,7 @@ function makeMathQ(age) {
     const opWordEn = op === '+' ? 'plus' : 'minus';
     const opWordAr = op === '+' ? 'زائد' : 'ناقص';
     return {
-      html: `<div class="q-instr">${instrEN}</div>
-             <div class="q-instr ar">${instrAR}</div>
+      html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEN:instrAR}</div>
              <div class="q-math">${a} ${op} ${b} = ?</div>`,
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(ans),
@@ -772,8 +788,7 @@ function makeMathQ(age) {
   const opEn  = op==='+' ? 'plus' : op==='−' ? 'minus' : 'times';
   const opAr  = op==='+' ? 'زائد' : op==='−' ? 'ناقص' : 'مضروب في';
   return {
-    html: `<div class="q-instr">${instrEN}</div>
-           <div class="q-instr ar">${instrAR}</div>
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEN:instrAR}</div>
            <div class="q-math">${a} ${op} ${b} = ?</div>`,
     choices: pool.map(n => ({ label: String(n), sub: '' })),
     correct: pool.indexOf(ans),
@@ -795,8 +810,8 @@ function makeLetterQ() {
     return {
       html: `<div class="q-instr">What English sound does this Arabic letter make?</div>
              <div class="q-letter-ar">${tgt.ar}</div>
-             <div class="q-hint">${tgt.emoji} ${tgt.wordAr} · ${tgt.wordEn}</div>`,
-      choices: choices.map(l => ({ label: l.en, sub: l.ar, bigAr: false })),
+             <div class="q-hint">${tgt.emoji} ${tgt.wordEn}</div>`,
+      choices: choices.map(l => ({ label: l.en, sub: '' })),
       correct: choices.indexOf(tgt),
       audio: [{ text: 'What English sound does this letter make?', lang: 'en-US' }],
     };
@@ -804,8 +819,8 @@ function makeLetterQ() {
   return {
     html: `<div class="q-instr ar">أي حرف عربي يصدر هذا الصوت؟</div>
            <div class="q-letter-en">${tgt.en}</div>
-           <div class="q-hint">${tgt.emoji} ${tgt.wordEn} · ${tgt.wordAr}</div>`,
-    choices: choices.map(l => ({ label: l.ar, sub: l.en, bigAr: true })),
+           <div class="q-hint">${tgt.emoji} ${tgt.wordAr}</div>`,
+    choices: choices.map(l => ({ label: l.ar, sub: '', bigAr: true })),
     correct: choices.indexOf(tgt),
     audio: [{ text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA' }],
   };
@@ -846,10 +861,10 @@ function makeColorShapeQ() {
     return {
       html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
              <div>${svgShape(shape.key, color.hex, 86)}</div>
-             <div class="q-hint">${shape.en} · ${shape.ar}</div>`,
+             <div class="q-hint">${gameLang==='en'?shape.en:shape.ar}</div>`,
       choices: choices.map(c => ({
         label: gameLang==='en' ? c.en : c.ar,
-        sub:   gameLang==='en' ? c.ar : c.en,
+        sub:   '',
         bigAr: gameLang==='ar',
       })),
       correct: choices.indexOf(color),
@@ -867,10 +882,10 @@ function makeColorShapeQ() {
   return {
     html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
            <div>${svgShape(shape.key, color.hex, 86)}</div>
-           <div class="q-hint">${color.en} · ${color.ar}</div>`,
+           <div class="q-hint">${gameLang==='en'?color.en:color.ar}</div>`,
     choices: choices.map(s => ({
       label: gameLang==='en' ? s.en : s.ar,
-      sub:   gameLang==='en' ? s.ar : s.en,
+      sub:   '',
       bigAr: gameLang==='ar',
     })),
     correct: choices.indexOf(shape),
@@ -927,6 +942,8 @@ function startGame(subjectId) {
 
   $('gs-en').textContent = activeSubject.en;
   $('gs-ar').textContent = activeSubject.ar;
+  $('gs-en').style.display = gameLang === 'en' ? '' : 'none';
+  $('gs-ar').style.display = gameLang === 'ar' ? '' : 'none';
   $('score-display').textContent = '0';
   $('progress-fill').style.width = '0%';
 
@@ -1002,8 +1019,8 @@ function onAnswer(selected) {
 }
 
 function showFeedback(l1, l2, col) {
-  $('fb-l1').textContent = l1;
-  $('fb-l2').textContent = l2;
+  $('fb-l1').textContent = gameLang === 'en' ? l1 : l2;
+  $('fb-l2').textContent = '';
   $('feedback').style.color = col;
   $('feedback').classList.add('show');
 }
@@ -1034,9 +1051,12 @@ function showResults() {
     : { emoji:'💪', en:'Keep Trying!',    ar:'استمر في المحاولة!' };
 
   $('res-emoji').textContent    = d.emoji;
-  $('res-title-en').textContent = d.en;
-  $('res-title-ar').textContent = d.ar;
-  $('res-score').textContent    = `${sessionScore} / ${total} correct · صحيح`;
+  $('res-title-en').textContent = gameLang === 'en' ? d.en : d.ar;
+  $('res-title-en').className   = gameLang === 'ar' ? 'res-title-en ar' : 'res-title-en';
+  $('res-title-ar').textContent = '';
+  $('res-score').textContent = gameLang === 'en'
+    ? `${sessionScore} / ${total} correct`
+    : `${sessionScore} / ${total} صحيح`;
 
   const row = $('res-stars');
   row.innerHTML = '';
