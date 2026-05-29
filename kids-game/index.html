@@ -853,7 +853,7 @@ function makeMathQ(age) {
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(ans),
       audio: gameLang === 'en'
-        ? [{ text: `What is ${a} ${opLabel} ${b}`, lang: 'en-US' }]
+        ? [{ text: `What is the answer`, lang: 'en-US' }]
         : [{ text: `ما هي الإجابة`, lang: 'ar-SA' }],
     };
   }
@@ -877,7 +877,7 @@ function makeMathQ(age) {
     choices: pool.map(n => ({ label: String(n), sub: '' })),
     correct: pool.indexOf(ans),
     audio: gameLang === 'en'
-      ? [{ text: `What is ${a} ${opDef.en} ${b}`, lang: 'en-US' }]
+      ? [{ text: `What is the answer`, lang: 'en-US' }]
       : [{ text: `ما هي الإجابة`, lang: 'ar-SA' }],
   };
 }
