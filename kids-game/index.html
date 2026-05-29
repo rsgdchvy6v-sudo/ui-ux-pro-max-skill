@@ -805,46 +805,49 @@ function makeMathQ(age) {
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(count),
       audio: gameLang === 'en'
-        ? [{ text: `Count the ${emo.enP}! How many are there?`, lang: 'en-US' }]
-        : [{ text: `كم عدد؟`, lang: 'ar-SA' }],
+        ? [{ text: `Count the ${emo.enP}. How many are there`, lang: 'en-US' }]
+        : [{ text: `كم عدد`, lang: 'ar-SA' }],
     };
   }
 
   if (age <= 5) {
-    let a, b, op, ans;
-    if (Math.random() < 0.5) { a=rand(1,8); b=rand(1,10-a); op='+'; ans=a+b; }
-    else                       { a=rand(2,10); b=rand(1,a-1); op='−'; ans=a-b; }
-    const pool    = shuffle([ans, ...uniqueWrongs(ans, Math.max(0,ans-3), ans+3, 2)]);
-    const opWordEn = op === '+' ? 'plus' : 'minus';
-    const opWordAr = op === '+' ? 'زائد' : 'ناقص';
+    let a, b, opSym, opLabel, ans;
+    if (Math.random() < 0.5) { a=rand(1,8); b=rand(1,10-a); opSym='+'; opLabel='plus';  ans=a+b; }
+    else                       { a=rand(2,10); b=rand(1,a-1); opSym='-'; opLabel='minus'; ans=a-b; }
+    const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(0,ans-3), ans+3, 2)]);
+    const displayOp = opSym === '+' ? '+' : '−';
     return {
       html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEN:instrAR}</div>
-             <div class="q-math">${a} ${op} ${b} = ?</div>`,
+             <div class="q-math">${a} ${displayOp} ${b} = ?</div>`,
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(ans),
       audio: gameLang === 'en'
-        ? [{ text: `What is ${a} ${opWordEn} ${b}?`, lang: 'en-US' }]
-        : [{ text: `ما هي الإجابة؟`, lang: 'ar-SA' }],
+        ? [{ text: `What is ${a} ${opLabel} ${b}`, lang: 'en-US' }]
+        : [{ text: `ما هي الإجابة`, lang: 'ar-SA' }],
     };
   }
 
-  const ops = ['+','−','×'];
-  const op  = ops[rand(0,2)];
+  const opDefs = [
+    { sym: '+', display: '+', en: 'plus',  ar: 'زائد',      calc: (a,b)=>a+b, minA:4,  maxA:15, minB:4,  maxB:15 },
+    { sym: '-', display: '−', en: 'minus', ar: 'ناقص',      calc: (a,b)=>a-b, minA:6,  maxA:20, minB:1,  maxB:null },
+    { sym: '*', display: '×', en: 'times', ar: 'مضروب في', calc: (a,b)=>a*b, minA:2,  maxA:5,  minB:2,  maxB:5 },
+  ];
+  const opDef = opDefs[rand(0, opDefs.length - 1)];
   let a, b, ans;
-  if (op==='+')  { a=rand(4,15); b=rand(4,15); ans=a+b; }
-  else if(op==='−') { a=rand(6,20); b=rand(1,a-1); ans=a-b; }
-  else              { a=rand(2,5);  b=rand(2,5);   ans=a*b; }
-  const pool  = shuffle([ans, ...uniqueWrongs(ans, Math.max(1,ans-7), ans+7, 3)]);
-  const opEn  = op==='+' ? 'plus' : op==='−' ? 'minus' : 'times';
-  const opAr  = op==='+' ? 'زائد' : op==='−' ? 'ناقص' : 'مضروب في';
+  if (opDef.sym === '-') {
+    a = rand(6, 20); b = rand(1, a - 1); ans = a - b;
+  } else {
+    a = rand(opDef.minA, opDef.maxA); b = rand(opDef.minB, opDef.maxB); ans = opDef.calc(a, b);
+  }
+  const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(1, ans-7), ans+7, 3)]);
   return {
     html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEN:instrAR}</div>
-           <div class="q-math">${a} ${op} ${b} = ?</div>`,
+           <div class="q-math">${a} ${opDef.display} ${b} = ?</div>`,
     choices: pool.map(n => ({ label: String(n), sub: '' })),
     correct: pool.indexOf(ans),
     audio: gameLang === 'en'
-      ? [{ text: `What is ${a} ${opEn} ${b}?`, lang: 'en-US' }]
-      : [{ text: `ما هي الإجابة؟`, lang: 'ar-SA' }],
+      ? [{ text: `What is ${a} ${opDef.en} ${b}`, lang: 'en-US' }]
+      : [{ text: `ما هي الإجابة`, lang: 'ar-SA' }],
   };
 }
 
