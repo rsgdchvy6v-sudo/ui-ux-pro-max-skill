@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>🌟 Learning Stars | نجوم التعلم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&family=Nunito:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== VARIABLES & RESET ===== */
+    :root {
+      --purple: #6C63FF;
+      --pink:   #FF6B9D;
+      --green:  #11998e;
+      --orange: #F7971E;
+      --correct:#4CAF50;
+      --wrong:  #FF5252;
+      --star:   #FFD700;
+      --radius: 22px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.14);
+      --fe:     'Nunito', sans-serif;
+      --fa:     'Noto Sans Arabic', sans-serif;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+    body {
+      font-family: var(--fe);
+      background: linear-gradient(150deg, #667eea 0%, #764ba2 55%, #f953c6 100%);
+      min-height: 100vh; min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ===== SCREENS ===== */
+    .screen {
+      display: none; width: 100%;
+      min-height: 100vh; min-height: 100dvh;
+      padding: 20px 16px 36px;
+      flex-direction: column; align-items: center; gap: 16px;
+    }
+    .screen.active { display: flex; }
+
+    /* ===== SHARED COMPONENTS ===== */
+    .btn { border: none; border-radius: 50px; cursor: pointer;
+           font-family: var(--fe); font-weight: 900;
+           transition: transform .12s, opacity .12s; }
+    .btn:active { transform: scale(.93); opacity: .82; }
+
+    .back-btn { background: rgba(255,255,255,.2); color: white;
+                width: 56px; height: 56px; font-size: 1.5rem;
+                display: flex; align-items: center; justify-content: center; flex-shrink:0; }
+    .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color:white;
+                   padding:16px 28px; font-size:1.05rem; min-height:60px; min-width:140px;
+                   box-shadow:0 4px 16px rgba(102,126,234,.45); }
+    .btn-green   { background: linear-gradient(135deg,#11998e,#38ef7d); color:white;
+                   padding:16px 28px; font-size:1.05rem; min-height:60px; min-width:140px;
+                   box-shadow:0 4px 16px rgba(17,153,142,.4); }
+    .btn-orange  { background: linear-gradient(135deg,#F7971E,#FFD200); color:#333;
+                   padding:16px 28px; font-size:1.05rem; min-height:60px; min-width:140px;
+                   box-shadow:0 4px 16px rgba(247,151,30,.4); }
+
+    .ar { font-family: var(--fa) !important; direction: rtl; }
+
+    /* ===== PROFILE SCREEN ===== */
+    #screen-profiles { justify-content: center; }
+    .app-title { text-align: center; color: white; margin-bottom: 6px; }
+    .app-title .en { font-size: 2.1rem; font-weight: 900; }
+    .app-title .ar { font-size: 1.55rem; font-family: var(--fa); opacity: .88; display: block; margin-top: 2px; }
+
+    .profiles-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px;
+                     width: 100%; max-width: 720px; }
+    .profile-card { background: white; border-radius: 26px; padding: 22px 14px 18px;
+                    text-align: center; cursor: pointer; box-shadow: var(--shadow);
+                    transition: transform .13s; border: 4px solid transparent;
+                    display: flex; flex-direction: column; align-items: center; gap: 6px;
+                    min-height: 165px; }
+    .profile-card:active { transform: scale(.94); }
+    .p-avatar   { font-size: 3rem; line-height: 1; }
+    .p-name-en  { font-size: 1.3rem; font-weight: 900; }
+    .p-name-ar  { font-size: 1.05rem; font-family: var(--fa); color: #666; font-weight: 700; }
+    .p-meta     { font-size: .78rem; color: #aaa; font-weight: 700; }
+    .p-level    { font-size: .88rem; font-weight: 900; color: var(--purple); }
+    .p-stars    { font-size: .82rem; font-weight: 900; color: var(--star); }
+
+    /* ===== LANGUAGE SCREEN ===== */
+    #screen-lang { justify-content: center; }
+    .lang-greeting { color: white; text-align: center; }
+    .lang-greeting .en { font-size: 1.8rem; font-weight: 900; }
+    .lang-greeting .ar { font-size: 1.45rem; font-family: var(--fa); opacity: .88; display: block; margin-top: 4px; }
+    .lang-subtitle { color: rgba(255,255,255,.82); font-size: 1rem; font-weight: 700; text-align: center; }
+
+    .lang-grid { display: grid; grid-template-columns: repeat(2,1fr);
+                 gap: 16px; width: 100%; max-width: 560px; margin-top: 8px; }
+    .lang-card { background: white; border-radius: 28px; padding: 30px 18px;
+                 text-align: center; cursor: pointer; box-shadow: var(--shadow);
+                 transition: transform .13s; display: flex; flex-direction: column;
+                 align-items: center; gap: 12px; min-height: 190px;
+                 border: 4px solid transparent; }
+    .lang-card:active { transform: scale(.93); }
+    .lang-flag  { font-size: 3.8rem; line-height: 1; }
+    .lang-name  { font-size: 1.5rem; font-weight: 900; }
+    .lang-sub   { font-size: .9rem; color: #888; font-weight: 700; }
+
+    /* ===== MENU SCREEN ===== */
+    .menu-top { width: 100%; max-width: 720px;
+                display: flex; align-items: center; justify-content: space-between; }
+    .menu-profile-info { display: flex; align-items: center; gap: 10px; }
+    .m-avatar   { font-size: 2.3rem; }
+    .m-name-en  { font-size: 1.2rem; font-weight: 900; color: white; }
+    .m-name-ar  { font-size: .9rem; font-family: var(--fa); color: rgba(255,255,255,.8); }
+    .m-lang-badge { background: rgba(255,255,255,.22); color:white; padding: 8px 14px;
+                    border-radius: 50px; font-size: .85rem; font-weight: 900; cursor: pointer; }
+    .menu-level-bar { width: 100%; max-width: 720px; }
+    .level-card { background: rgba(255,255,255,.15); border-radius: 16px;
+                  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .level-left { color: white; }
+    .level-title { font-size: 1.05rem; font-weight: 900; }
+    .level-sub   { font-size: .8rem; opacity: .8; font-family: var(--fa); }
+    .level-prog-wrap { flex: 1; margin: 0 14px; height: 10px;
+                       background: rgba(255,255,255,.25); border-radius: 50px; overflow: hidden; }
+    .level-prog-fill { height: 100%; background: var(--star);
+                       border-radius: 50px; transition: width .5s ease; }
+    .level-stars { color: var(--star); font-weight: 900; font-size: .95rem; }
+
+    .menu-subtitle { color: white; text-align: center; width: 100%; max-width: 720px; }
+    .menu-subtitle .en { font-size: 1.3rem; font-weight: 900; }
+    .menu-subtitle .ar { font-size: 1rem; font-family: var(--fa); opacity: .85; display: block; }
+
+    .subjects-grid { display: grid; grid-template-columns: repeat(2,1fr);
+                     gap: 14px; width: 100%; max-width: 720px; }
+    .subject-card { background: white; border-radius: 24px; padding: 26px 14px 22px;
+                    text-align: center; cursor: pointer; box-shadow: var(--shadow);
+                    transition: transform .13s; display: flex; flex-direction: column;
+                    align-items: center; gap: 10px; min-height: 148px; border: 3px solid transparent; }
+    .subject-card:active { transform: scale(.94); }
+    .s-icon    { font-size: 2.8rem; }
+    .s-name-en { font-size: 1.05rem; font-weight: 900; }
+    .s-name-ar { font-size: .9rem; font-family: var(--fa); color: #666; font-weight: 700; }
+
+    /* ===== GAME SCREEN ===== */
+    .game-top { width: 100%; max-width: 720px;
+                display: flex; align-items: center; justify-content: space-between; }
+    .game-label { display: flex; flex-direction: column; align-items: center; color: white; }
+    .game-label .en { font-size: .95rem; font-weight: 900; }
+    .game-label .ar { font-size: .8rem; font-family: var(--fa); opacity: .85; }
+    .score-chip { background: var(--star); color: #333; font-weight: 900;
+                  font-size: 1rem; padding: 10px 18px; border-radius: 50px;
+                  min-height: 48px; display: flex; align-items: center; gap: 5px; }
+
+    .progress-wrap { width: 100%; max-width: 720px;
+                     background: rgba(255,255,255,.22); border-radius: 50px;
+                     height: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--star);
+                     border-radius: 50px; transition: width .4s ease; }
+
+    .question-card { background: white; border-radius: 28px; padding: 26px 20px;
+                     text-align: center; box-shadow: var(--shadow);
+                     width: 100%; max-width: 720px;
+                     display: flex; flex-direction: column; align-items: center;
+                     gap: 8px; min-height: 170px; animation: fadeUp .35s ease both; }
+    .q-instr     { font-size: 1rem; color: #777; font-weight: 700; }
+    .q-instr.ar  { font-family: var(--fa); color: #999; font-size: .9rem; }
+    .q-math      { font-size: 3rem; font-weight: 900; color: #333; line-height: 1; }
+    .q-count     { font-size: 2.6rem; line-height: 1.35; word-break: break-all; max-width: 340px; }
+    .q-emoji     { font-size: 4rem; line-height: 1; }
+    .q-word      { font-size: 1.8rem; font-weight: 900; color: #444; }
+    .q-word.ar   { font-family: var(--fa); }
+    .q-letter-ar { font-size: 5rem; font-family: var(--fa); font-weight: 900; color: var(--purple); line-height: 1; }
+    .q-letter-en { font-size: 4.5rem; font-weight: 900; color: var(--purple); line-height: 1; }
+    .q-hint      { font-size: .85rem; color: #bbb; font-weight: 700; }
+
+    .feedback { min-height: 38px; width: 100%; max-width: 720px;
+                text-align: center; font-weight: 900; font-size: 1.1rem;
+                color: white; text-shadow: 0 2px 6px rgba(0,0,0,.2);
+                opacity: 0; transition: opacity .25s; }
+    .feedback.show { opacity: 1; }
+    .feedback .l1 { display: block; }
+    .feedback .l2 { display: block; font-family: var(--fa); font-size: .9rem; margin-top: 2px; opacity: .88; }
+
+    .choices-grid { display: grid; gap: 12px; width: 100%; max-width: 720px;
+                    animation: fadeUp .38s .06s ease both; }
+    .choices-grid.g3 { grid-template-columns: repeat(3,1fr); }
+    .choices-grid.g4 { grid-template-columns: repeat(2,1fr); }
+    .choices-grid.g5 { grid-template-columns: repeat(5,1fr); }
+
+    .choice-btn { background: white; border: 3px solid #E0E0E0; border-radius: 18px;
+                  padding: 14px 10px; font-weight: 900; color: #333; cursor: pointer;
+                  min-height: 70px; display: flex; flex-direction: column;
+                  align-items: center; justify-content: center; gap: 3px;
+                  box-shadow: 0 3px 10px rgba(0,0,0,.08); font-family: var(--fe);
+                  font-size: 1.2rem; transition: transform .1s; }
+    .choice-btn:active { transform: scale(.91); }
+    .choice-btn.big-ar { font-family: var(--fa); font-size: 2rem; direction: rtl; }
+    .choice-btn .sub   { font-size: .72rem; color: #aaa; font-weight: 700; font-family: var(--fa); direction: rtl; }
+    .choice-btn.correct { background: #E8F5E9; border-color: var(--correct); color: #2E7D32; animation: pulseOk .5s ease; }
+    .choice-btn.wrong   { background: #FFEBEE; border-color: var(--wrong); color: #C62828; animation: shakeX .4s ease; }
+    .choice-btn.dim     { pointer-events: none; opacity: .4; }
+
+    /* ===== RESULTS SCREEN ===== */
+    #screen-results { justify-content: center; }
+    .results-card { background: white; border-radius: 30px; padding: 36px 22px 30px;
+                    text-align: center; box-shadow: var(--shadow); width: 100%; max-width: 560px;
+                    display: flex; flex-direction: column; align-items: center; gap: 14px;
+                    animation: fadeUp .4s ease; }
+    .res-emoji     { font-size: 5.5rem; animation: bounce .75s ease infinite alternate; }
+    .res-title-en  { font-size: 1.85rem; font-weight: 900; color: #333; }
+    .res-title-ar  { font-size: 1.4rem; font-family: var(--fa); color: #666; font-weight: 700; }
+    .res-score     { font-size: 1.05rem; color: #999; font-weight: 700; }
+    .stars-row     { font-size: 2.6rem; display: flex; gap: 6px; }
+    .star-item.lit { animation: starPop .5s ease both; }
+    .levelup-badge { background: linear-gradient(135deg,#FFD200,#F7971E);
+                     color: #333; border-radius: 50px; padding: 10px 22px;
+                     font-size: 1rem; font-weight: 900; display: none; }
+    .levelup-badge.show { display: block; animation: fadeUp .4s .3s ease both; }
+    .results-btns  { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+                     width: 100%; margin-top: 4px; }
+    .r-btn-inner   { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .r-btn-inner .ar { font-family: var(--fa); font-size: .8em; }
+
+    /* ===== CONFETTI ===== */
+    #confetti-overlay { position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; }
+    .confetti-bit { position:absolute; top:-16px; border-radius:2px; animation: fall linear forwards; }
+
+    /* ===== KEYFRAMES ===== */
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulseOk  { 0%{transform:scale(1)} 40%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    @keyframes shakeX   { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
+    @keyframes bounce   { from{transform:translateY(0)} to{transform:translateY(-14px)} }
+    @keyframes starPop  { 0%{transform:scale(0) rotate(-20deg)} 65%{transform:scale(1.25) rotate(8deg)} 100%{transform:scale(1) rotate(0)} }
+    @keyframes fall     { to{transform:translateY(110vh) rotate(420deg);opacity:0} }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:480px) {
+      .profiles-grid,.subjects-grid { gap:10px; }
+      .profile-card { min-height:148px; padding:16px 10px 14px; }
+      .p-avatar { font-size:2.6rem; }
+      .subject-card { padding:18px 10px 14px; min-height:130px; }
+      .s-icon { font-size:2.4rem; }
+      .q-math { font-size:2.3rem; }
+      .q-count { font-size:2.1rem; }
+      .q-letter-ar { font-size:4rem; }
+    }
+    @media (min-width:900px) {
+      .profiles-grid,.subjects-grid { grid-template-columns:repeat(4,1fr); }
+      .lang-grid { grid-template-columns:repeat(2,1fr); }
+    }
+    @media (orientation:landscape) and (max-height:520px) {
+      .screen { padding:10px 16px 16px; gap:10px; }
+      .profile-card,.subject-card { min-height:110px; padding:12px; }
+      .question-card { padding:16px; min-height:130px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     SCREEN 1 — PROFILE SELECTION
+============================================================= -->
+<div id="screen-profiles" class="screen active">
+  <div class="app-title">
+    <span class="en">🌟 Learning Stars</span>
+    <span class="ar">نجوم التعلم ✨</span>
+  </div>
+  <div class="profiles-grid" id="profiles-grid"><!-- JS --></div>
+</div>
+
+<!-- ============================================================
+     SCREEN 2 — LANGUAGE SELECTION
+============================================================= -->
+<div id="screen-lang" class="screen">
+  <button class="btn back-btn" style="align-self:flex-start" onclick="goProfiles()">←</button>
+  <div class="lang-greeting" id="lang-greeting">
+    <span class="en">Hello, Theyab! 👋</span>
+    <span class="ar">أهلاً ثياب! 👋</span>
+  </div>
+  <div class="lang-subtitle">Choose your language / اختر لغتك</div>
+  <div class="lang-grid">
+    <div class="lang-card" onclick="selectLang('en')"
+         style="border-color:#667eea55; background:linear-gradient(135deg,#fff 55%,#667eea14)">
+      <div class="lang-flag">🇬🇧</div>
+      <div class="lang-name" style="color:#667eea">English</div>
+      <div class="lang-sub">Learn in English</div>
+    </div>
+    <div class="lang-card" onclick="selectLang('ar')"
+         style="border-color:#F7971E55; background:linear-gradient(135deg,#fff 55%,#F7971E14)">
+      <div class="lang-flag">🇦🇪</div>
+      <div class="lang-name ar" style="color:#F7971E">العربية</div>
+      <div class="lang-sub ar" style="font-size:.9rem">تعلّم بالعربية</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCREEN 3 — SUBJECT MENU
+============================================================= -->
+<div id="screen-menu" class="screen">
+  <div class="menu-top" id="menu-top"><!-- JS --></div>
+  <div class="menu-level-bar" id="menu-level-bar"><!-- JS --></div>
+  <div class="menu-subtitle">
+    <span class="en">Choose a Game 🎮</span>
+    <span class="ar">اختر لعبة</span>
+  </div>
+  <div class="subjects-grid" id="subjects-grid"><!-- JS --></div>
+</div>
+
+<!-- ============================================================
+     SCREEN 4 — GAME
+============================================================= -->
+<div id="screen-game" class="screen">
+  <div class="game-top">
+    <button class="btn back-btn" onclick="goMenu()">←</button>
+    <div class="game-label">
+      <span class="en" id="gs-en">Math</span>
+      <span class="ar" id="gs-ar">الرياضيات</span>
+    </div>
+    <div class="score-chip">⭐ <span id="score-display">0</span></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="question-card" id="question-card"><!-- JS --></div>
+  <div class="feedback" id="feedback">
+    <span class="l1" id="fb-l1"></span>
+    <span class="l2" id="fb-l2"></span>
+  </div>
+  <div class="choices-grid" id="choices-grid"><!-- JS --></div>
+</div>
+
+<!-- ============================================================
+     SCREEN 5 — RESULTS
+============================================================= -->
+<div id="screen-results" class="screen">
+  <div class="results-card">
+    <div class="res-emoji" id="res-emoji">🎉</div>
+    <div class="res-title-en" id="res-title-en">Amazing!</div>
+    <div class="res-title-ar ar" id="res-title-ar">رائع!</div>
+    <div class="res-score" id="res-score">8 / 10</div>
+    <div class="stars-row" id="res-stars"></div>
+    <div class="levelup-badge" id="levelup-badge">🎉 Level Up!</div>
+    <div class="results-btns">
+      <button class="btn btn-primary" onclick="playAgain()">
+        <div class="r-btn-inner"><span>Play Again</span><span class="ar">العب مجدداً</span></div>
+      </button>
+      <button class="btn btn-green" onclick="goMenu()">
+        <div class="r-btn-inner"><span>Menu</span><span class="ar">القائمة</span></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div id="confetti-overlay"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================= -->
+<script>
+'use strict';
+
+// ================================================================
+//  DATA
+// ================================================================
+
+const PROFILES = [
+  { id:'theyab',  nameEn:'Theyab',  nameAr:'ثياب',    age:7, avatar:'🦁', color:'#764ba2' },
+  { id:'dhabia',  nameEn:'Dhabia',  nameAr:'ظبية',    age:5, avatar:'🌸', color:'#FF6B9D' },
+  { id:'abdulla', nameEn:'Abdulla', nameAr:'عبدالله', age:5, avatar:'🚀', color:'#11998e' },
+  { id:'hazza',   nameEn:'Hazza',   nameAr:'هزاع',    age:3, avatar:'🐣', color:'#F7971E' },
+];
+
+const SUBJECTS = [
+  { id:'math',    en:'Numbers & Math',  ar:'الأرقام والرياضيات', emoji:'🔢' },
+  { id:'letters', en:'Letters',         ar:'الحروف',             emoji:'🔤' },
+  { id:'animals', en:'Animals',         ar:'الحيوانات',          emoji:'🦁' },
+  { id:'colors',  en:'Colors & Shapes', ar:'الألوان والأشكال',  emoji:'🎨' },
+];
+
+const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E'];
+
+const ANIMALS = [
+  { emoji:'🐱', ar:'قطة',    en:'Cat'       },
+  { emoji:'🐶', ar:'كلب',    en:'Dog'       },
+  { emoji:'🦁', ar:'أسد',    en:'Lion'      },
+  { emoji:'🐘', ar:'فيل',    en:'Elephant'  },
+  { emoji:'🦒', ar:'زرافة',  en:'Giraffe'   },
+  { emoji:'🐠', ar:'سمكة',   en:'Fish'      },
+  { emoji:'🐇', ar:'أرنب',   en:'Rabbit'    },
+  { emoji:'🐸', ar:'ضفدع',   en:'Frog'      },
+  { emoji:'🐯', ar:'نمر',    en:'Tiger'     },
+  { emoji:'🐮', ar:'بقرة',   en:'Cow'       },
+  { emoji:'🐔', ar:'دجاجة',  en:'Chicken'   },
+  { emoji:'🦆', ar:'بطة',    en:'Duck'      },
+  { emoji:'🦊', ar:'ثعلب',   en:'Fox'       },
+  { emoji:'🐧', ar:'بطريق',  en:'Penguin'   },
+  { emoji:'🦋', ar:'فراشة',  en:'Butterfly' },
+  { emoji:'🐺', ar:'ذئب',    en:'Wolf'      },
+  { emoji:'🐻', ar:'دب',     en:'Bear'      },
+  { emoji:'🦜', ar:'ببغاء',  en:'Parrot'    },
+];
+
+const COLORS_DATA = [
+  { ar:'أحمر',    en:'Red',    hex:'#FF4444' },
+  { ar:'أزرق',    en:'Blue',   hex:'#4488FF' },
+  { ar:'أخضر',    en:'Green',  hex:'#44CC44' },
+  { ar:'أصفر',    en:'Yellow', hex:'#FFDD00' },
+  { ar:'برتقالي', en:'Orange', hex:'#FF8C00' },
+  { ar:'بنفسجي',  en:'Purple', hex:'#9B59B6' },
+  { ar:'وردي',    en:'Pink',   hex:'#FF69B4' },
+  { ar:'بني',     en:'Brown',  hex:'#8B4513' },
+];
+
+const SHAPES_DATA = [
+  { ar:'دائرة',  en:'Circle',    key:'circle'    },
+  { ar:'مربع',   en:'Square',    key:'square'    },
+  { ar:'مثلث',   en:'Triangle',  key:'triangle'  },
+  { ar:'نجمة',   en:'Star',      key:'star'      },
+  { ar:'قلب',    en:'Heart',     key:'heart'     },
+  { ar:'مستطيل', en:'Rectangle', key:'rectangle' },
+];
+
+const AR_LETTERS = [
+  { ar:'أ', en:'A',  wordAr:'أسد',    wordEn:'Lion',       emoji:'🦁' },
+  { ar:'ب', en:'B',  wordAr:'بطة',    wordEn:'Duck',       emoji:'🦆' },
+  { ar:'ت', en:'T',  wordAr:'تفاحة',  wordEn:'Apple',      emoji:'🍎' },
+  { ar:'ث', en:'TH', wordAr:'ثعلب',   wordEn:'Fox',        emoji:'🦊' },
+  { ar:'ج', en:'J',  wordAr:'جمل',    wordEn:'Camel',      emoji:'🐪' },
+  { ar:'ح', en:'H',  wordAr:'حصان',   wordEn:'Horse',      emoji:'🐴' },
+  { ar:'د', en:'D',  wordAr:'دب',     wordEn:'Bear',       emoji:'🐻' },
+  { ar:'ر', en:'R',  wordAr:'رمان',   wordEn:'Pomegranate',emoji:'🌿' },
+  { ar:'ز', en:'Z',  wordAr:'زرافة',  wordEn:'Giraffe',    emoji:'🦒' },
+  { ar:'س', en:'S',  wordAr:'سمكة',   wordEn:'Fish',       emoji:'🐠' },
+  { ar:'ش', en:'SH', wordAr:'شجرة',   wordEn:'Tree',       emoji:'🌳' },
+  { ar:'ف', en:'F',  wordAr:'فراشة',  wordEn:'Butterfly',  emoji:'🦋' },
+  { ar:'ق', en:'Q',  wordAr:'قمر',    wordEn:'Moon',       emoji:'🌙' },
+  { ar:'ك', en:'K',  wordAr:'كلب',    wordEn:'Dog',        emoji:'🐶' },
+  { ar:'ل', en:'L',  wordAr:'لبن',    wordEn:'Milk',       emoji:'🥛' },
+  { ar:'م', en:'M',  wordAr:'موزة',   wordEn:'Banana',     emoji:'🍌' },
+  { ar:'ن', en:'N',  wordAr:'نجمة',   wordEn:'Star',       emoji:'⭐' },
+  { ar:'و', en:'W',  wordAr:'وردة',   wordEn:'Rose',       emoji:'🌹' },
+  { ar:'ي', en:'Y',  wordAr:'يد',     wordEn:'Hand',       emoji:'✋' },
+];
+
+const COUNT_EMOJIS = ['⭐','🍎','🌟','🎈','🍭','🐥','💎','🌺','🦋','🍊'];
+
+// Level thresholds [minStars, labelEn, labelAr]
+const LEVELS = [
+  [0,   'Beginner',     'مبتدئ',     '🌱'],
+  [15,  'Explorer',     'مستكشف',    '🔍'],
+  [35,  'Learner',      'متعلم',     '📚'],
+  [65,  'Scholar',      'عالم',      '🎓'],
+  [100, 'Champion',     'بطل',       '🏆'],
+];
+
+const MSGS_CORRECT = [
+  ['Excellent! 🎉', 'ممتاز! 🎉'],
+  ['Amazing! ⭐',   'رائع! ⭐'],
+  ['Great job! 🌟', 'عمل جيد! 🌟'],
+  ['Well done! 👏', 'أحسنت! 👏'],
+  ['Perfect! ✨',   'مثالي! ✨'],
+  ['Superstar! 💫', 'نجم متألق! 💫'],
+];
+const MSGS_WRONG = [
+  ['Keep going! 💪',      'استمر! 💪'],
+  ['Try again next time!','حاول مرة أخرى! 🌈'],
+  ['Almost there! 🔥',   'تقريباً! 🔥'],
+  ["You've got this! 🌻", 'أنت تستطيع! 🌻'],
+];
+
+// ================================================================
+//  UTILITIES
+// ================================================================
+
+const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = rand(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function uniqueWrongs(correct, min, max, n) {
+  const set = new Set();
+  let tries = 0;
+  while (set.size < n && tries++ < 300) {
+    const v = rand(min, max);
+    if (v !== correct) set.add(v);
+  }
+  let e = max + 1;
+  while (set.size < n) set.add(e++);
+  return [...set];
+}
+
+// ================================================================
+//  LOCALSTORAGE
+// ================================================================
+
+function loadProg(id) {
+  try { return JSON.parse(localStorage.getItem('ls_' + id)) || { stars: 0, games: 0 }; }
+  catch(e) { return { stars: 0, games: 0 }; }
+}
+
+function saveProg(id, earned) {
+  const p = loadProg(id);
+  p.stars += earned; p.games += 1;
+  try { localStorage.setItem('ls_' + id, JSON.stringify(p)); } catch(e) {}
+}
+
+function getLevel(stars) {
+  let lv = LEVELS[0];
+  for (const l of LEVELS) if (stars >= l[0]) lv = l;
+  return lv;
+}
+
+function nextLevelStars(stars) {
+  for (let i = 0; i < LEVELS.length - 1; i++)
+    if (stars < LEVELS[i + 1][0]) return LEVELS[i + 1][0];
+  return null;
+}
+
+// ================================================================
+//  STATE
+// ================================================================
+
+let activeProfile  = null;
+let gameLang       = 'en';   // 'en' | 'ar'
+let activeSubject  = null;
+let questions      = [];
+let qIdx           = 0;
+let sessionScore   = 0;
+let locked         = false;
+let lastSubjectId  = 'math';
+
+// ================================================================
+//  NAVIGATION
+// ================================================================
+
+const $ = id => document.getElementById(id);
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goProfiles() { renderProfiles(); showScreen('screen-profiles'); }
+function goMenu()     { renderMenu();     showScreen('screen-menu');     }
+
+// ================================================================
+//  PROFILE SCREEN
+// ================================================================
+
+function renderProfiles() {
+  $('profiles-grid').innerHTML = PROFILES.map(p => {
+    const prog  = loadProg(p.id);
+    const lv    = getLevel(prog.stars);
+    return `
+      <div class="profile-card" onclick="selectProfile('${p.id}')"
+        style="border-color:${p.color}33;background:linear-gradient(135deg,#fff 60%,${p.color}18)">
+        <div class="p-avatar">${p.avatar}</div>
+        <div class="p-name-en" style="color:${p.color}">${p.nameEn}</div>
+        <div class="p-name-ar">${p.nameAr}</div>
+        <div class="p-meta">Age ${p.age} · عمر ${p.age}</div>
+        <div class="p-level">${lv[3]} Level ${LEVELS.indexOf(lv)+1} – ${lv[1]}</div>
+        ${prog.stars > 0 ? `<div class="p-stars">⭐ ${prog.stars} stars</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function selectProfile(id) {
+  activeProfile = PROFILES.find(p => p.id === id);
+  // Show greeting
+  $('lang-greeting').innerHTML = `
+    <span class="en">Hello, ${activeProfile.nameEn}! 👋</span>
+    <span class="ar">أهلاً ${activeProfile.nameAr}! 👋</span>`;
+  showScreen('screen-lang');
+}
+
+// ================================================================
+//  LANGUAGE SELECTION
+// ================================================================
+
+function selectLang(lang) {
+  gameLang = lang;
+  goMenu();
+}
+
+// ================================================================
+//  MENU SCREEN
+// ================================================================
+
+function renderMenu() {
+  const prog  = loadProg(activeProfile.id);
+  const lv    = getLevel(prog.stars);
+  const lvIdx = LEVELS.indexOf(lv);
+  const nextS = nextLevelStars(prog.stars);
+  const pct   = nextS
+    ? Math.round(((prog.stars - lv[0]) / (nextS - lv[0])) * 100)
+    : 100;
+  const langLabel = gameLang === 'en' ? '🇬🇧 EN' : '🇦🇪 عر';
+
+  $('menu-top').innerHTML = `
+    <button class="btn back-btn" onclick="showScreen('screen-lang')">←</button>
+    <div class="menu-profile-info">
+      <span class="m-avatar">${activeProfile.avatar}</span>
+      <div>
+        <div class="m-name-en">${activeProfile.nameEn}</div>
+        <div class="m-name-ar">${activeProfile.nameAr}</div>
+      </div>
+    </div>
+    <div class="m-lang-badge" onclick="showScreen('screen-lang')">${langLabel}</div>`;
+
+  $('menu-level-bar').innerHTML = `
+    <div class="level-card">
+      <div class="level-left">
+        <div class="level-title">${lv[3]} Level ${lvIdx + 1}</div>
+        <div class="level-sub">${lv[2]} · ${lv[1]}</div>
+      </div>
+      <div class="level-prog-wrap">
+        <div class="level-prog-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="level-stars">⭐ ${prog.stars}${nextS ? ' / '+nextS : ''}</div>
+    </div>`;
+
+  $('subjects-grid').innerHTML = SUBJECTS.map((s, i) => `
+    <div class="subject-card" onclick="startGame('${s.id}')"
+      style="border-color:${SUBJECT_COLORS[i]}44;background:linear-gradient(135deg,#fff 55%,${SUBJECT_COLORS[i]}18)">
+      <div class="s-icon">${s.emoji}</div>
+      <div class="s-name-en" style="color:${SUBJECT_COLORS[i]}">${s.en}</div>
+      <div class="s-name-ar">${s.ar}</div>
+    </div>`).join('');
+}
+
+// ================================================================
+//  QUESTION FACTORIES
+// ================================================================
+
+function makeMathQ(age) {
+  // Math is language-neutral; instructions bilingual
+  const instrEN = 'What is the answer?';
+  const instrAR = 'ما هي الإجابة؟';
+
+  if (age <= 3) {
+    const count  = rand(1, 5);
+    const emoji  = COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length-1)];
+    const objs   = Array(count).fill(emoji).join(' ');
+    const wrongs = uniqueWrongs(count, 1, 5, 4);
+    const pool   = shuffle([count, ...wrongs]);
+    return {
+      html: `<div class="q-instr">How many? / كم عدد؟</div>
+             <div class="q-count">${objs}</div>`,
+      choices: pool.map(n => ({ label: String(n), sub: '' })),
+      correct: pool.indexOf(count),
+    };
+  }
+
+  if (age <= 5) {
+    let a, b, op, ans;
+    if (Math.random() < 0.5) { a=rand(1,8); b=rand(1,10-a); op='+'; ans=a+b; }
+    else                       { a=rand(2,10); b=rand(1,a-1); op='−'; ans=a-b; }
+    const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(0,ans-3), ans+3, 2)]);
+    return {
+      html: `<div class="q-instr">${instrEN}</div>
+             <div class="q-instr ar">${instrAR}</div>
+             <div class="q-math">${a} ${op} ${b} = ?</div>`,
+      choices: pool.map(n => ({ label: String(n), sub: '' })),
+      correct: pool.indexOf(ans),
+    };
+  }
+
+  const ops = ['+','−','×'];
+  const op  = ops[rand(0,2)];
+  let a, b, ans;
+  if (op==='+')  { a=rand(4,15); b=rand(4,15); ans=a+b; }
+  else if(op==='−') { a=rand(6,20); b=rand(1,a-1); ans=a-b; }
+  else              { a=rand(2,5);  b=rand(2,5);   ans=a*b; }
+  const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(1,ans-7), ans+7, 3)]);
+  return {
+    html: `<div class="q-instr">${instrEN}</div>
+           <div class="q-instr ar">${instrAR}</div>
+           <div class="q-math">${a} ${op} ${b} = ?</div>`,
+    choices: pool.map(n => ({ label: String(n), sub: '' })),
+    correct: pool.indexOf(ans),
+  };
+}
+
+function makeLetterQ() {
+  // In English mode: show Arabic letter → choose English phonetic equivalent
+  // In Arabic mode:  show English letter → choose Arabic letter
+  const pool = shuffle(AR_LETTERS);
+  const tgt  = pool[0];
+  const dist = pool.filter(l => l.ar !== tgt.ar).slice(0, 3);
+  const choices = shuffle([tgt, ...dist]);
+
+  if (gameLang === 'en') {
+    return {
+      html: `<div class="q-instr">What English sound does this Arabic letter make?</div>
+             <div class="q-letter-ar">${tgt.ar}</div>
+             <div class="q-hint">${tgt.emoji} ${tgt.wordAr} · ${tgt.wordEn}</div>`,
+      choices: choices.map(l => ({ label: l.en, sub: l.ar, bigAr: false })),
+      correct: choices.indexOf(tgt),
+    };
+  }
+  return {
+    html: `<div class="q-instr ar">أي حرف عربي يصدر هذا الصوت؟</div>
+           <div class="q-letter-en">${tgt.en}</div>
+           <div class="q-hint">${tgt.emoji} ${tgt.wordEn} · ${tgt.wordAr}</div>`,
+    choices: choices.map(l => ({ label: l.ar, sub: l.en, bigAr: true })),
+    correct: choices.indexOf(tgt),
+  };
+}
+
+function makeAnimalQ() {
+  const pool    = shuffle(ANIMALS);
+  const tgt     = pool[0];
+  const choices = shuffle([tgt, ...pool.slice(1,4)]);
+
+  if (gameLang === 'en') {
+    // Show Arabic name + emoji → tap English name
+    return {
+      html: `<div class="q-instr">What is this animal in English?</div>
+             <div class="q-emoji">${tgt.emoji}</div>
+             <div class="q-word ar">${tgt.ar}</div>`,
+      choices: choices.map(a => ({ label: a.en, sub: '' })),
+      correct: choices.indexOf(tgt),
+    };
+  }
+  // Show English name + emoji → tap Arabic name
+  return {
+    html: `<div class="q-instr ar">ما هو هذا الحيوان بالعربية؟</div>
+           <div class="q-emoji">${tgt.emoji}</div>
+           <div class="q-word">${tgt.en}</div>`,
+    choices: choices.map(a => ({ label: a.ar, sub: '', bigAr: true })),
+    correct: choices.indexOf(tgt),
+  };
+}
+
+function makeColorShapeQ() {
+  if (Math.random() < 0.5) {
+    const color   = COLORS_DATA[rand(0, COLORS_DATA.length-1)];
+    const shape   = SHAPES_DATA[rand(0, SHAPES_DATA.length-1)];
+    const choices = shuffle([color, ...shuffle(COLORS_DATA.filter(c=>c.en!==color.en)).slice(0,3)]);
+    const instrEn = 'What color is this shape?';
+    const instrAr = 'ما لون هذا الشكل؟';
+    return {
+      html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
+             <div>${svgShape(shape.key, color.hex, 86)}</div>
+             <div class="q-hint">${shape.en} · ${shape.ar}</div>`,
+      choices: choices.map(c => ({
+        label: gameLang==='en' ? c.en : c.ar,
+        sub:   gameLang==='en' ? c.ar : c.en,
+        bigAr: gameLang==='ar',
+      })),
+      correct: choices.indexOf(color),
+    };
+  }
+
+  const shape   = SHAPES_DATA[rand(0, SHAPES_DATA.length-1)];
+  const color   = COLORS_DATA[rand(0, COLORS_DATA.length-1)];
+  const choices = shuffle([shape, ...shuffle(SHAPES_DATA.filter(s=>s.en!==shape.en)).slice(0,3)]);
+  const instrEn = 'What shape is this?';
+  const instrAr = 'ما هو هذا الشكل؟';
+  return {
+    html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
+           <div>${svgShape(shape.key, color.hex, 86)}</div>
+           <div class="q-hint">${color.en} · ${color.ar}</div>`,
+    choices: choices.map(s => ({
+      label: gameLang==='en' ? s.en : s.ar,
+      sub:   gameLang==='en' ? s.ar : s.en,
+      bigAr: gameLang==='ar',
+    })),
+    correct: choices.indexOf(shape),
+  };
+}
+
+function svgShape(key, fill, size) {
+  const s = size, f = fill;
+  switch(key) {
+    case 'circle':
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="${f}"/></svg>`;
+    case 'square':
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><rect x="7" y="7" width="86" height="86" rx="10" fill="${f}"/></svg>`;
+    case 'triangle':
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><polygon points="50,7 93,93 7,93" fill="${f}"/></svg>`;
+    case 'star':
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><polygon points="50,7 61,37 94,37 68,58 79,89 50,70 21,89 32,58 6,37 39,37" fill="${f}"/></svg>`;
+    case 'heart':
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><path d="M50,86C50,86,14,60,14,35C14,19,27,11,37,14C43,16,48,21,50,26C52,21,57,16,63,14C73,11,86,19,86,35C86,60,50,86,50,86Z" fill="${f}"/></svg>`;
+    case 'rectangle':
+      return `<svg width="${Math.round(s*1.5)}" height="${Math.round(s*.7)}" viewBox="0 0 150 70"><rect x="4" y="4" width="142" height="62" rx="10" fill="${f}"/></svg>`;
+    default:
+      return `<svg width="${s}" height="${s}" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="${f}"/></svg>`;
+  }
+}
+
+function generateQuestions(subjectId, age) {
+  const out = [];
+  for (let i = 0; i < 10; i++) {
+    switch(subjectId) {
+      case 'math':    out.push(makeMathQ(age));    break;
+      case 'letters': out.push(makeLetterQ());     break;
+      case 'animals': out.push(makeAnimalQ());     break;
+      case 'colors':  out.push(makeColorShapeQ()); break;
+    }
+  }
+  return out;
+}
+
+// ================================================================
+//  GAME FLOW
+// ================================================================
+
+function startGame(subjectId) {
+  activeSubject = SUBJECTS.find(s => s.id === subjectId);
+  lastSubjectId = subjectId;
+  questions     = generateQuestions(subjectId, activeProfile.age);
+  qIdx          = 0;
+  sessionScore  = 0;
+  locked        = false;
+
+  $('gs-en').textContent = activeSubject.en;
+  $('gs-ar').textContent = activeSubject.ar;
+  $('score-display').textContent = '0';
+  $('progress-fill').style.width = '0%';
+
+  showScreen('screen-game');
+  renderQ();
+}
+
+function renderQ() {
+  const q = questions[qIdx];
+  locked = false;
+
+  $('progress-fill').style.width = (qIdx / questions.length * 100) + '%';
+  $('score-display').textContent = sessionScore;
+
+  const fb = $('feedback');
+  fb.classList.remove('show');
+
+  // Question
+  const card = $('question-card');
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+  card.innerHTML = q.html;
+
+  // Choices
+  const grid = $('choices-grid');
+  const n = q.choices.length;
+  grid.className = 'choices-grid ' + (n===3?'g3':n===5?'g5':'g4');
+  grid.style.animation = 'none'; void grid.offsetWidth; grid.style.animation = '';
+  grid.innerHTML = '';
+
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn' + (c.bigAr ? ' big-ar' : '');
+    btn.innerHTML  = `<span>${c.label}</span>` +
+                     (c.sub ? `<span class="sub">${c.sub}</span>` : '');
+    btn.addEventListener('click', () => onAnswer(i));
+    grid.appendChild(btn);
+  });
+}
+
+function onAnswer(selected) {
+  if (locked) return;
+  locked = true;
+
+  const q    = questions[qIdx];
+  const ok   = selected === q.correct;
+  document.querySelectorAll('.choice-btn').forEach((b, i) => {
+    b.classList.add('dim');
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === selected && !ok) b.classList.add('wrong');
+  });
+
+  if (ok) {
+    sessionScore++;
+    $('score-display').textContent = sessionScore;
+    const m = MSGS_CORRECT[rand(0, MSGS_CORRECT.length-1)];
+    showFeedback(m[0], m[1], '#86efac');
+    if (sessionScore % 3 === 0) launchConfetti(false);
+  } else {
+    const m = MSGS_WRONG[rand(0, MSGS_WRONG.length-1)];
+    showFeedback(m[0], m[1], '#fde68a');
+  }
+
+  setTimeout(() => {
+    qIdx++;
+    if (qIdx >= questions.length) showResults();
+    else renderQ();
+  }, 1300);
+}
+
+function showFeedback(l1, l2, col) {
+  $('fb-l1').textContent = l1;
+  $('fb-l2').textContent = l2;
+  $('feedback').style.color = col;
+  $('feedback').classList.add('show');
+}
+
+// ================================================================
+//  RESULTS & LEVEL
+// ================================================================
+
+function showResults() {
+  const total  = questions.length;
+  const pct    = sessionScore / total;
+  const earned = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : 1;
+
+  const prevProg  = loadProg(activeProfile.id);
+  const prevLevel = getLevel(prevProg.stars);
+
+  saveProg(activeProfile.id, earned);
+
+  const newProg  = loadProg(activeProfile.id);
+  const newLevel = getLevel(newProg.stars);
+
+  const didLevelUp = LEVELS.indexOf(newLevel) > LEVELS.indexOf(prevLevel);
+
+  const d = pct >= 0.9
+    ? { emoji:'🏆', en:'Amazing Work!',  ar:'عمل مذهل!' }
+    : pct >= 0.6
+    ? { emoji:'🌟', en:'Great Job!',      ar:'عمل رائع!' }
+    : { emoji:'💪', en:'Keep Trying!',    ar:'استمر في المحاولة!' };
+
+  $('res-emoji').textContent    = d.emoji;
+  $('res-title-en').textContent = d.en;
+  $('res-title-ar').textContent = d.ar;
+  $('res-score').textContent    = `${sessionScore} / ${total} correct · صحيح`;
+
+  const row = $('res-stars');
+  row.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const sp = document.createElement('span');
+    sp.className = 'star-item' + (i < earned ? ' lit' : '');
+    sp.style.animationDelay = (i * 0.18) + 's';
+    sp.textContent = i < earned ? '⭐' : '☆';
+    row.appendChild(sp);
+  }
+
+  const lub = $('levelup-badge');
+  if (didLevelUp) {
+    lub.textContent = `${newLevel[3]} Level Up! → ${newLevel[1]} · ${newLevel[2]}`;
+    lub.classList.add('show');
+  } else {
+    lub.classList.remove('show');
+  }
+
+  showScreen('screen-results');
+  if (pct >= 0.9) launchConfetti(true);
+}
+
+function playAgain() { startGame(lastSubjectId); }
+
+// ================================================================
+//  CONFETTI
+// ================================================================
+
+function launchConfetti(big) {
+  const overlay = $('confetti-overlay');
+  overlay.innerHTML = '';
+  const COLS = ['#FF4444','#4488FF','#44CC44','#FFDD00','#FF8C00','#9B59B6','#FF69B4','#fff'];
+  const n    = big ? 75 : 28;
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti-bit';
+    d.style.cssText = `
+      left:${rand(0,100)}vw;
+      background:${COLS[rand(0,COLS.length-1)]};
+      width:${rand(8,14)}px; height:${rand(8,14)}px;
+      border-radius:${Math.random()<.4?'50%':'2px'};
+      animation-duration:${(.7+Math.random()*.9).toFixed(2)}s;
+      animation-delay:${(Math.random()*.5).toFixed(2)}s;
+    `;
+    overlay.appendChild(d);
+  }
+  setTimeout(() => { overlay.innerHTML = ''; }, 2300);
+}
+
+// ================================================================
+//  BOOT
+// ================================================================
+
+renderProfiles();
+</script>
+</body>
+</html>
