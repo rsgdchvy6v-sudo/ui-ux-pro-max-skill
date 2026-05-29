@@ -664,8 +664,8 @@ function speakSeq(parts) {
     const p    = parts[i++];
     const utt  = new SpeechSynthesisUtterance(_cleanText(p.text));
     utt.lang   = p.lang  || 'en-US';
-    utt.rate   = p.rate  || 0.80;
-    utt.pitch  = p.pitch || 1.35;
+    utt.rate   = p.rate  || 1.0;
+    utt.pitch  = p.pitch || 1.2;
     utt.volume = 1;
     const voice = _pickVoice(utt.lang);
     if (voice) utt.voice = voice;
