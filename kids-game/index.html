@@ -1319,6 +1319,8 @@ const PL = {
     stars:      'Stars', games:    'Games',  level:    'Level',
     toNext:     'stars to next level', maxLevel: '🏆 Max level reached',
     viewReport: '📊 Report',  export: '📄 Export PDF', reset: 'Reset',
+    setLevel:   '🎯 Set Level',
+    cancelLevel:'Cancel',
     noSessions: 'No sessions yet.',
     back:       'Back',
     sessionOn:  'Session on',
@@ -1334,6 +1336,8 @@ const PL = {
     stars:      'نجوم',  games:    'ألعاب', level:    'المستوى',
     toNext:     'نجوم للمستوى التالي', maxLevel: '🏆 أعلى مستوى',
     viewReport: '📊 التقرير', export: '📄 تصدير PDF', reset: 'إعادة',
+    setLevel:   '🎯 تحديد المستوى',
+    cancelLevel:'إلغاء',
     noSessions: 'لا توجد جلسات بعد.',
     back:       'رجوع',
     sessionOn:  'جلسة بتاريخ',
@@ -1396,7 +1400,7 @@ function showParentDashboard() {
           <div style="width:${pct}%;background:${p.color};height:100%;border-radius:50px;transition:width .5s"></div>
         </div>
         <div style="font-size:.73rem;color:#bbb;margin-bottom:12px;font-family:${isAr?'var(--fa)':'var(--fe)'}">${progressText}</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
           <button onclick="openReport('${p.id}')"
             style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
             ${L.viewReport}
@@ -1405,9 +1409,26 @@ function showParentDashboard() {
             style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;border:none;border-radius:12px;padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
             ${L.export}
           </button>
+          <button onclick="toggleLevelPicker('${p.id}')"
+            style="background:linear-gradient(135deg,#F7971E,#FFD200);color:#333;border:none;border-radius:12px;padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            ${L.setLevel}
+          </button>
           <button onclick="resetProgress('${p.id}')"
             style="background:#fff0f0;border:1.5px solid #ffb3b3;border-radius:12px;padding:8px 12px;font-size:.8rem;font-weight:900;color:#e55;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
             ${L.reset}
+          </button>
+        </div>
+        <div id="lvpicker-${p.id}" style="display:none;flex-wrap:wrap;gap:7px;padding:10px;background:#f8f8ff;border-radius:12px;margin-top:2px">
+          ${LEVELS.map((lv2, i2) => {
+            const isActive = lvIdx === i2;
+            return `<button onclick="applyLevel('${p.id}',${i2})"
+              style="border:2px solid ${isActive ? p.color : '#ddd'};background:${isActive ? p.color : 'white'};color:${isActive ? 'white' : '#555'};border-radius:50px;padding:6px 13px;font-size:.82rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+              ${lv2[3]} ${isAr ? lv2[2] : lv2[1]}
+            </button>`;
+          }).join('')}
+          <button onclick="toggleLevelPicker('${p.id}')"
+            style="border:none;background:none;color:#aaa;font-size:.8rem;font-weight:900;cursor:pointer;padding:6px;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            ${L.cancelLevel}
           </button>
         </div>
       </div>`;
@@ -1417,12 +1438,25 @@ function showParentDashboard() {
 }
 
 function resetProgress(profileId) {
-  const L = PL[parentLang];
-  const msg = parentLang === 'en' ? 'Reset progress for this child?' : 'هل تريد إعادة تعيين تقدم هذا الطفل؟';
+  const msg = parentLang === 'en' ? 'Reset all progress for this child?' : 'هل تريد إعادة تعيين تقدم هذا الطفل؟';
   if (!confirm(msg)) return;
   try {
     localStorage.removeItem('ls_' + profileId);
     localStorage.removeItem('ls_sessions_' + profileId);
+  } catch(e) {}
+  showParentDashboard();
+}
+
+function toggleLevelPicker(profileId) {
+  const el = $('lvpicker-' + profileId);
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function applyLevel(profileId, levelIdx) {
+  try {
+    const p = loadProg(profileId);
+    p.stars = LEVELS[levelIdx][0];
+    localStorage.setItem('ls_' + profileId, JSON.stringify(p));
   } catch(e) {}
   showParentDashboard();
 }
@@ -1463,6 +1497,8 @@ function openReport(profileId) {
               <span style="background:${s.lang==='ar'?'#F7971E':'#667eea'};color:white;border-radius:50px;padding:2px 9px;font-size:.72rem;font-weight:900">${s.lang.toUpperCase()}</span>
               <span style="color:#888;font-size:.78rem;font-family:var(--fe)">${s.dateStr} ${s.timeStr}</span>
               <span style="margin-left:auto;font-weight:900;color:#333;font-size:.88rem">${correctCount}/${s.qa.length} ${starsHtml}</span>
+              <button onclick="deleteSession('${profileId}',${idx})"
+                style="background:#fff0f0;border:1.5px solid #ffb3b3;border-radius:8px;padding:3px 9px;font-size:.78rem;font-weight:900;color:#e55;cursor:pointer;flex-shrink:0">🗑</button>
             </div>
             <div style="padding:8px 14px">${qaHtml}</div>
           </div>`;
@@ -1496,6 +1532,18 @@ function openReport(profileId) {
 function closeReport() {
   $('report-modal').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function deleteSession(profileId, idx) {
+  const msg = parentLang === 'en' ? 'Delete this session?' : 'هل تريد حذف هذه الجلسة؟';
+  if (!confirm(msg)) return;
+  try {
+    const key = 'ls_sessions_' + profileId;
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch(e) {}
+  openReport(profileId);
 }
 
 function exportReport(profileId) {
@@ -1588,7 +1636,13 @@ document.getElementById('app-title').addEventListener('click', () => {
   }
 });
 
-renderProfiles();
+// Auto-select profile via ?kid= URL param (e.g. ?kid=theyab)
+const _kidParam = new URLSearchParams(window.location.search).get('kid');
+if (_kidParam && PROFILES.find(p => p.id === _kidParam)) {
+  selectProfile(_kidParam);
+} else {
+  renderProfiles();
+}
 </script>
 </body>
 </html>
