@@ -373,10 +373,10 @@
 // ================================================================
 
 const PROFILES = [
-  { id:'theyab',  nameEn:'Theyab',  nameAr:'ذياب',    age:7, avatar:'🦁', color:'#764ba2' },
-  { id:'dhabia',  nameEn:'Dhabia',  nameAr:'ظبية',    age:5, avatar:'🌸', color:'#FF6B9D' },
-  { id:'abdulla', nameEn:'Abdulla', nameAr:'عبدالله', age:5, avatar:'🚀', color:'#11998e' },
-  { id:'hazza',   nameEn:'Hazza',   nameAr:'هزاع',    age:3, avatar:'🐣', color:'#F7971E' },
+  { id:'theyab',  nameEn:'Theyab',  nameAr:'ذياب',    age:7, avatar:'🦁', color:'#764ba2', voice:'male'   },
+  { id:'dhabia',  nameEn:'Dhabia',  nameAr:'ظبية',    age:5, avatar:'🌸', color:'#FF6B9D', voice:'female' },
+  { id:'abdulla', nameEn:'Abdulla', nameAr:'عبدالله', age:5, avatar:'🚀', color:'#11998e', voice:'male'   },
+  { id:'hazza',   nameEn:'Hazza',   nameAr:'هزاع',    age:3, avatar:'🐣', color:'#F7971E', voice:'male'   },
 ];
 
 const SUBJECTS = [
@@ -560,6 +560,40 @@ let currentAudio   = [];
 //  SPEECH
 // ================================================================
 
+let _voices = [];
+
+function _loadVoices() {
+  _voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+}
+
+if (window.speechSynthesis) {
+  _loadVoices();
+  window.speechSynthesis.onvoiceschanged = _loadVoices;
+}
+
+// Voice name preferences per language + gender
+const VOICE_PREFS = {
+  ar: {
+    female: ['layla'],
+    male:   ['maged', 'tarik'],
+  },
+  en: {
+    female: ['samantha', 'karen', 'tessa', 'moira', 'allison', 'ava', 'fiona', 'victoria', 'susan'],
+    male:   ['alex', 'daniel', 'fred', 'oliver', 'thomas', 'lee'],
+  },
+};
+
+function _pickVoice(lang) {
+  if (!_voices.length) _loadVoices();
+  const prefix = lang.split('-')[0];
+  const gender = activeProfile?.voice || 'female';
+  const pool   = _voices.filter(v => v.lang.startsWith(prefix));
+  if (!pool.length) return null;
+  const prefs  = VOICE_PREFS[prefix]?.[gender] || [];
+  // try preferred gender first, fall back to any voice in that language
+  return pool.find(v => prefs.some(n => v.name.toLowerCase().includes(n))) || pool[0];
+}
+
 function speakSeq(parts) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
@@ -568,13 +602,17 @@ function speakSeq(parts) {
     if (i >= parts.length) return;
     const p   = parts[i++];
     const utt = new SpeechSynthesisUtterance(p.text);
-    utt.lang  = p.lang  || 'en-US';
-    utt.rate  = p.rate  || 0.85;
-    utt.pitch = 1.1;
-    utt.onend = () => setTimeout(next, 180);
+    utt.lang   = p.lang  || 'en-US';
+    utt.rate   = p.rate  || 0.80;   // slow & clear for kids
+    utt.pitch  = p.pitch || 1.35;   // higher = warmer, less robotic
+    utt.volume = 1;
+    const voice = _pickVoice(utt.lang);
+    if (voice) utt.voice = voice;
+    utt.onend  = () => setTimeout(next, 220);
+    utt.onerror = () => setTimeout(next, 220);
     window.speechSynthesis.speak(utt);
   }
-  setTimeout(next, 380);
+  setTimeout(next, 400);
 }
 
 function replayAudio() { speakSeq(currentAudio); }
@@ -761,9 +799,9 @@ function makeLetterQ() {
       choices: choices.map(l => ({ label: l.en, sub: l.ar, bigAr: false })),
       correct: choices.indexOf(tgt),
       audio: [
-        { text: tgt.ar,     lang: 'ar-SA', rate: 0.65 },
-        { text: tgt.wordAr, lang: 'ar-SA', rate: 0.75 },
-        { text: 'What English sound does this letter make?', lang: 'en-US' },
+        { text: tgt.ar,     lang: 'ar-SA', rate: 0.65, pitch: 1.4 },
+        { text: tgt.wordAr, lang: 'ar-SA', rate: 0.75, pitch: 1.35 },
+        { text: 'What English sound does this letter make?', lang: 'en-US', pitch: 1.3 },
       ],
     };
   }
@@ -774,9 +812,9 @@ function makeLetterQ() {
     choices: choices.map(l => ({ label: l.ar, sub: l.en, bigAr: true })),
     correct: choices.indexOf(tgt),
     audio: [
-      { text: tgt.en,     lang: 'en-US', rate: 0.65 },
-      { text: tgt.wordEn, lang: 'en-US', rate: 0.75 },
-      { text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA' },
+      { text: tgt.en,     lang: 'en-US', rate: 0.65, pitch: 1.4 },
+      { text: tgt.wordEn, lang: 'en-US', rate: 0.75, pitch: 1.35 },
+      { text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA', pitch: 1.3 },
     ],
   };
 }
