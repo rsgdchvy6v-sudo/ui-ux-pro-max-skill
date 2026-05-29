@@ -272,7 +272,7 @@
      SCREEN 1 — PROFILE SELECTION
 ============================================================= -->
 <div id="screen-profiles" class="screen active">
-  <div class="app-title">
+  <div class="app-title" id="app-title">
     <span class="en">🌟 Learning Stars</span>
     <span class="ar">نجوم التعلم ✨</span>
   </div>
@@ -312,8 +312,8 @@
   <div class="menu-top" id="menu-top"><!-- JS --></div>
   <div class="menu-level-bar" id="menu-level-bar"><!-- JS --></div>
   <div class="menu-subtitle">
-    <span class="en-only">Choose a Game 🎮</span>
-    <span class="ar-only ar">اختر لعبة 🎮</span>
+    <span class="en-only">Choose a Subject 🎓</span>
+    <span class="ar-only ar">اختر المادة 🎓</span>
   </div>
   <div class="subjects-grid" id="subjects-grid"><!-- JS --></div>
 </div>
@@ -325,8 +325,8 @@
   <div class="game-top">
     <button class="btn back-btn" onclick="goMenu()">←</button>
     <div class="game-label">
-      <span class="en" id="gs-en">Math</span>
-      <span class="ar" id="gs-ar">الرياضيات</span>
+      <span class="en en-only" id="gs-en">Math</span>
+      <span class="ar ar-only" id="gs-ar">الرياضيات</span>
     </div>
     <div class="score-chip">⭐ <span id="score-display">0</span></div>
   </div>
@@ -365,6 +365,18 @@
   </div>
 </div>
 
+<!-- ============================================================
+     SCREEN 6 — PARENT DASHBOARD (triple-tap title to open)
+============================================================= -->
+<div id="screen-parent" class="screen">
+  <div style="width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <button class="btn back-btn" onclick="goProfiles()">←</button>
+    <div style="color:white;font-size:1.3rem;font-weight:900">👨‍👩‍👧‍👦 Parent Dashboard</div>
+    <div style="width:56px"></div>
+  </div>
+  <div id="parent-grid" style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:14px"></div>
+</div>
+
 <!-- CONFETTI -->
 <div id="confetti-overlay"></div>
 
@@ -379,20 +391,22 @@
 // ================================================================
 
 const PROFILES = [
-  { id:'theyab',  nameEn:'Theyab',  nameAr:'ذياب',    age:7, avatar:'🦁', color:'#764ba2', voice:'male'   },
-  { id:'dhabia',  nameEn:'Dhabia',  nameAr:'ظبية',    age:5, avatar:'🌸', color:'#FF6B9D', voice:'female' },
-  { id:'abdulla', nameEn:'Abdulla', nameAr:'عبدالله', age:5, avatar:'🚀', color:'#11998e', voice:'male'   },
-  { id:'hazza',   nameEn:'Hazza',   nameAr:'هزاع',    age:3, avatar:'🐣', color:'#F7971E', voice:'male'   },
+  { id:'theyab',  nameEn:'Theyab',  nameAr:'ذياب',    age:7, avatar:'🦁', color:'#764ba2', voice:'male',   gradeEn:'Grade 1',  gradeAr:'الصف الأول'  },
+  { id:'dhabia',  nameEn:'Dhabia',  nameAr:'ظبية',    age:5, avatar:'🌸', color:'#FF6B9D', voice:'female', gradeEn:'KG 1',     gradeAr:'روضة أطفال'  },
+  { id:'abdulla', nameEn:'Abdulla', nameAr:'عبدالله', age:5, avatar:'🚀', color:'#11998e', voice:'male',   gradeEn:'KG 1',     gradeAr:'روضة أطفال'  },
+  { id:'hazza',   nameEn:'Hazza',   nameAr:'هزاع',    age:3, avatar:'🐣', color:'#F7971E', voice:'male',   gradeEn:'Nursery',  gradeAr:'الحضانة'     },
 ];
 
 const SUBJECTS = [
-  { id:'math',    en:'Numbers & Math',  ar:'الأرقام والرياضيات', emoji:'🔢' },
-  { id:'letters', en:'Letters',         ar:'الحروف',             emoji:'🔤' },
-  { id:'animals', en:'Animals',         ar:'الحيوانات',          emoji:'🦁' },
-  { id:'colors',  en:'Colors & Shapes', ar:'الألوان والأشكال',  emoji:'🎨' },
+  { id:'math',     en:'Numbers & Math',   ar:'الأرقام والرياضيات', emoji:'🔢' },
+  { id:'letters',  en:'Letters',          ar:'الحروف',             emoji:'🔤' },
+  { id:'animals',  en:'Animals',          ar:'الحيوانات',          emoji:'🦁' },
+  { id:'colors',   en:'Colors & Shapes',  ar:'الألوان والأشكال',  emoji:'🎨' },
+  { id:'words',    en:'Words',            ar:'الكلمات',            emoji:'📖' },
+  { id:'patterns', en:'Patterns',         ar:'الأنماط',            emoji:'🧩' },
 ];
 
-const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E'];
+const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2'];
 
 const ANIMALS = [
   { emoji:'🐱', ar:'قطة',    en:'Cat'       },
@@ -456,6 +470,39 @@ const AR_LETTERS = [
   { ar:'و', en:'W',  wordAr:'وردة',   wordEn:'Rose',       emoji:'🌹' },
   { ar:'ي', en:'Y',  wordAr:'يد',     wordEn:'Hand',       emoji:'✋' },
 ];
+
+const WORDS_DATA = [
+  // level 1 — nursery / simple 3-letter
+  { emoji:'☀️', en:'Sun',        ar:'شمس',      level:1 },
+  { emoji:'🌙', en:'Moon',       ar:'قمر',      level:1 },
+  { emoji:'⭐', en:'Star',       ar:'نجمة',     level:1 },
+  { emoji:'🍎', en:'Apple',      ar:'تفاحة',    level:1 },
+  { emoji:'🍌', en:'Banana',     ar:'موزة',     level:1 },
+  { emoji:'🚗', en:'Car',        ar:'سيارة',    level:1 },
+  { emoji:'📚', en:'Book',       ar:'كتاب',     level:1 },
+  { emoji:'🏠', en:'House',      ar:'بيت',      level:1 },
+  { emoji:'✋', en:'Hand',       ar:'يد',       level:1 },
+  { emoji:'🌊', en:'Sea',        ar:'بحر',      level:1 },
+  { emoji:'🐟', en:'Fish',       ar:'سمكة',     level:1 },
+  { emoji:'🌳', en:'Tree',       ar:'شجرة',     level:1 },
+  // level 2 — KG1 / grade 1
+  { emoji:'🌈', en:'Rainbow',    ar:'قوس قزح',  level:2 },
+  { emoji:'🌺', en:'Flower',     ar:'زهرة',     level:2 },
+  { emoji:'🦋', en:'Butterfly',  ar:'فراشة',    level:2 },
+  { emoji:'🐘', en:'Elephant',   ar:'فيل',      level:2 },
+  { emoji:'🚀', en:'Rocket',     ar:'صاروخ',    level:2 },
+  { emoji:'🎂', en:'Cake',       ar:'كعكة',     level:2 },
+  { emoji:'🏔️', en:'Mountain',   ar:'جبل',      level:2 },
+  { emoji:'✈️', en:'Plane',      ar:'طائرة',    level:2 },
+  { emoji:'🦁', en:'Lion',       ar:'أسد',      level:2 },
+  { emoji:'🐬', en:'Dolphin',    ar:'دلفين',    level:2 },
+];
+
+const PATTERN_ELEMS = {
+  colors:  ['🔴','🔵','🟡','🟢','🟠','🟣'],
+  animals: ['🐱','🐶','🐸','🐘','🦁'],
+  fruits:  ['🍎','🍌','🍇','🍊','🍓'],
+};
 
 const COUNT_EMOJIS = [
   { e:'⭐', enP:'stars',       ar:'نجوم'      },
@@ -660,9 +707,9 @@ function renderProfiles() {
         <div class="p-avatar">${p.avatar}</div>
         <div class="p-name-en" style="color:${p.color}">${p.nameEn}</div>
         <div class="p-name-ar">${p.nameAr}</div>
-        <div class="p-meta">Age ${p.age} · عمر ${p.age}</div>
-        <div class="p-level">${lv[3]} Level ${LEVELS.indexOf(lv)+1} – ${lv[1]}</div>
-        ${prog.stars > 0 ? `<div class="p-stars">⭐ ${prog.stars} stars</div>` : ''}
+        <div class="p-meta">${p.gradeEn}</div>
+        <div class="p-level">${lv[3]} ${lv[1]}</div>
+        ${prog.stars > 0 ? `<div class="p-stars">⭐ ${prog.stars}</div>` : ''}
       </div>`;
   }).join('');
 }
@@ -707,6 +754,9 @@ function renderMenu() {
       <div>
         <div class="m-name-en" style="font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
           ${gameLang === 'en' ? activeProfile.nameEn : activeProfile.nameAr}
+        </div>
+        <div style="color:rgba(255,255,255,.7);font-size:.78rem;font-weight:700;font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
+          ${gameLang === 'en' ? activeProfile.gradeEn : activeProfile.gradeAr}
         </div>
       </div>
     </div>
@@ -756,7 +806,7 @@ function makeMathQ(age) {
       correct: pool.indexOf(count),
       audio: gameLang === 'en'
         ? [{ text: `Count the ${emo.enP}! How many are there?`, lang: 'en-US' }]
-        : [{ text: `عدّ ${emo.ar}! كم عدد؟`, lang: 'ar-SA' }],
+        : [{ text: `كم عدد؟`, lang: 'ar-SA' }],
     };
   }
 
@@ -774,7 +824,7 @@ function makeMathQ(age) {
       correct: pool.indexOf(ans),
       audio: gameLang === 'en'
         ? [{ text: `What is ${a} ${opWordEn} ${b}?`, lang: 'en-US' }]
-        : [{ text: `كم يساوي ${a} ${opWordAr} ${b}؟`, lang: 'ar-SA' }],
+        : [{ text: `ما هي الإجابة؟`, lang: 'ar-SA' }],
     };
   }
 
@@ -794,35 +844,50 @@ function makeMathQ(age) {
     correct: pool.indexOf(ans),
     audio: gameLang === 'en'
       ? [{ text: `What is ${a} ${opEn} ${b}?`, lang: 'en-US' }]
-      : [{ text: `كم يساوي ${a} ${opAr} ${b}؟`, lang: 'ar-SA' }],
+      : [{ text: `ما هي الإجابة؟`, lang: 'ar-SA' }],
   };
 }
 
 function makeLetterQ() {
-  // In English mode: show Arabic letter → choose English phonetic equivalent
-  // In Arabic mode:  show English letter → choose Arabic letter
-  const pool = shuffle(AR_LETTERS);
+  const pool = shuffle([...AR_LETTERS]);
   const tgt  = pool[0];
-  const dist = pool.filter(l => l.ar !== tgt.ar).slice(0, 3);
-  const choices = shuffle([tgt, ...dist]);
 
   if (gameLang === 'en') {
+    // Show emoji + English word → tap the first letter
+    const correctLetter = tgt.wordEn[0].toUpperCase();
+    const distractors = [];
+    for (const entry of pool.slice(1)) {
+      const l = entry.wordEn[0].toUpperCase();
+      if (l !== correctLetter && !distractors.includes(l)) {
+        distractors.push(l);
+        if (distractors.length >= 3) break;
+      }
+    }
+    for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+      if (distractors.length >= 3) break;
+      if (c !== correctLetter && !distractors.includes(c)) distractors.push(c);
+    }
+    const choices = shuffle([correctLetter, ...distractors.slice(0, 3)]);
     return {
-      html: `<div class="q-instr">What English sound does this Arabic letter make?</div>
-             <div class="q-letter-ar">${tgt.ar}</div>
-             <div class="q-hint">${tgt.emoji} ${tgt.wordEn}</div>`,
-      choices: choices.map(l => ({ label: l.en, sub: '' })),
-      correct: choices.indexOf(tgt),
-      audio: [{ text: 'What English sound does this letter make?', lang: 'en-US' }],
+      html: `<div class="q-instr">What is the first letter?</div>
+             <div class="q-emoji">${tgt.emoji}</div>
+             <div class="q-word">${tgt.wordEn}</div>`,
+      choices: choices.map(l => ({ label: l, sub: '' })),
+      correct: choices.indexOf(correctLetter),
+      audio: [{ text: `What is the first letter of ${tgt.wordEn}?`, lang: 'en-US' }],
     };
   }
+
+  // Arabic mode: show emoji + Arabic word → tap the first Arabic letter
+  const dist    = pool.filter(l => l.ar !== tgt.ar).slice(0, 3);
+  const choices = shuffle([tgt, ...dist]);
   return {
-    html: `<div class="q-instr ar">أي حرف عربي يصدر هذا الصوت؟</div>
-           <div class="q-letter-en">${tgt.en}</div>
-           <div class="q-hint">${tgt.emoji} ${tgt.wordAr}</div>`,
+    html: `<div class="q-instr ar">ما هو أول حرف؟</div>
+           <div class="q-emoji">${tgt.emoji}</div>
+           <div class="q-word ar">${tgt.wordAr}</div>`,
     choices: choices.map(l => ({ label: l.ar, sub: '', bigAr: true })),
     correct: choices.indexOf(tgt),
-    audio: [{ text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA' }],
+    audio: [{ text: `ما هو أول حرف في كلمة ${tgt.wordAr}؟`, lang: 'ar-SA' }],
   };
 }
 
@@ -833,21 +898,19 @@ function makeAnimalQ() {
 
   if (gameLang === 'en') {
     return {
-      html: `<div class="q-instr">What is this animal in English?</div>
-             <div class="q-emoji">${tgt.emoji}</div>
-             <div class="q-word ar">${tgt.ar}</div>`,
+      html: `<div class="q-instr">What is this animal?</div>
+             <div class="q-emoji">${tgt.emoji}</div>`,
       choices: choices.map(a => ({ label: a.en, sub: '' })),
       correct: choices.indexOf(tgt),
-      audio: [{ text: 'What is this animal in English?', lang: 'en-US' }],
+      audio: [{ text: `What is this animal?`, lang: 'en-US' }],
     };
   }
   return {
-    html: `<div class="q-instr ar">ما هو هذا الحيوان بالعربية؟</div>
-           <div class="q-emoji">${tgt.emoji}</div>
-           <div class="q-word">${tgt.en}</div>`,
+    html: `<div class="q-instr ar">ما هو هذا الحيوان؟</div>
+           <div class="q-emoji">${tgt.emoji}</div>`,
     choices: choices.map(a => ({ label: a.ar, sub: '', bigAr: true })),
     correct: choices.indexOf(tgt),
-    audio: [{ text: 'ما هو هذا الحيوان بالعربية؟', lang: 'ar-SA' }],
+    audio: [{ text: 'ما هو هذا الحيوان؟', lang: 'ar-SA' }],
   };
 }
 
@@ -859,9 +922,9 @@ function makeColorShapeQ() {
     const instrEn = 'What color is this shape?';
     const instrAr = 'ما لون هذا الشكل؟';
     return {
-      html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
+      html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEn:instrAr}</div>
              <div>${svgShape(shape.key, color.hex, 86)}</div>
-             <div class="q-hint">${gameLang==='en'?shape.en:shape.ar}</div>`,
+             <div class="q-hint${gameLang==='ar'?' ar':''}">${gameLang==='en'?shape.en:shape.ar}</div>`,
       choices: choices.map(c => ({
         label: gameLang==='en' ? c.en : c.ar,
         sub:   '',
@@ -880,9 +943,9 @@ function makeColorShapeQ() {
   const instrEn = 'What shape is this?';
   const instrAr = 'ما هو هذا الشكل؟';
   return {
-    html: `<div class="q-instr">${gameLang==='en'?instrEn:instrAr}</div>
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEn:instrAr}</div>
            <div>${svgShape(shape.key, color.hex, 86)}</div>
-           <div class="q-hint">${gameLang==='en'?color.en:color.ar}</div>`,
+           <div class="q-hint${gameLang==='ar'?' ar':''}">${gameLang==='en'?color.en:color.ar}</div>`,
     choices: choices.map(s => ({
       label: gameLang==='en' ? s.en : s.ar,
       sub:   '',
@@ -892,6 +955,80 @@ function makeColorShapeQ() {
     audio: gameLang === 'en'
       ? [{ text: `What shape is this?`, lang: 'en-US' }]
       : [{ text: `ما هو هذا الشكل؟`, lang: 'ar-SA' }],
+  };
+}
+
+function makeWordQ() {
+  const maxLevel = activeProfile.age <= 3 ? 1 : 2;
+  const pool     = shuffle(WORDS_DATA.filter(w => w.level <= maxLevel));
+  const tgt      = pool[0];
+  const dist     = pool.slice(1, 4);
+  const choices  = shuffle([tgt, ...dist]);
+
+  if (gameLang === 'en') {
+    return {
+      html: `<div class="q-instr">Which word matches this picture?</div>
+             <div class="q-emoji">${tgt.emoji}</div>`,
+      choices: choices.map(w => ({ label: w.en, sub: '' })),
+      correct: choices.indexOf(tgt),
+      audio: [{ text: `Which word matches this picture?`, lang: 'en-US' }],
+    };
+  }
+  return {
+    html: `<div class="q-instr ar">أي كلمة تناسب هذه الصورة؟</div>
+           <div class="q-emoji">${tgt.emoji}</div>`,
+    choices: choices.map(w => ({ label: w.ar, sub: '', bigAr: true })),
+    correct: choices.indexOf(tgt),
+    audio: [{ text: `أي كلمة تناسب هذه الصورة؟`, lang: 'ar-SA' }],
+  };
+}
+
+function makePatternQ() {
+  const age     = activeProfile.age;
+  const catKeys = Object.keys(PATTERN_ELEMS);
+  const cat     = shuffle([...PATTERN_ELEMS[catKeys[rand(0, catKeys.length - 1)]]]);
+
+  let unitArr;
+  if (age <= 3) {
+    unitArr = [cat[0], cat[1]];                  // AB
+  } else if (age <= 5) {
+    unitArr = Math.random() < 0.5
+      ? [cat[0], cat[1], cat[1]]                 // ABB
+      : [cat[0], cat[0], cat[1]];                // AAB
+  } else {
+    unitArr = [cat[0], cat[1], cat[2] || cat[0]]; // ABC
+  }
+
+  const repeatCount = age <= 3 ? 3 : 2;
+  const seq = [];
+  for (let r = 0; r < repeatCount; r++) seq.push(...unitArr);
+  const answer = unitArr[0];
+
+  const seqHtml = seq.map(e => `<span style="font-size:2rem">${e}</span>`).join(' ')
+    + ' <span style="font-size:2rem">❓</span>';
+
+  const wrongPool = cat.filter(e => e !== answer);
+  let wrongs = shuffle(wrongPool).slice(0, 3);
+  if (wrongs.length < 3) {
+    for (const ck of catKeys) {
+      if (wrongs.length >= 3) break;
+      for (const e of PATTERN_ELEMS[ck]) {
+        if (e !== answer && !wrongs.includes(e)) { wrongs.push(e); }
+      }
+    }
+  }
+  const choices = shuffle([answer, ...wrongs.slice(0, 3)]);
+
+  const instrEn = 'What comes next?';
+  const instrAr = 'ما الذي يأتي بعد ذلك؟';
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEn:instrAr}</div>
+           <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px 0">${seqHtml}</div>`,
+    choices: choices.map(e => ({ label: e, sub: '' })),
+    correct: choices.indexOf(answer),
+    audio: gameLang === 'en'
+      ? [{ text: 'What comes next in the pattern?', lang: 'en-US' }]
+      : [{ text: 'ما الذي يأتي بعد ذلك؟', lang: 'ar-SA' }],
   };
 }
 
@@ -919,10 +1056,12 @@ function generateQuestions(subjectId, age) {
   const out = [];
   for (let i = 0; i < 10; i++) {
     switch(subjectId) {
-      case 'math':    out.push(makeMathQ(age));    break;
-      case 'letters': out.push(makeLetterQ());     break;
-      case 'animals': out.push(makeAnimalQ());     break;
-      case 'colors':  out.push(makeColorShapeQ()); break;
+      case 'math':     out.push(makeMathQ(age));    break;
+      case 'letters':  out.push(makeLetterQ());     break;
+      case 'animals':  out.push(makeAnimalQ());     break;
+      case 'colors':   out.push(makeColorShapeQ()); break;
+      case 'words':    out.push(makeWordQ());        break;
+      case 'patterns': out.push(makePatternQ());    break;
     }
   }
   return out;
@@ -1070,7 +1209,9 @@ function showResults() {
 
   const lub = $('levelup-badge');
   if (didLevelUp) {
-    lub.textContent = `${newLevel[3]} Level Up! → ${newLevel[1]} · ${newLevel[2]}`;
+    lub.textContent = gameLang === 'en'
+      ? `${newLevel[3]} Level Up! → ${newLevel[1]}`
+      : `${newLevel[3]} ارتقيت مستوى! → ${newLevel[2]}`;
     lub.classList.add('show');
   } else {
     lub.classList.remove('show');
@@ -1108,8 +1249,71 @@ function launchConfetti(big) {
 }
 
 // ================================================================
+//  PARENT DASHBOARD
+// ================================================================
+
+function showParentDashboard() {
+  const grid = $('parent-grid');
+  grid.innerHTML = PROFILES.map(p => {
+    const prog  = loadProg(p.id);
+    const lv    = getLevel(prog.stars);
+    const lvIdx = LEVELS.indexOf(lv);
+    const nextS = nextLevelStars(prog.stars);
+    const pct   = nextS
+      ? Math.round(((prog.stars - lv[0]) / (nextS - lv[0])) * 100)
+      : 100;
+    const subjectBreakdown = (() => {
+      try {
+        const raw = JSON.parse(localStorage.getItem('ls_sub_' + p.id) || '{}');
+        return SUBJECTS.map(s => `<span style="background:#f3f4f6;border-radius:50px;padding:3px 10px;font-size:.75rem">${s.emoji} ${raw[s.id]||0}</span>`).join('');
+      } catch(e) { return ''; }
+    })();
+    return `
+      <div style="background:white;border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);border-left:6px solid ${p.color}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <span style="font-size:2.2rem">${p.avatar}</span>
+          <div style="flex:1">
+            <div style="font-weight:900;font-size:1.1rem;color:${p.color}">${p.nameEn} · <span style="font-family:var(--fa)">${p.nameAr}</span></div>
+            <div style="color:#999;font-size:.8rem;font-weight:700">Age ${p.age}</div>
+          </div>
+          <button onclick="resetProgress('${p.id}')" style="background:#fff0f0;border:1.5px solid #ffb3b3;border-radius:12px;padding:6px 12px;font-size:.75rem;font-weight:900;color:#e55;cursor:pointer">Reset</button>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-weight:700;font-size:.88rem;color:#555;margin-bottom:8px">
+          <span>⭐ <strong>${prog.stars}</strong> stars</span>
+          <span>🎮 <strong>${prog.games}</strong> games</span>
+          <span>${lv[3]} <strong>${lv[1]}</strong> (Level ${lvIdx+1})</span>
+        </div>
+        <div style="background:#eee;border-radius:50px;height:9px;overflow:hidden;margin-bottom:5px">
+          <div style="width:${pct}%;background:${p.color};height:100%;border-radius:50px;transition:width .5s"></div>
+        </div>
+        <div style="font-size:.75rem;color:#bbb">${nextS ? prog.stars + ' / ' + nextS + ' stars to next level' : '🏆 Max level reached!'}</div>
+      </div>`;
+  }).join('');
+  showScreen('screen-parent');
+}
+
+function resetProgress(profileId) {
+  if (!confirm('Reset progress for this child?')) return;
+  try { localStorage.removeItem('ls_' + profileId); } catch(e) {}
+  showParentDashboard();
+}
+
+// ================================================================
 //  BOOT
 // ================================================================
+
+// Triple-tap title to open parent dashboard
+let _tapCount = 0, _tapTimer = null;
+document.getElementById('app-title').addEventListener('click', () => {
+  _tapCount++;
+  clearTimeout(_tapTimer);
+  if (_tapCount >= 3) {
+    _tapCount = 0;
+    showParentDashboard();
+  } else {
+    _tapTimer = setTimeout(() => { _tapCount = 0; }, 700);
+  }
+});
 
 renderProfiles();
 </script>
