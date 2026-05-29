@@ -160,9 +160,15 @@
 
     .question-card { background: white; border-radius: 28px; padding: 26px 20px;
                      text-align: center; box-shadow: var(--shadow);
-                     width: 100%; max-width: 720px;
+                     width: 100%; max-width: 720px; position: relative;
                      display: flex; flex-direction: column; align-items: center;
                      gap: 8px; min-height: 170px; animation: fadeUp .35s ease both; }
+    .speak-btn { position: absolute; top: 10px; right: 12px;
+                 background: #f0f0ff; border: none; border-radius: 50%;
+                 width: 44px; height: 44px; font-size: 1.25rem; cursor: pointer;
+                 display: flex; align-items: center; justify-content: center;
+                 transition: background .15s, transform .12s; box-shadow: 0 2px 8px rgba(108,99,255,.15); }
+    .speak-btn:active { background: #dddaff; transform: scale(.88); }
     .q-instr     { font-size: 1rem; color: #777; font-weight: 700; }
     .q-instr.ar  { font-family: var(--fa); color: #999; font-size: .9rem; }
     .q-math      { font-size: 3rem; font-weight: 900; color: #333; line-height: 1; }
@@ -445,7 +451,18 @@ const AR_LETTERS = [
   { ar:'ي', en:'Y',  wordAr:'يد',     wordEn:'Hand',       emoji:'✋' },
 ];
 
-const COUNT_EMOJIS = ['⭐','🍎','🌟','🎈','🍭','🐥','💎','🌺','🦋','🍊'];
+const COUNT_EMOJIS = [
+  { e:'⭐', enP:'stars',       ar:'نجوم'      },
+  { e:'🍎', enP:'apples',      ar:'تفاحات'    },
+  { e:'🌟', enP:'stars',       ar:'نجوم'      },
+  { e:'🎈', enP:'balloons',    ar:'بالونات'   },
+  { e:'🍭', enP:'lollipops',   ar:'مصاصات'    },
+  { e:'🐥', enP:'chicks',      ar:'كتاكيت'    },
+  { e:'💎', enP:'diamonds',    ar:'ماس'       },
+  { e:'🌺', enP:'flowers',     ar:'زهور'      },
+  { e:'🦋', enP:'butterflies', ar:'فراشات'    },
+  { e:'🍊', enP:'oranges',     ar:'برتقالات'  },
+];
 
 // Level thresholds [minStars, labelEn, labelAr]
 const LEVELS = [
@@ -537,6 +554,30 @@ let qIdx           = 0;
 let sessionScore   = 0;
 let locked         = false;
 let lastSubjectId  = 'math';
+let currentAudio   = [];
+
+// ================================================================
+//  SPEECH
+// ================================================================
+
+function speakSeq(parts) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  let i = 0;
+  function next() {
+    if (i >= parts.length) return;
+    const p   = parts[i++];
+    const utt = new SpeechSynthesisUtterance(p.text);
+    utt.lang  = p.lang  || 'en-US';
+    utt.rate  = p.rate  || 0.85;
+    utt.pitch = 1.1;
+    utt.onend = () => setTimeout(next, 180);
+    window.speechSynthesis.speak(utt);
+  }
+  setTimeout(next, 380);
+}
+
+function replayAudio() { speakSeq(currentAudio); }
 
 // ================================================================
 //  NAVIGATION
@@ -649,8 +690,8 @@ function makeMathQ(age) {
 
   if (age <= 3) {
     const count  = rand(1, 5);
-    const emoji  = COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length-1)];
-    const objs   = Array(count).fill(emoji).join(' ');
+    const emo    = COUNT_EMOJIS[rand(0, COUNT_EMOJIS.length-1)];
+    const objs   = Array(count).fill(emo.e).join(' ');
     const wrongs = uniqueWrongs(count, 1, 5, 4);
     const pool   = shuffle([count, ...wrongs]);
     return {
@@ -658,6 +699,9 @@ function makeMathQ(age) {
              <div class="q-count">${objs}</div>`,
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(count),
+      audio: gameLang === 'en'
+        ? [{ text: `Count the ${emo.enP}! How many are there?`, lang: 'en-US' }]
+        : [{ text: `عدّ ${emo.ar}! كم عدد؟`, lang: 'ar-SA' }],
     };
   }
 
@@ -665,13 +709,18 @@ function makeMathQ(age) {
     let a, b, op, ans;
     if (Math.random() < 0.5) { a=rand(1,8); b=rand(1,10-a); op='+'; ans=a+b; }
     else                       { a=rand(2,10); b=rand(1,a-1); op='−'; ans=a-b; }
-    const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(0,ans-3), ans+3, 2)]);
+    const pool    = shuffle([ans, ...uniqueWrongs(ans, Math.max(0,ans-3), ans+3, 2)]);
+    const opWordEn = op === '+' ? 'plus' : 'minus';
+    const opWordAr = op === '+' ? 'زائد' : 'ناقص';
     return {
       html: `<div class="q-instr">${instrEN}</div>
              <div class="q-instr ar">${instrAR}</div>
              <div class="q-math">${a} ${op} ${b} = ?</div>`,
       choices: pool.map(n => ({ label: String(n), sub: '' })),
       correct: pool.indexOf(ans),
+      audio: gameLang === 'en'
+        ? [{ text: `What is ${a} ${opWordEn} ${b}?`, lang: 'en-US' }]
+        : [{ text: `كم يساوي ${a} ${opWordAr} ${b}؟`, lang: 'ar-SA' }],
     };
   }
 
@@ -681,13 +730,18 @@ function makeMathQ(age) {
   if (op==='+')  { a=rand(4,15); b=rand(4,15); ans=a+b; }
   else if(op==='−') { a=rand(6,20); b=rand(1,a-1); ans=a-b; }
   else              { a=rand(2,5);  b=rand(2,5);   ans=a*b; }
-  const pool = shuffle([ans, ...uniqueWrongs(ans, Math.max(1,ans-7), ans+7, 3)]);
+  const pool  = shuffle([ans, ...uniqueWrongs(ans, Math.max(1,ans-7), ans+7, 3)]);
+  const opEn  = op==='+' ? 'plus' : op==='−' ? 'minus' : 'times';
+  const opAr  = op==='+' ? 'زائد' : op==='−' ? 'ناقص' : 'مضروب في';
   return {
     html: `<div class="q-instr">${instrEN}</div>
            <div class="q-instr ar">${instrAR}</div>
            <div class="q-math">${a} ${op} ${b} = ?</div>`,
     choices: pool.map(n => ({ label: String(n), sub: '' })),
     correct: pool.indexOf(ans),
+    audio: gameLang === 'en'
+      ? [{ text: `What is ${a} ${opEn} ${b}?`, lang: 'en-US' }]
+      : [{ text: `كم يساوي ${a} ${opAr} ${b}؟`, lang: 'ar-SA' }],
   };
 }
 
@@ -706,6 +760,11 @@ function makeLetterQ() {
              <div class="q-hint">${tgt.emoji} ${tgt.wordAr} · ${tgt.wordEn}</div>`,
       choices: choices.map(l => ({ label: l.en, sub: l.ar, bigAr: false })),
       correct: choices.indexOf(tgt),
+      audio: [
+        { text: tgt.ar,     lang: 'ar-SA', rate: 0.65 },
+        { text: tgt.wordAr, lang: 'ar-SA', rate: 0.75 },
+        { text: 'What English sound does this letter make?', lang: 'en-US' },
+      ],
     };
   }
   return {
@@ -714,6 +773,11 @@ function makeLetterQ() {
            <div class="q-hint">${tgt.emoji} ${tgt.wordEn} · ${tgt.wordAr}</div>`,
     choices: choices.map(l => ({ label: l.ar, sub: l.en, bigAr: true })),
     correct: choices.indexOf(tgt),
+    audio: [
+      { text: tgt.en,     lang: 'en-US', rate: 0.65 },
+      { text: tgt.wordEn, lang: 'en-US', rate: 0.75 },
+      { text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA' },
+    ],
   };
 }
 
@@ -723,22 +787,28 @@ function makeAnimalQ() {
   const choices = shuffle([tgt, ...pool.slice(1,4)]);
 
   if (gameLang === 'en') {
-    // Show Arabic name + emoji → tap English name
     return {
       html: `<div class="q-instr">What is this animal in English?</div>
              <div class="q-emoji">${tgt.emoji}</div>
              <div class="q-word ar">${tgt.ar}</div>`,
       choices: choices.map(a => ({ label: a.en, sub: '' })),
       correct: choices.indexOf(tgt),
+      audio: [
+        { text: tgt.ar, lang: 'ar-SA', rate: 0.8 },
+        { text: 'What is this animal in English?', lang: 'en-US' },
+      ],
     };
   }
-  // Show English name + emoji → tap Arabic name
   return {
     html: `<div class="q-instr ar">ما هو هذا الحيوان بالعربية؟</div>
            <div class="q-emoji">${tgt.emoji}</div>
            <div class="q-word">${tgt.en}</div>`,
     choices: choices.map(a => ({ label: a.ar, sub: '', bigAr: true })),
     correct: choices.indexOf(tgt),
+    audio: [
+      { text: tgt.en, lang: 'en-US', rate: 0.8 },
+      { text: 'ما هو هذا الحيوان بالعربية؟', lang: 'ar-SA' },
+    ],
   };
 }
 
@@ -759,6 +829,9 @@ function makeColorShapeQ() {
         bigAr: gameLang==='ar',
       })),
       correct: choices.indexOf(color),
+      audio: gameLang === 'en'
+        ? [{ text: `What color is this ${shape.en}?`, lang: 'en-US' }]
+        : [{ text: `ما لون هذا الشكل؟`, lang: 'ar-SA' }],
     };
   }
 
@@ -777,6 +850,9 @@ function makeColorShapeQ() {
       bigAr: gameLang==='ar',
     })),
     correct: choices.indexOf(shape),
+    audio: gameLang === 'en'
+      ? [{ text: `What shape is this?`, lang: 'en-US' }]
+      : [{ text: `ما هو هذا الشكل؟`, lang: 'ar-SA' }],
   };
 }
 
@@ -847,7 +923,12 @@ function renderQ() {
   // Question
   const card = $('question-card');
   card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-  card.innerHTML = q.html;
+  card.innerHTML = q.html +
+    `<button class="speak-btn" onclick="replayAudio()" title="Listen again">🔊</button>`;
+
+  // Speak
+  currentAudio = q.audio || [];
+  speakSeq(currentAudio);
 
   // Choices
   const grid = $('choices-grid');
