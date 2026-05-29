@@ -798,11 +798,7 @@ function makeLetterQ() {
              <div class="q-hint">${tgt.emoji} ${tgt.wordAr} · ${tgt.wordEn}</div>`,
       choices: choices.map(l => ({ label: l.en, sub: l.ar, bigAr: false })),
       correct: choices.indexOf(tgt),
-      audio: [
-        { text: tgt.ar,     lang: 'ar-SA', rate: 0.65, pitch: 1.4 },
-        { text: tgt.wordAr, lang: 'ar-SA', rate: 0.75, pitch: 1.35 },
-        { text: 'What English sound does this letter make?', lang: 'en-US', pitch: 1.3 },
-      ],
+      audio: [{ text: 'What English sound does this letter make?', lang: 'en-US' }],
     };
   }
   return {
@@ -811,11 +807,7 @@ function makeLetterQ() {
            <div class="q-hint">${tgt.emoji} ${tgt.wordEn} · ${tgt.wordAr}</div>`,
     choices: choices.map(l => ({ label: l.ar, sub: l.en, bigAr: true })),
     correct: choices.indexOf(tgt),
-    audio: [
-      { text: tgt.en,     lang: 'en-US', rate: 0.65, pitch: 1.4 },
-      { text: tgt.wordEn, lang: 'en-US', rate: 0.75, pitch: 1.35 },
-      { text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA', pitch: 1.3 },
-    ],
+    audio: [{ text: 'أي حرف عربي يصدر هذا الصوت؟', lang: 'ar-SA' }],
   };
 }
 
@@ -831,10 +823,7 @@ function makeAnimalQ() {
              <div class="q-word ar">${tgt.ar}</div>`,
       choices: choices.map(a => ({ label: a.en, sub: '' })),
       correct: choices.indexOf(tgt),
-      audio: [
-        { text: tgt.ar, lang: 'ar-SA', rate: 0.8 },
-        { text: 'What is this animal in English?', lang: 'en-US' },
-      ],
+      audio: [{ text: 'What is this animal in English?', lang: 'en-US' }],
     };
   }
   return {
@@ -843,10 +832,7 @@ function makeAnimalQ() {
            <div class="q-word">${tgt.en}</div>`,
     choices: choices.map(a => ({ label: a.ar, sub: '', bigAr: true })),
     correct: choices.indexOf(tgt),
-    audio: [
-      { text: tgt.en, lang: 'en-US', rate: 0.8 },
-      { text: 'ما هو هذا الحيوان بالعربية؟', lang: 'ar-SA' },
-    ],
+    audio: [{ text: 'ما هو هذا الحيوان بالعربية؟', lang: 'ar-SA' }],
   };
 }
 
