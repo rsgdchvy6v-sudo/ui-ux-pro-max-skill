@@ -456,6 +456,11 @@
   <div class="subjects-grid" id="subjects-grid"><!-- JS --></div>
   <div class="section-label"><span class="en-only">🧩 Puzzle Games</span><span class="ar-only ar">🧩 ألعاب الألغاز</span></div>
   <div class="subjects-grid" id="puzzles-grid"><!-- JS --></div>
+  <div class="section-label">
+    <span id="stories-section-label-en" class="en-only">📚 Stories</span>
+    <span id="stories-section-label-ar" class="ar-only ar">📚 القصص</span>
+  </div>
+  <div id="stories-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%"><!-- JS --></div>
 </div>
 
 <!-- ============================================================
@@ -600,6 +605,151 @@ const SIGHT_WORDS = {
     grade1:  ['ماذا','لماذا','متى','أين','لكن','ثم','قبل','بعد','كل','أي','عند','بين'],
   }
 };
+
+const STORIES = [
+  {
+    id: 'sharing-rabbit',
+    en: 'The Sharing Rabbit', ar: 'الأرنب المشارك',
+    emoji: '🐰', color: '#FF6B9D', minAge: 3,
+    moral: { en: 'Sharing makes everyone happy! ❤️', ar: 'المشاركة تجعل الجميع سعيداً! ❤️' },
+    pages: [
+      { scene: '🐰🏠', en: 'Once upon a time, there was a little rabbit named Zara. She lived in a cozy burrow in the forest.', ar: 'كان يا ما كان، أرنبة صغيرة اسمها زارا. كانت تعيش في جُحر مريح في الغابة.' },
+      { scene: '🐰🥕🧺', en: 'One sunny morning, Zara found a big basket full of crunchy carrots in the garden!', ar: 'في صباح مشمس، وجدت زارا سلة كبيرة مليئة بالجزر الطازج في الحديقة!' },
+      { scene: '🐰💭', en: 'Zara had so many carrots. She couldn\'t eat them all alone!', ar: 'كان معها جزر كثير جداً. لم تستطع أكله وحدها!',
+        choice: {
+          q: { en: 'What should Zara do with all the carrots?', ar: 'ماذا يجب أن تفعل زارا بكل هذا الجزر؟' },
+          options: [
+            { en: 'Keep them all 🥕', ar: 'تحتفظ بها كلها 🥕', correct: false, reaction: { en: 'Oh no — Zara ate too much and felt sick! Try again.', ar: 'أكلت زارا كثيراً ومرضت! حاول مرة أخرى.' } },
+            { en: 'Share with friends 🤝', ar: 'تشاركها مع الأصدقاء 🤝', correct: true, reaction: { en: 'What a kind idea! 🌟', ar: 'يا لها من فكرة رائعة! 🌟' } },
+            { en: 'Bury them 🙈', ar: 'تدفنها في التراب 🙈', correct: false, reaction: { en: 'The carrots will go bad! Try again.', ar: 'سيتعفن الجزر! حاول مرة أخرى.' } },
+          ]
+        }
+      },
+      { scene: '🐰🦔🦋🦆', en: 'Zara called her friends — the hedgehog, the butterfly, and the duck. They all came running!', ar: 'نادت زارا أصدقاءها — القنفذ والفراشة والبطة. جاءوا جميعاً مسرعين!' },
+      { scene: '🎉😊🥕', en: 'They sat together and shared every carrot. Everyone laughed and ate together!', ar: 'جلسوا معاً وتشاركوا كل الجزر. ضحكوا وأكلوا معاً!' },
+    ]
+  },
+  {
+    id: 'brave-firefly',
+    en: 'The Brave Firefly', ar: 'اليراعة الشجاعة',
+    emoji: '✨', color: '#F7971E', minAge: 3,
+    moral: { en: 'You are braver than you think! 🌟', ar: 'أنت أشجع مما تعتقد! 🌟' },
+    pages: [
+      { scene: '✨😰🌑', en: 'Lulu the firefly was afraid of the dark. She kept her light hidden inside.', ar: 'كانت لولو اليراعة تخاف من الظلام. كانت تخبئ ضوءها بداخلها.' },
+      { scene: '🐦😢🌑', en: 'One night, a baby bird got lost on its way home. It was very dark and scary.', ar: 'في إحدى الليالي، ضاع فرخ صغير في طريقه إلى البيت. كان الظلام مخيفاً جداً.' },
+      { scene: '✨💭🐦', en: 'Lulu saw the lost bird. Her heart was beating fast.', ar: 'رأت لولو الفرخ الضائع. كان قلبها يدق بسرعة.',
+        choice: {
+          q: { en: 'What should Lulu do?', ar: 'ماذا يجب أن تفعل لولو؟' },
+          options: [
+            { en: 'Hide under a leaf 🍃', ar: 'تختبئ تحت ورقة 🍃', correct: false, reaction: { en: 'But the baby bird is still lost... Try again!', ar: 'لكن الفرخ لا يزال ضائعاً... حاول مرة أخرى!' } },
+            { en: 'Light up and help! 💡', ar: 'تضيء وتساعد! 💡', correct: true, reaction: { en: 'So brave! ✨', ar: 'يا لها من شجاعة! ✨' } },
+            { en: 'Fly away 🌬️', ar: 'تطير بعيداً 🌬️', correct: false, reaction: { en: 'That\'s not very kind. Try again!', ar: 'هذا ليس لطيفاً. حاول مرة أخرى!' } },
+          ]
+        }
+      },
+      { scene: '✨💛🌟', en: 'Lulu took a deep breath... and she glowed BRIGHT! The whole forest lit up!', ar: 'أخذت لولو نفساً عميقاً... وأضاءت بضوء ساطع! أضاءت الغابة بأكملها!' },
+      { scene: '🐦🏠💛✨', en: 'The baby bird followed the light and flew straight home! "Thank you, Lulu!" it sang.', ar: 'تبع الفرخ الضوء وطار مباشرة إلى بيته! غنّى: "شكراً لك، لولو!"' },
+    ]
+  },
+  {
+    id: 'colors-parrot',
+    en: 'Mimi Learns Colors', ar: 'ميمي تتعلم الألوان',
+    emoji: '🦜', color: '#667eea', minAge: 4,
+    moral: { en: 'Learning is fun when you explore! 🎨', ar: 'التعلم ممتع حين تستكشف! 🎨' },
+    pages: [
+      { scene: '🦜🌈', en: 'Mimi the parrot wanted to learn all the colors of the world.', ar: 'أرادت ميمي الببغاء أن تتعلم كل ألوان العالم.' },
+      { scene: '🦜🍎❤️', en: 'She flew to a big apple. "I am RED!" said the apple proudly.', ar: 'طارت إلى تفاحة كبيرة. قالت التفاحة بفخر: "أنا أحمر!"' },
+      { scene: '🦜☁️', en: 'Then Mimi looked up at the sky. It was so big and beautiful!', ar: 'ثم نظرت ميمي إلى السماء. كانت كبيرة وجميلة جداً!',
+        choice: {
+          q: { en: 'What color is the sky?', ar: 'ما لون السماء؟' },
+          options: [
+            { en: 'Red 🔴', ar: 'أحمر 🔴', correct: false, reaction: { en: 'Look again! Try again.', ar: 'انظر مجدداً! حاول مرة أخرى.' } },
+            { en: 'Blue 💙', ar: 'أزرق 💙', correct: true, reaction: { en: 'Yes! The sky is blue! 💙', ar: 'نعم! السماء زرقاء! 💙' } },
+            { en: 'Green 💚', ar: 'أخضر 💚', correct: false, reaction: { en: 'Not quite! Try again.', ar: 'ليس تماماً! حاول مرة أخرى.' } },
+          ]
+        }
+      },
+      { scene: '🌱☀️🌸', en: '"GREEN grass, YELLOW sun, ORANGE flowers!" sang Mimi happily as she flew.', ar: 'غنّت ميمي بسعادة وهي تطير: "عشب أخضر، شمس صفراء، زهور برتقالية!"',
+        choice: {
+          q: { en: 'What color is the sun?', ar: 'ما لون الشمس؟' },
+          options: [
+            { en: 'Purple 💜', ar: 'بنفسجي 💜', correct: false, reaction: { en: 'Nope! Try again.', ar: 'لا! حاول مجدداً.' } },
+            { en: 'Yellow 💛', ar: 'أصفر 💛', correct: true, reaction: { en: 'Correct! ☀️ Shine bright!', ar: 'صحيح! ☀️' } },
+            { en: 'Pink 🩷', ar: 'وردي 🩷', correct: false, reaction: { en: 'Not quite! Try again.', ar: 'ليس تماماً! حاول مرة أخرى.' } },
+          ]
+        }
+      },
+      { scene: '🦜🌈🎨', en: 'Mimi flew home and taught all the baby parrots every color of the rainbow!', ar: 'طارت ميمي إلى البيت وعلّمت كل الببغاوات الصغيرة ألوان قوس قزح!' },
+    ]
+  },
+  {
+    id: 'counting-sheep',
+    en: 'The Missing Sheep', ar: 'الشاة الضائعة',
+    emoji: '🐑', color: '#11998e', minAge: 4,
+    moral: { en: 'Count carefully — everyone matters! 🐑', ar: 'عدّ بعناية — كل واحد مهم! 🐑' },
+    pages: [
+      { scene: '👨‍🌾🐑🐑🐑🐑🐑', en: 'Farmer Nasser had five fluffy sheep. Every morning he counted them carefully.', ar: 'كان للمزارع ناصر خمس أغنام صوفية. كل صباح كان يعدّها بعناية.' },
+      { scene: '1️⃣2️⃣3️⃣4️⃣5️⃣', en: '"One, two, three, four, FIVE!" he said with a smile every day.', ar: 'قال بابتسامة كل يوم: "واحدة، اثنتان، ثلاثة، أربعة، خمسة!"' },
+      { scene: '👨‍🌾😟', en: 'One morning he counted: one, two, three, four... and stopped. Someone was missing!', ar: 'في صباح أحد الأيام عدّ: واحدة، اثنتان، ثلاثة، أربعة... وتوقف. أحدهم كان مفقوداً!',
+        choice: {
+          q: { en: 'He counted 4 sheep. How many are missing?', ar: 'عدّ 4 أغنام. كم واحدة مفقودة؟' },
+          options: [
+            { en: '2 sheep 🐑🐑', ar: 'اثنتان 🐑🐑', correct: false, reaction: { en: 'He started with 5 and sees 4. Try again!', ar: 'بدأ بـ5 ورأى 4. حاول مرة أخرى!' } },
+            { en: '1 sheep 🐑', ar: 'واحدة 🐑', correct: true, reaction: { en: 'Right! 5 − 4 = 1 missing! 🎉', ar: 'صحيح! 5 − 4 = 1 مفقودة! 🎉' } },
+            { en: '3 sheep 🐑🐑🐑', ar: 'ثلاثة 🐑🐑🐑', correct: false, reaction: { en: 'He started with 5 and sees 4. Try again!', ar: 'بدأ بـ5 ورأى 4. حاول مرة أخرى!' } },
+          ]
+        }
+      },
+      { scene: '👨‍🌾🔍🌳🪨', en: 'Nasser searched everywhere — behind the big tree, near the pond, by the rock...', ar: 'بحث ناصر في كل مكان — خلف الشجرة الكبيرة، بالقرب من البركة، بجانب الصخرة...' },
+      { scene: '🐑🪨😅', en: '"Baaaa!" The lost sheep was hiding behind a big rock, eating tasty clover!', ar: '"بع!" كانت الشاة الضائعة تختبئ خلف صخرة كبيرة تأكل البرسيم اللذيذ!' },
+      { scene: '👨‍🌾🐑🐑🐑🐑🐑🎉', en: 'Nasser counted again: "1, 2, 3, 4, 5!" All his sheep were safe and together!', ar: 'عدّ ناصر مجدداً: "1، 2، 3، 4، 5!" كانت جميع أغنامه بأمان ومعاً!' },
+    ]
+  },
+  {
+    id: 'honest-fox',
+    en: 'The Honest Fox', ar: 'الثعلب الصادق',
+    emoji: '🦊', color: '#7b1fa2', minAge: 5,
+    moral: { en: 'Honesty brings true happiness! 🌟', ar: 'الصدق يجلب السعادة الحقيقية! 🌟' },
+    pages: [
+      { scene: '🦊🌲🍯', en: 'One day, Farris the fox found a big golden jar of honey in the forest.', ar: 'في أحد الأيام، وجد فارس الثعلب جرة ذهبية كبيرة من العسل في الغابة.' },
+      { scene: '🦊💭🍯', en: '"Mmm, so sweet!" he thought. "I could eat it all alone and tell no one..."', ar: 'فكّر: "مم، كم هو حلو! يمكنني أكله كله وحدي دون أن أخبر أحداً..."',
+        choice: {
+          q: { en: 'What should Farris do?', ar: 'ماذا يجب أن يفعل فارس؟' },
+          options: [
+            { en: 'Keep all the honey secretly 🤫', ar: 'يحتفظ بالعسل سراً 🤫', correct: false, reaction: { en: 'Hmm, but is that kind? Try again!', ar: 'هممم، لكن هل هذا لطيف؟ حاول مرة أخرى!' } },
+            { en: 'Share it with friends 🤝', ar: 'يشاركه مع الأصدقاء 🤝', correct: true, reaction: { en: 'What a good heart! 💛', ar: 'يا له من قلب طيب! 💛' } },
+            { en: 'Hide it and come back later 🙈', ar: 'يخبئه ويعود لاحقاً 🙈', correct: false, reaction: { en: 'Friends deserve to know! Try again!', ar: 'الأصدقاء يستحقون أن يعرفوا! حاول مرة أخرى!' } },
+          ]
+        }
+      },
+      { scene: '🦊📢🐻🐰🦌', en: 'Farris chose to be honest. He called Bear, Rabbit, and Deer to share the honey!', ar: 'اختار فارس أن يكون صادقاً. نادى الدب والأرنب والغزال ليتشاركوا العسل!' },
+      { scene: '🍯😊🎉', en: 'They all sat together, laughing and enjoying the honey. It tasted even sweeter shared!', ar: 'جلسوا جميعاً يضحكون ويتمتعون بالعسل. كان أحلى بكثير حين يُتشارك!' },
+      { scene: '🦊💛🌟', en: 'That night, Farris felt the warmest, happiest feeling — the joy of being honest and kind.', ar: 'في تلك الليلة، شعر فارس بأدفأ وأسعد إحساس — فرحة الصدق واللطف.' },
+    ]
+  },
+  {
+    id: 'rainbow-storm',
+    en: 'The Rainbow\'s Secret', ar: 'سر قوس قزح',
+    emoji: '🌈', color: '#0097a7', minAge: 5,
+    moral: { en: 'Together we can do anything! 🌈', ar: 'معاً يمكننا فعل أي شيء! 🌈' },
+    pages: [
+      { scene: '⛈️😢', en: 'A terrible storm swept through the forest and stole all the colors from the world!', ar: 'اجتاحت عاصفة هائلة الغابة وسرقت كل الألوان من العالم!' },
+      { scene: '🌫️🐘🦁🐧', en: 'Everything turned grey. The animals were very sad. "Where did the colors go?" they asked.', ar: 'أصبح كل شيء رمادياً. كانت الحيوانات حزينة جداً. سألوا: "أين ذهبت الألوان؟"' },
+      { scene: '🦁❤️🐘💙🦋💛', en: 'Then Lion roared: "We can bring the colors back — TOGETHER!" Each animal chose a color to find.', ar: 'ثم زأر الأسد: "يمكننا إعادة الألوان — معاً!" اختار كل حيوان لوناً ليجده.',
+        choice: {
+          q: { en: 'The butterfly mixes BLUE and YELLOW paint. What color does she make?', ar: 'تمزج الفراشة طلاء أزرق وأصفر. ما اللون الذي ستصنعه؟' },
+          options: [
+            { en: 'Red 🔴', ar: 'أحمر 🔴', correct: false, reaction: { en: 'Blue + Yellow = ? Try again!', ar: 'أزرق + أصفر = ؟ حاول مرة أخرى!' } },
+            { en: 'Green 💚', ar: 'أخضر 💚', correct: true, reaction: { en: 'Yes! Blue + Yellow = Green! 💚', ar: 'نعم! أزرق + أصفر = أخضر! 💚' } },
+            { en: 'Orange 🟠', ar: 'برتقالي 🟠', correct: false, reaction: { en: 'Blue + Yellow = ? Try again!', ar: 'أزرق + أصفر = ؟ حاول مرة أخرى!' } },
+          ]
+        }
+      },
+      { scene: '🎨🖌️🤝', en: 'Every animal worked hard and found their color. Then they painted together — side by side!', ar: 'عمل كل حيوان بجد ووجد لونه. ثم رسموا معاً — جنباً إلى جنب!' },
+      { scene: '🌈✨🎉', en: 'The biggest, most beautiful rainbow appeared across the sky! The whole forest cheered!', ar: 'ظهر أكبر وأجمل قوس قزح عبر السماء! احتفل الغابة بأكملها!' },
+    ]
+  },
+];
 
 const ANIMALS = [
   { emoji:'🐱', ar:'قطة',    en:'Cat'       },
@@ -1195,6 +1345,19 @@ function renderMenu() {
         ${gameLang === 'en' ? p.en : p.ar}
       </div>
     </div>`).join('');
+
+  // Stories section
+  const storiesForAge = STORIES.filter(s => s.minAge <= activeProfile.age);
+  $('stories-grid').innerHTML = storiesForAge.map(s => `
+    <div class="subject-card" onclick="openStory('${s.id}')"
+      style="border-color:${s.color}55">
+      <div class="s-icon">${s.emoji}</div>
+      <div class="s-name-en" style="color:${s.color};font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
+        ${gameLang === 'en' ? s.en : s.ar}
+      </div>
+    </div>`).join('');
+  $('stories-section-label-en').style.display = gameLang === 'ar' ? 'none' : '';
+  $('stories-section-label-ar').style.display = gameLang === 'en' ? 'none' : '';
 }
 
 // ================================================================
@@ -2769,6 +2932,166 @@ function checkSyncImport() {
 }
 
 // ================================================================
+//  STORIES
+// ================================================================
+let _story = null;
+let _storyPageIdx = 0;
+let _storyCorrect = 0;
+let _storyTotal = 0;
+let _storyWaitingChoice = false;
+
+function openStory(storyId) {
+  _story = STORIES.find(s => s.id === storyId);
+  if (!_story) return;
+  _storyPageIdx = 0;
+  _storyCorrect = 0;
+  _storyTotal = 0;
+  _storyWaitingChoice = false;
+  lastSubjectId = 'story_' + storyId;
+  $('story-title-bar').textContent = gameLang === 'en' ? _story.en : _story.ar;
+  renderStoryPage();
+  showScreen('screen-story');
+}
+
+function closeStory() {
+  _story = null;
+  goMenu();
+}
+
+function renderStoryPage() {
+  if (!_story) return;
+  const page = _story.pages[_storyPageIdx];
+  const total = _story.pages.length;
+  const isAr = gameLang === 'ar';
+
+  $('story-page-counter').textContent = (_storyPageIdx + 1) + ' / ' + total;
+  $('story-progress').style.width = ((_storyPageIdx / (total - 1)) * 100) + '%';
+  $('story-scene').textContent = page.scene;
+  $('story-text').textContent = isAr ? page.ar : page.en;
+  $('story-text').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
+  $('story-text').style.direction = isAr ? 'rtl' : 'ltr';
+
+  $('story-choices-wrap').style.display = 'none';
+  $('story-feedback').textContent = '';
+  _storyWaitingChoice = false;
+
+  const nextBtn = $('story-next-btn');
+  // Check if last page
+  const isLast = _storyPageIdx === total - 1;
+  nextBtn.textContent = isLast
+    ? (isAr ? '🏁 إنهاء' : '🏁 Finish')
+    : (isAr ? 'التالي ▶' : 'Next ▶');
+  nextBtn.style.display = page.choice ? 'none' : '';
+
+  // TTS
+  speakSeq([{ text: isAr ? page.ar : page.en, lang: isAr ? 'ar-SA' : 'en-US' }]);
+
+  // Show choices if this page has a choice
+  if (page.choice) {
+    nextBtn.style.display = 'none';
+    $('story-choices-wrap').style.display = 'flex';
+    const q = page.choice;
+    $('story-choice-q').textContent = isAr ? q.q.ar : q.q.en;
+    $('story-choice-q').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
+    $('story-choices').innerHTML = q.options.map((opt, i) => `
+      <button onclick="onStoryChoice(${i})"
+        style="background:white;border:2.5px solid #ddd;border-radius:16px;padding:12px 18px;font-size:.9rem;font-weight:900;cursor:pointer;text-align:${isAr?'right':'left'};font-family:${isAr?'var(--fa)':'var(--fe)'}">
+        ${isAr ? opt.ar : opt.en}
+      </button>`).join('');
+    _storyTotal++;
+    _storyWaitingChoice = true;
+    speakSeq([{ text: isAr ? q.q.ar : q.q.en, lang: isAr ? 'ar-SA' : 'en-US' }]);
+  }
+}
+
+function onStoryChoice(idx) {
+  if (!_storyWaitingChoice || !_story) return;
+  const page = _story.pages[_storyPageIdx];
+  const opt = page.choice.options[idx];
+  const isAr = gameLang === 'ar';
+  const btns = $('story-choices').querySelectorAll('button');
+
+  if (opt.correct) {
+    _storyCorrect++;
+    _storyWaitingChoice = false;
+    btns[idx].style.background = '#e8f5e9';
+    btns[idx].style.borderColor = '#4caf50';
+    $('story-feedback').textContent = isAr ? opt.reaction.ar : opt.reaction.en;
+    $('story-feedback').style.color = '#4caf50';
+    playSound('correct');
+    btns.forEach(b => b.disabled = true);
+    // Show next button after brief pause
+    setTimeout(() => {
+      $('story-next-btn').style.display = '';
+      $('story-next-btn').textContent = _storyPageIdx === _story.pages.length - 1
+        ? (isAr ? '🏁 إنهاء' : '🏁 Finish')
+        : (isAr ? 'التالي ▶' : 'Next ▶');
+    }, 800);
+  } else {
+    btns[idx].style.background = '#ffebee';
+    btns[idx].style.borderColor = '#f44336';
+    $('story-feedback').textContent = isAr ? opt.reaction.ar : opt.reaction.en;
+    $('story-feedback').style.color = '#f44336';
+    playSound('wrong');
+    setTimeout(() => {
+      btns[idx].style.background = '';
+      btns[idx].style.borderColor = '#ddd';
+      $('story-feedback').textContent = '';
+    }, 1200);
+  }
+}
+
+function nextStoryPage() {
+  if (!_story) return;
+  const total = _story.pages.length;
+  if (_storyPageIdx >= total - 1) {
+    finishStory();
+    return;
+  }
+  _storyPageIdx++;
+  renderStoryPage();
+}
+
+function finishStory() {
+  if (!_story) return;
+  const isAr = gameLang === 'ar';
+  const stars = _storyTotal === 0 ? 3 : Math.round((_storyCorrect / _storyTotal) * 3);
+  const earnedStars = Math.max(1, stars);
+
+  // Save progress
+  saveProg(activeProfile.id, earnedStars);
+  saveSession(activeProfile.id, {
+    ts: Date.now(),
+    dateStr: new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }),
+    timeStr: new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }),
+    subject: _story.id, subjectEn: _story.en, subjectAr: _story.ar,
+    subjectEmoji: _story.emoji, lang: gameLang,
+    score: _storyCorrect, total: _storyTotal || 1, stars: earnedStars, qa: [],
+  });
+  updateStreak(activeProfile.id);
+  checkBadges(activeProfile.id);
+
+  // Show results on the story card
+  $('story-scene').textContent = '🏆';
+  $('story-text').textContent = isAr ? _story.moral.ar : _story.moral.en;
+  $('story-text').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
+  $('story-choices-wrap').style.display = 'none';
+  $('story-progress').style.width = '100%';
+  $('story-page-counter').textContent = '✅';
+
+  const starsHtml = '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars);
+  $('story-card').insertAdjacentHTML('beforeend',
+    `<div style="font-size:1.6rem;margin-top:8px">${starsHtml}</div>
+     <div style="font-size:.85rem;color:#888;font-weight:700;font-family:${isAr?'var(--fa)':'var(--fe)'}">${isAr?'أحسنت! 🎉':'Well done! 🎉'}</div>`);
+
+  $('story-next-btn').textContent = isAr ? '🏠 القائمة' : '🏠 Menu';
+  $('story-next-btn').onclick = () => { _story = null; goMenu(); };
+  $('story-next-btn').style.display = '';
+  launchConfetti(earnedStars === 3);
+  playSound('levelup');
+}
+
+// ================================================================
 //  BOOT
 // ================================================================
 
@@ -2797,5 +3120,35 @@ if (_kidParam && PROFILES.find(p => p.id === _kidParam)) {
   renderProfiles();
 }
 </script>
+
+<!-- ============================================================
+     SCREEN — STORY READER
+============================================================= -->
+<div id="screen-story" class="screen">
+  <div style="width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <button class="btn back-btn" onclick="closeStory()">←</button>
+    <div id="story-title-bar" style="color:white;font-size:1rem;font-weight:900;text-align:center;flex:1">Story</div>
+    <div id="story-page-counter" style="color:rgba(255,255,255,.7);font-size:.8rem;font-weight:900;min-width:44px;text-align:right">1/5</div>
+  </div>
+  <div style="width:100%;max-width:520px;background:rgba(255,255,255,.18);border-radius:50px;height:8px;overflow:hidden;flex-shrink:0">
+    <div id="story-progress" style="height:100%;background:white;border-radius:50px;transition:width .4s"></div>
+  </div>
+  <div id="story-card" style="width:100%;max-width:520px;background:rgba(255,255,255,.95);border-radius:28px;padding:28px 22px;box-shadow:0 8px 32px rgba(0,0,0,.15);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:280px">
+    <div id="story-scene" style="font-size:4rem;line-height:1.2;text-align:center"></div>
+    <div id="story-text" style="font-size:1.05rem;font-weight:700;color:#333;text-align:center;line-height:1.6;max-width:420px"></div>
+  </div>
+  <div id="story-choices-wrap" style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;display:none">
+    <div id="story-choice-q" style="color:white;font-size:.95rem;font-weight:900;text-align:center"></div>
+    <div id="story-choices" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div id="story-feedback" style="font-size:.9rem;font-weight:900;text-align:center;color:white;min-height:24px"></div>
+  </div>
+  <div style="width:100%;max-width:520px;display:flex;gap:10px;justify-content:center;flex-shrink:0">
+    <button id="story-next-btn" onclick="nextStoryPage()"
+      style="background:white;color:#5c6bc0;border:none;border-radius:50px;padding:14px 36px;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+      Next ▶
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
