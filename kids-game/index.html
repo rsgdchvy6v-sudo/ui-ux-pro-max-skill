@@ -943,6 +943,19 @@ const LEVELS = [
   [100, 'Champion',     'بطل',       '🏆'],
 ];
 
+const REWARD_SUGGESTIONS = [
+  { en: '⏱ 30 min extra screen time',  ar: '⏱ 30 دقيقة شاشة إضافية' },
+  { en: '🍦 Choose tonight\'s dessert', ar: '🍦 اختيار حلوى الليلة' },
+  { en: '📚 New book of their choice',  ar: '📚 كتاب جديد من اختيارهم' },
+  { en: '🎮 New game or app',           ar: '🎮 لعبة أو تطبيق جديد' },
+  { en: '🏖 Trip to the park',          ar: '🏖 رحلة إلى الحديقة' },
+  { en: '🎬 Movie night — their pick',  ar: '🎬 اختيار فيلم الليلة' },
+  { en: '🍕 Pick dinner tonight',       ar: '🍕 اختيار عشاء الليلة' },
+  { en: '🎁 Small surprise gift',       ar: '🎁 هدية مفاجأة صغيرة' },
+  { en: '👨‍👩‍👧 Special family outing',     ar: '👨‍👩‍👧 نزهة عائلية مميزة' },
+  { en: '🌟 Gold star + certificate',   ar: '🌟 نجمة ذهبية وشهادة' },
+];
+
 const MSGS_CORRECT = [
   ['Excellent! 🎉', 'ممتاز! 🎉'],
   ['Amazing! ⭐',   'رائع! ⭐'],
@@ -1059,6 +1072,17 @@ function showBadgeToast(badge) {
 
 // ================================================================
 //  SOUND EFFECTS (Web Audio API)
+function loadGoals(id) {
+  try { return JSON.parse(localStorage.getItem('ls_goals_' + id) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveGoal(id, levelKey, reward) {
+  const g = loadGoals(id);
+  if (reward) g[levelKey] = reward; else delete g[levelKey];
+  try { localStorage.setItem('ls_goals_' + id, JSON.stringify(g)); } catch(e) {}
+  cloudSaveKid(id);
+}
+
 // ================================================================
 let _audioCtx = null;
 function _getAudioCtx() {
@@ -2258,9 +2282,10 @@ function showResults() {
 
   const lub = $('levelup-badge');
   if (didLevelUp) {
-    lub.textContent = gameLang === 'en'
-      ? `${newLevel[3]} Level Up! → ${newLevel[1]}`
-      : `${newLevel[3]} ارتقيت مستوى! → ${newLevel[2]}`;
+    const reward = loadGoals(activeProfile.id)[newLevel[1]] || '';
+    lub.innerHTML = gameLang === 'en'
+      ? `${newLevel[3]} Level Up! → ${newLevel[1]}${reward ? `<br><span style="font-size:.85em;opacity:.9">🎁 ${reward}</span>` : ''}`
+      : `${newLevel[3]} ارتقيت مستوى! → ${newLevel[2]}${reward ? `<br><span style="font-size:.85em;opacity:.9">🎁 ${reward}</span>` : ''}`;
     lub.classList.add('show');
     setTimeout(()=>playSound('levelup'), 300);
   } else {
@@ -2512,6 +2537,7 @@ function showParentDashboard() {
   const grid = $('parent-grid');
   grid.innerHTML = _buildCloudCard(isAr) + PROFILES.map(p => {
     const prog  = loadProg(p.id);
+    const goals = loadGoals(p.id);
     const lv    = getLevel(prog.stars);
     const lvIdx = LEVELS.indexOf(lv);
     const nextS = nextLevelStars(prog.stars);
@@ -2563,6 +2589,36 @@ function showParentDashboard() {
             style="background:#fff0f0;border:1.5px solid #ffb3b3;border-radius:12px;padding:8px 12px;font-size:.8rem;font-weight:900;color:#e55;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
             ${L.reset}
           </button>
+          <button onclick="toggleGoals('${p.id}')"
+            style="background:linear-gradient(135deg,#ff8a00,#e52e71);color:white;border:none;border-radius:12px;padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            🎯 ${isAr?'الأهداف':'Goals'}
+          </button>
+        </div>
+        <!-- Goals panel -->
+        <div id="goals-panel-${p.id}" style="display:none;background:#fffbf0;border:1.5px solid #ffe082;border-radius:14px;padding:12px 14px;margin-top:6px;direction:${isAr?'rtl':'ltr'}">
+          <div style="font-weight:900;font-size:.85rem;color:#e65100;margin-bottom:8px;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            🎯 ${isAr?'حدد جائزة لكل مستوى':'Set a reward for each level'}
+          </div>
+          ${LEVELS.slice(1).map((lv2,i2) => {
+            const levelKey = lv2[1];
+            const achieved = lvIdx >= (i2+1);
+            const currentGoal = goals[levelKey] || '';
+            return `<div style="margin-bottom:10px">
+              <div style="font-size:.8rem;font-weight:900;color:${achieved?'#2e7d32':'#888'};margin-bottom:4px;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+                ${lv2[3]} ${isAr?lv2[2]:lv2[1]} ${achieved?'✅':''}
+              </div>
+              <select onchange="pickGoal('${p.id}','${levelKey}',this)"
+                style="width:100%;border:1.5px solid #ffe082;border-radius:10px;padding:7px 10px;font-size:.8rem;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+                <option value="">${isAr?'-- اختر جائزة --':'-- Pick a reward --'}</option>
+                ${REWARD_SUGGESTIONS.map(s => {
+                  const label = isAr ? s.ar : s.en;
+                  return `<option value="${label}" ${currentGoal===label?'selected':''}>${label}</option>`;
+                }).join('')}
+                <option value="__custom__" ${currentGoal&&!REWARD_SUGGESTIONS.some(s=>(isAr?s.ar:s.en)===currentGoal)?'selected':''}>${isAr?'✏️ مخصص...':'✏️ Custom...'}</option>
+              </select>
+              ${currentGoal ? `<div style="font-size:.75rem;color:#e65100;margin-top:3px;font-family:${isAr?'var(--fa)':'var(--fe)'}">🎁 ${currentGoal}</div>` : ''}
+            </div>`;
+          }).join('')}
         </div>
         <div id="lvpicker-${p.id}" style="display:none;flex-wrap:wrap;gap:7px;padding:10px;background:#f8f8ff;border-radius:12px;margin-top:2px">
           ${LEVELS.map((lv2, i2) => {
@@ -2597,6 +2653,27 @@ function resetProgress(profileId) {
 function toggleLevelPicker(profileId) {
   const el = $('lvpicker-' + profileId);
   el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleGoals(profileId) {
+  const el = $('goals-panel-' + profileId);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function pickGoal(profileId, levelKey, sel) {
+  if (sel.value === '__custom__') {
+    const isAr = parentLang === 'ar';
+    const custom = prompt(isAr ? 'أدخل الجائزة المخصصة:' : 'Enter custom reward:');
+    if (custom && custom.trim()) {
+      saveGoal(profileId, levelKey, custom.trim());
+      showParentDashboard();
+    } else {
+      sel.value = '';
+    }
+  } else {
+    saveGoal(profileId, levelKey, sel.value);
+    showParentDashboard();
+  }
 }
 
 function applyLevel(profileId, levelIdx) {
@@ -2876,6 +2953,7 @@ async function cloudSaveKid(kidId) {
     b: localStorage.getItem('ls_badges_' + kidId) || '',
     t: localStorage.getItem('ls_streak_' + kidId) || '',
     s: localStorage.getItem('ls_sessions_' + kidId) || '',
+    g: localStorage.getItem('ls_goals_' + kidId) || '',
     u: Date.now(),
   };
   try {
@@ -2902,6 +2980,7 @@ async function cloudLoadAll() {
       if (d.b) localStorage.setItem('ls_badges_' + p.id, d.b);
       if (d.t) localStorage.setItem('ls_streak_' + p.id, d.t);
       if (d.s) localStorage.setItem('ls_sessions_' + p.id, d.s);
+      if (d.g) localStorage.setItem('ls_goals_' + p.id, d.g);
     });
     return true;
   } catch(e) { return false; }
@@ -3080,6 +3159,7 @@ let _storyPageIdx = 0;
 let _storyCorrect = 0;
 let _storyTotal = 0;
 let _storyWaitingChoice = false;
+let _storyShuffledOpts = [];
 
 function openStory(storyId) {
   _story = STORIES.find(s => s.id === storyId);
@@ -3134,7 +3214,8 @@ function renderStoryPage() {
     const q = page.choice;
     $('story-choice-q').textContent = isAr ? q.q.ar : q.q.en;
     $('story-choice-q').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
-    $('story-choices').innerHTML = q.options.map((opt, i) => `
+    _storyShuffledOpts = shuffle([...q.options]);
+    $('story-choices').innerHTML = _storyShuffledOpts.map((opt, i) => `
       <button onclick="onStoryChoice(${i})"
         style="background:white;border:2.5px solid #ddd;border-radius:16px;padding:12px 18px;font-size:.9rem;font-weight:900;cursor:pointer;text-align:${isAr?'right':'left'};font-family:${isAr?'var(--fa)':'var(--fe)'}">
         ${isAr ? opt.ar : opt.en}
@@ -3148,7 +3229,7 @@ function renderStoryPage() {
 function onStoryChoice(idx) {
   if (!_storyWaitingChoice || !_story) return;
   const page = _story.pages[_storyPageIdx];
-  const opt = page.choice.options[idx];
+  const opt = _storyShuffledOpts[idx];
   const isAr = gameLang === 'ar';
   const btns = $('story-choices').querySelectorAll('button');
 
