@@ -519,27 +519,10 @@
     <button onclick="toggleParentLang()" id="parent-lang-btn"
       style="background:rgba(255,255,255,.22);color:white;border:none;border-radius:50px;padding:8px 14px;font-size:.85rem;font-weight:900;cursor:pointer;min-width:52px">EN</button>
   </div>
-  <!-- Cloud sync panel -->
-  <div id="cloud-panel" style="width:100%;max-width:720px;background:rgba(255,255,255,.18);border-radius:16px;padding:12px 16px;flex-shrink:0">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <span id="cloud-status-badge" style="font-size:.82rem;font-weight:900;color:rgba(255,255,255,.7)">⬜ Not synced</span>
-      <div style="display:flex;gap:7px">
-        <button onclick="cloudSaveAll(true)" id="cloud-save-btn"
-          style="background:white;color:#5c6bc0;border:none;border-radius:50px;padding:6px 13px;font-size:.78rem;font-weight:900;cursor:pointer">☁️ Save Now</button>
-        <button onclick="toggleCloudImport()" id="cloud-load-btn"
-          style="background:rgba(255,255,255,.22);color:white;border:none;border-radius:50px;padding:6px 13px;font-size:.78rem;font-weight:900;cursor:pointer">📥 Load</button>
-      </div>
-    </div>
-    <div id="cloud-code-display" style="display:none;font-size:.72rem;color:rgba(255,255,255,.75);margin-top:5px;font-family:monospace;word-break:break-all"></div>
-    <div id="cloud-import-row" style="display:none;margin-top:9px;display:none">
-      <div style="font-size:.74rem;color:rgba(255,255,255,.8);margin-bottom:5px" id="cloud-import-lbl">Enter the Cloud Code from another device:</div>
-      <div style="display:flex;gap:7px">
-        <input id="cloud-code-input" placeholder="Cloud Code (e.g. 1150263...)" type="text"
-          style="flex:1;border:none;border-radius:50px;padding:8px 14px;font-size:.8rem;outline:none;min-width:0"/>
-        <button onclick="importByCode()" id="cloud-import-go"
-          style="background:#4caf50;color:white;border:none;border-radius:50px;padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;white-space:nowrap">✓ Go</button>
-      </div>
-    </div>
+  <!-- Cloud sync header -->
+  <div id="cloud-panel" style="width:100%;max-width:720px;background:rgba(255,255,255,.15);border-radius:14px;padding:9px 16px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <span id="cloud-header-lbl" style="font-size:.78rem;font-weight:900;color:rgba(255,255,255,.85)">☁️ Cloud Sync</span>
+    <span id="cloud-header-status" style="font-size:.75rem;color:rgba(255,255,255,.6);font-weight:700"></span>
   </div>
   <div id="parent-grid" style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:14px"></div>
 </div>
@@ -2343,15 +2326,7 @@ function showParentDashboard() {
   $('parent-lang-btn').textContent = parentLang === 'en' ? 'AR | عر' : 'EN';
   $('parent-lang-btn').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
   $('cloud-panel').style.direction = isAr ? 'rtl' : 'ltr';
-  $('cloud-save-btn').textContent   = isAr ? '☁️ حفظ الآن' : '☁️ Save Now';
-  $('cloud-load-btn').textContent   = isAr ? '📥 تحميل' : '📥 Load';
-  $('cloud-import-lbl').textContent = isAr ? 'أدخل رمز السحابة من جهاز آخر:' : 'Enter the Cloud Code from another device:';
-  $('cloud-import-go').textContent  = isAr ? '✓ تحميل' : '✓ Go';
-  $('cloud-code-input').placeholder = isAr ? 'رمز السحابة...' : 'Cloud Code (e.g. 1150263...)';
-  _refreshCloudStatus();
-  // Auto-load from cloud if we have a saved cloud ID
-  const _cid = localStorage.getItem('ls_cloud_id');
-  if (_cid) cloudLoadById(_cid, false);
+  $('cloud-header-lbl').textContent = isAr ? '☁️ المزامنة السحابية' : '☁️ Cloud Sync';
 
   const grid = $('parent-grid');
   grid.innerHTML = PROFILES.map(p => {
@@ -2421,8 +2396,38 @@ function showParentDashboard() {
             ${L.cancelLevel}
           </button>
         </div>
+        <!-- Per-kid cloud row -->
+        <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;direction:${isAr?'rtl':'ltr'}">
+          <span id="cloud-badge-${p.id}"
+            style="font-size:.74rem;font-weight:900;padding:4px 12px;border-radius:50px;background:#f3f4f6;color:#888;cursor:default">
+            ${localStorage.getItem(_kidCloudKey(p.id)) ? '☁️ ' + (isAr?'متزامن':'Synced') : '🔗 ' + (isAr?'اربط السحابة':'Connect')}
+          </span>
+          <button onclick="cloudSaveKidFromDash('${p.id}')"
+            style="background:#e8f4fd;color:#1565c0;border:none;border-radius:50px;padding:4px 12px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            ${isAr?'☁️ احفظ من هذا الجهاز':'☁️ Save (on this iPad)'}
+          </button>
+          <button onclick="toggleKidCloudConnect('${p.id}')"
+            style="background:#f3f4f6;color:#555;border:none;border-radius:50px;padding:4px 12px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            ${isAr?'📥 أدخل الرمز':'📥 Enter Code'}
+          </button>
+        </div>
+        <div id="cloud-connect-row-${p.id}" style="display:none;margin-top:7px;gap:6px;direction:${isAr?'rtl':'ltr'}">
+          <input id="cloud-inp-${p.id}" placeholder="${isAr?'رمز السحابة...':'Paste Cloud Code here'}" type="text"
+            style="flex:1;border:1.5px solid #ddd;border-radius:50px;padding:7px 14px;font-size:.78rem;outline:none;min-width:0;width:100%;box-sizing:border-box;margin-bottom:5px"/>
+          <button onclick="importKidByCode('${p.id}')" id="cloud-go-${p.id}"
+            style="background:#4caf50;color:white;border:none;border-radius:50px;padding:7px 18px;font-size:.78rem;font-weight:900;cursor:pointer">
+            ${isAr?'✓ تحميل':'✓ Load'}
+          </button>
+        </div>
       </div>`;
   }).join('');
+
+  _updateCloudHeader();
+  // Auto-refresh each connected kid's data from cloud
+  PROFILES.forEach(p => {
+    const cid = localStorage.getItem(_kidCloudKey(p.id));
+    if (cid) cloudLoadKid(p.id, cid, false);
+  });
 
   showScreen('screen-parent');
 }
@@ -2610,30 +2615,31 @@ function exportReport(profileId) {
 }
 
 // ================================================================
-//  CLOUD SYNC — JSONBlob (free, no account required)
+//  CLOUD SYNC — per-kid JSONBlob (free, no account required)
 // ================================================================
 const JBLOB_API = 'https://jsonblob.com/api/jsonBlob';
-let _cloudSaveTimer = null;
+let _cloudSaveTimers = {};   // profileId → timer
 
-function _cloudAllData() {
+function _kidCloudKey(profileId) { return 'ls_cloud_id_' + profileId; }
+
+function _kidData(profileId) {
   const d = {};
-  PROFILES.forEach(p => {
-    ['ls_','ls_sessions_','ls_streak_','ls_badges_'].forEach(pfx => {
-      const v = localStorage.getItem(pfx + p.id);
-      if (v) d[pfx + p.id] = v;
-    });
+  ['ls_','ls_sessions_','ls_streak_','ls_badges_'].forEach(pfx => {
+    const v = localStorage.getItem(pfx + profileId);
+    if (v) d[pfx + profileId] = v;
   });
   return d;
 }
 
-async function cloudSaveAll(manual) {
-  const data = _cloudAllData();
+async function cloudSaveKid(profileId, manual) {
+  const data = _kidData(profileId);
   if (!Object.keys(data).length) {
-    if (manual) alert(parentLang === 'ar' ? 'لا توجد بيانات للحفظ بعد.' : 'No progress data to save yet.');
+    if (manual) alert(parentLang === 'ar' ? 'لا توجد بيانات للحفظ بعد.' : 'No progress yet to save.');
     return;
   }
-  const id = localStorage.getItem('ls_cloud_id');
-  _setCloudStatus('saving');
+  const key = _kidCloudKey(profileId);
+  const id  = localStorage.getItem(key);
+  _setKidCloudBadge(profileId, 'saving');
   try {
     const res = await fetch(id ? `${JBLOB_API}/${id}` : JBLOB_API, {
       method: id ? 'PUT' : 'POST',
@@ -2642,85 +2648,104 @@ async function cloudSaveAll(manual) {
     });
     if (res.ok) {
       if (!id) {
-        const loc = res.headers.get('Location') || '';
-        const newId = loc.split('/').pop();
-        if (newId) localStorage.setItem('ls_cloud_id', newId);
+        const newId = (res.headers.get('Location') || '').split('/').pop();
+        if (newId) localStorage.setItem(key, newId);
       }
-      _setCloudStatus('saved');
+      _setKidCloudBadge(profileId, 'saved');
       if (manual) {
-        const code = (localStorage.getItem('ls_cloud_id') || '').slice(-8);
+        const code = localStorage.getItem(key) || '';
         alert(parentLang === 'ar'
-          ? `✅ تم الحفظ على السحابة!\nرمز السحابة: ${localStorage.getItem('ls_cloud_id')}`
-          : `✅ Saved to cloud!\nCloud Code: ${localStorage.getItem('ls_cloud_id')}`);
+          ? `✅ تم الحفظ!\nرمز السحابة:\n${code}`
+          : `✅ Saved!\nCloud Code for this iPad:\n\n${code}\n\nSend this to yourself and enter it on your phone once.`);
       }
-    } else { _setCloudStatus('error'); }
-  } catch(e) { _setCloudStatus('offline'); }
+    } else { _setKidCloudBadge(profileId, 'error'); }
+  } catch(e) { _setKidCloudBadge(profileId, 'offline'); }
+  _updateCloudHeader();
 }
 
-async function cloudLoadById(id, showAlert) {
-  if (!id) return false;
+async function cloudLoadKid(profileId, blobId, showAlert) {
+  if (!blobId) return false;
   try {
-    const res = await fetch(`${JBLOB_API}/${id.trim()}`, { headers: { 'Accept': 'application/json' } });
+    const res = await fetch(`${JBLOB_API}/${blobId.trim()}`, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) {
-      if (showAlert) alert(parentLang === 'ar' ? '❌ لم يُعثر على رمز السحابة.' : '❌ Cloud Code not found. Check the code and try again.');
+      if (showAlert) alert(parentLang === 'ar' ? '❌ الرمز غير صحيح، تحقق منه وأعد المحاولة.' : '❌ Code not found. Double-check and try again.');
       return false;
     }
     const data = await res.json();
     Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
-    localStorage.setItem('ls_cloud_id', id.trim());
-    _setCloudStatus('saved');
+    localStorage.setItem(_kidCloudKey(profileId), blobId.trim());
+    _setKidCloudBadge(profileId, 'saved');
+    _updateCloudHeader();
+    if (showAlert) {
+      const p = PROFILES.find(pr => pr.id === profileId);
+      alert(parentLang === 'ar'
+        ? `✅ تم تحميل بيانات ${p.nameAr}!`
+        : `✅ ${p.nameEn}'s data loaded! It will auto-refresh from now on.`);
+    }
     showParentDashboard();
-    if (showAlert) alert(parentLang === 'ar' ? '✅ تم تحميل البيانات!' : '✅ Data loaded successfully!');
     return true;
-  } catch(e) { _setCloudStatus('offline'); return false; }
-}
-
-function scheduleCloudSave() {
-  clearTimeout(_cloudSaveTimer);
-  _cloudSaveTimer = setTimeout(() => cloudSaveAll(false), 2000);
-}
-
-function _refreshCloudStatus() {
-  const id = localStorage.getItem('ls_cloud_id');
-  _setCloudStatus(id ? 'saved' : 'none');
-}
-
-function _setCloudStatus(status) {
-  const el = $('cloud-status-badge');
-  if (!el) return;
-  const id = localStorage.getItem('ls_cloud_id') || '';
-  const isAr = parentLang === 'ar';
-  const map = {
-    saved:  { label: isAr ? '☁️ متزامن'        : '☁️ Synced',   color: '#c8f7d0' },
-    saving: { label: isAr ? '☁️ جارٍ الحفظ...'  : '☁️ Saving…',  color: '#fff3cd' },
-    offline:{ label: isAr ? '⚡ غير متصل'       : '⚡ Offline',   color: '#ffe0b2' },
-    error:  { label: isAr ? '❌ خطأ في المزامنة' : '❌ Sync error', color: '#ffcdd2' },
-    none:   { label: isAr ? '⬜ غير محفوظ'      : '⬜ Not saved',  color: 'rgba(255,255,255,.5)' },
-  };
-  const s = map[status] || map.none;
-  el.textContent = s.label;
-  el.style.color = s.color;
-  const codeEl = $('cloud-code-display');
-  if (codeEl && id) {
-    codeEl.textContent = (isAr ? 'رمز السحابة: ' : 'Cloud Code: ') + id;
-    codeEl.style.display = 'block';
-  } else if (codeEl) {
-    codeEl.style.display = 'none';
+  } catch(e) {
+    if (showAlert) alert(parentLang === 'ar' ? '⚡ تعذر الاتصال.' : '⚡ Connection failed. Check your internet.');
+    return false;
   }
 }
 
-function toggleCloudImport() {
-  const row = $('cloud-import-row');
-  row.style.display = row.style.display === 'none' ? 'block' : 'none';
+function scheduleCloudSave() {
+  if (!activeProfile) return;
+  const pid = activeProfile.id;
+  clearTimeout(_cloudSaveTimers[pid]);
+  _cloudSaveTimers[pid] = setTimeout(() => cloudSaveKid(pid, false), 2000);
 }
 
-async function importByCode() {
-  const code = ($('cloud-code-input').value || '').trim();
+function _setKidCloudBadge(profileId, status) {
+  const el = document.getElementById('cloud-badge-' + profileId);
+  if (!el) return;
+  const isAr = parentLang === 'ar';
+  const map = {
+    saved:  { icon: '☁️', label: isAr ? 'متزامن'    : 'Synced',   color: '#e8f5e9', text: '#2e7d32' },
+    saving: { icon: '☁️', label: isAr ? 'جارٍ…'      : 'Saving…',  color: '#fffde7', text: '#f57f17' },
+    offline:{ icon: '⚡', label: isAr ? 'غير متصل'   : 'Offline',  color: '#fff3e0', text: '#e65100' },
+    error:  { icon: '❌', label: isAr ? 'خطأ'        : 'Error',    color: '#ffebee', text: '#c62828' },
+    none:   { icon: '🔗', label: isAr ? 'اربط السحابة': 'Connect',  color: '#f3f4f6', text: '#888'    },
+  };
+  const s = map[status] || map.none;
+  el.innerHTML = `${s.icon} ${s.label}`;
+  el.style.background = s.color;
+  el.style.color = s.text;
+}
+
+function _updateCloudHeader() {
+  const el = $('cloud-header-status');
+  if (!el) return;
+  const connected = PROFILES.filter(p => localStorage.getItem(_kidCloudKey(p.id))).length;
+  const isAr = parentLang === 'ar';
+  el.textContent = connected === 0
+    ? (isAr ? 'غير مربوط' : 'Not connected')
+    : connected === PROFILES.length
+      ? (isAr ? `✅ كل الأطفال مربوطون` : `✅ All ${PROFILES.length} kids synced`)
+      : (isAr ? `${connected}/${PROFILES.length} مربوطون` : `${connected}/${PROFILES.length} connected`);
+}
+
+function toggleKidCloudConnect(profileId) {
+  const row = document.getElementById('cloud-connect-row-' + profileId);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function importKidByCode(profileId) {
+  const inp = document.getElementById('cloud-inp-' + profileId);
+  const btn = document.getElementById('cloud-go-' + profileId);
+  if (!inp) return;
+  const code = inp.value.trim();
   if (!code) return;
-  $('cloud-import-go').textContent = '…';
-  await cloudLoadById(code, true);
-  $('cloud-import-go').textContent = parentLang === 'ar' ? '✓ تحميل' : '✓ Go';
-  $('cloud-import-row').style.display = 'none';
+  btn.textContent = '…';
+  await cloudLoadKid(profileId, code, true);
+  btn.textContent = '✓';
+}
+
+async function cloudSaveKidFromDash(profileId) {
+  await cloudSaveKid(profileId, true);
+  showParentDashboard();
 }
 
 // ================================================================
