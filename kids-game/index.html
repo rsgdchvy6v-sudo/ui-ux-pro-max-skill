@@ -2601,44 +2601,91 @@ function exportReport(profileId) {
 }
 
 // ================================================================
-//  QR SYNC — scan on phone to import progress (no cloud needed)
+//  SYNC — send progress to phone via AirDrop / QR (no cloud needed)
 // ================================================================
 
+// Build a COMPACT sync payload — strips per-question detail so the
+// URL stays small enough to AirDrop and to fit in a scannable QR.
 function _kidSyncUrl(profileId) {
   const d = { id: profileId };
-  const prog    = localStorage.getItem('ls_' + profileId);
-  const badges  = localStorage.getItem('ls_badges_' + profileId);
-  const streak  = localStorage.getItem('ls_streak_' + profileId);
-  const sessions= localStorage.getItem('ls_sessions_' + profileId);
-  if (prog)     d.p = prog;
-  if (badges)   d.k = badges;
-  if (streak)   d.t = streak;
-  if (sessions) d.s = sessions;
-  return location.origin + location.pathname + '#kid-sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+  const prog   = localStorage.getItem('ls_' + profileId);
+  const badges = localStorage.getItem('ls_badges_' + profileId);
+  const streak = localStorage.getItem('ls_streak_' + profileId);
+  if (prog)   d.p = prog;
+  if (badges) d.k = badges;
+  if (streak) d.t = streak;
+  // Sessions: keep last 20, drop the heavy qa arrays (keep summary)
+  try {
+    const sess = JSON.parse(localStorage.getItem('ls_sessions_' + profileId) || '[]');
+    if (sess.length) {
+      d.s = sess.slice(0, 20).map(s => ({
+        ts: s.ts, dateStr: s.dateStr, timeStr: s.timeStr,
+        subject: s.subject, subjectEn: s.subjectEn, subjectAr: s.subjectAr,
+        subjectEmoji: s.subjectEmoji, lang: s.lang,
+        score: s.score, total: s.total, stars: s.stars, qa: [],
+      }));
+    }
+  } catch(e) {}
+  const json = JSON.stringify(d);
+  return location.origin + location.pathname + '#kid-sync=' + btoa(unescape(encodeURIComponent(json)));
+}
+
+// AirDrop / Messages — the easiest for an all-Apple family
+function sendKidToPhone(profileId) {
+  const prog = localStorage.getItem('ls_' + profileId);
+  if (!prog) {
+    alert(parentLang === 'ar' ? 'لا يوجد تقدم بعد لهذا الطفل.' : 'No progress yet. Play some games first!');
+    return;
+  }
+  const p = PROFILES.find(pr => pr.id === profileId);
+  const url = _kidSyncUrl(profileId);
+  if (navigator.share) {
+    navigator.share({
+      title: (p ? p.nameEn : 'Kid') + ' — Progress',
+      text: parentLang === 'ar' ? `تقدم ${p ? p.nameAr : ''} — افتح الرابط على هاتفك` : `Open this on your phone to see ${p ? p.nameEn : ''}'s progress`,
+      url,
+    }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert(parentLang === 'ar' ? '✅ تم نسخ الرابط! أرسله لهاتفك وافتحه.' : '✅ Link copied! Send it to your phone and open it.');
+    });
+  } else {
+    prompt(parentLang === 'ar' ? 'انسخ الرابط وافتحه على هاتفك:' : 'Copy this link and open on your phone:', url);
+  }
 }
 
 function showKidQR(profileId) {
   const prog = localStorage.getItem('ls_' + profileId);
   if (!prog) {
-    alert(parentLang === 'ar' ? 'لا يوجد تقدم بعد لهذا الطفل.' : 'No progress yet for this kid. Play some games first!');
+    alert(parentLang === 'ar' ? 'لا يوجد تقدم بعد لهذا الطفل.' : 'No progress yet. Play some games first!');
     return;
   }
   const syncUrl = _kidSyncUrl(profileId);
-  const qrSrc   = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=' + encodeURIComponent(syncUrl);
   const box = document.getElementById('cloud-code-box-' + profileId);
   const txt = document.getElementById('cloud-code-text-' + profileId);
   if (!box || !txt) return;
   box.style.display = 'block';
-  txt.innerHTML = `
-    <div style="text-align:center">
-      <img src="${qrSrc}" style="width:200px;height:200px;display:block;margin:0 auto;border-radius:8px" alt="QR Code" />
-      <div style="font-size:.72rem;color:#555;margin-top:6px;font-weight:700">
-        ${parentLang === 'ar' ? '📷 امسح بكاميرا هاتفك' : '📷 Scan with your phone camera'}
-      </div>
-      <div style="font-size:.65rem;color:#aaa;margin-top:2px">
-        ${parentLang === 'ar' ? 'يفتح لوحة الوالدين تلقائياً' : 'Opens Parent Dashboard automatically'}
-      </div>
+  txt.innerHTML = `<div style="text-align:center" id="qrwrap-${profileId}">
+      <div style="font-size:.72rem;color:#888">${parentLang === 'ar' ? 'جارٍ إنشاء الرمز…' : 'Generating QR…'}</div>
     </div>`;
+  // Render QR locally (no external server) using the bundled qrcode generator
+  const wrap = document.getElementById('qrwrap-' + profileId);
+  try {
+    wrap.innerHTML = '';
+    const holder = document.createElement('div');
+    holder.style.display = 'inline-block';
+    holder.style.background = '#fff';
+    holder.style.padding = '10px';
+    holder.style.borderRadius = '10px';
+    new QRCode(holder, { text: syncUrl, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.L });
+    wrap.appendChild(holder);
+    const cap = document.createElement('div');
+    cap.style.cssText = 'font-size:.72rem;color:#555;margin-top:8px;font-weight:700';
+    cap.textContent = parentLang === 'ar' ? '📷 امسح بكاميرا هاتفك' : '📷 Scan with your phone camera';
+    wrap.appendChild(cap);
+  } catch(e) {
+    wrap.innerHTML = `<div style="font-size:.74rem;color:#c62828">${parentLang === 'ar' ? 'تعذّر إنشاء الرمز — استخدم زر الإرسال.' : 'QR failed — use the Send button instead.'}</div>`;
+  }
 }
 
 function hideKidQR(profileId) {
@@ -2646,13 +2693,13 @@ function hideKidQR(profileId) {
   if (box) box.style.display = 'none';
 }
 
-function scheduleCloudSave() { /* no-op — using QR sync */ }
+function scheduleCloudSave() { /* no-op — using AirDrop/QR sync */ }
 
 function _updateCloudHeader() {
   const el = $('cloud-header-status');
   if (!el) return;
   const isAr = parentLang === 'ar';
-  el.textContent = isAr ? 'امسح QR من هاتفك' : 'Scan QR from your phone';
+  el.textContent = isAr ? 'أرسل لهاتفك من كل بطاقة' : 'Tap Send to Phone on each card';
 }
 
 function checkKidSyncImport() {
@@ -2664,7 +2711,7 @@ function checkKidSyncImport() {
     if (d.p) localStorage.setItem('ls_' + d.id, d.p);
     if (d.k) localStorage.setItem('ls_badges_' + d.id, d.k);
     if (d.t) localStorage.setItem('ls_streak_' + d.id, d.t);
-    if (d.s) localStorage.setItem('ls_sessions_' + d.id, d.s);
+    if (d.s) localStorage.setItem('ls_sessions_' + d.id, JSON.stringify(d.s));
     history.replaceState(null, '', location.pathname + location.search);
     const profile = PROFILES.find(p => p.id === d.id);
     setTimeout(() => {
