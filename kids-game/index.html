@@ -519,10 +519,10 @@
     <button onclick="toggleParentLang()" id="parent-lang-btn"
       style="background:rgba(255,255,255,.22);color:white;border:none;border-radius:50px;padding:8px 14px;font-size:.85rem;font-weight:900;cursor:pointer;min-width:52px">EN</button>
   </div>
-  <!-- Cloud sync header -->
+  <!-- Sync hint -->
   <div id="cloud-panel" style="width:100%;max-width:720px;background:rgba(255,255,255,.15);border-radius:14px;padding:9px 16px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px">
-    <span id="cloud-header-lbl" style="font-size:.78rem;font-weight:900;color:rgba(255,255,255,.85)">☁️ Cloud Sync</span>
-    <span id="cloud-header-status" style="font-size:.75rem;color:rgba(255,255,255,.6);font-weight:700"></span>
+    <span id="cloud-header-lbl" style="font-size:.78rem;font-weight:900;color:rgba(255,255,255,.85)">📱 Sync to Phone</span>
+    <span id="cloud-header-status" style="font-size:.75rem;color:rgba(255,255,255,.65);font-weight:700">Tap Show QR on each card → scan with phone</span>
   </div>
   <div id="parent-grid" style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:14px"></div>
 </div>
@@ -2396,53 +2396,25 @@ function showParentDashboard() {
             ${L.cancelLevel}
           </button>
         </div>
-        <!-- Per-kid cloud row -->
+        <!-- Per-kid QR sync row -->
         <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;direction:${isAr?'rtl':'ltr'}">
-          <span id="cloud-badge-${p.id}"
-            onclick="toggleKidCodeBox('${p.id}')"
-            style="font-size:.74rem;font-weight:900;padding:4px 12px;border-radius:50px;background:#f3f4f6;color:#888;cursor:pointer">
-            ${localStorage.getItem(_kidCloudKey(p.id)) ? '☁️ ' + (isAr?'متزامن':'Synced') : '🔗 ' + (isAr?'اربط السحابة':'Connect')}
-          </span>
-          <button onclick="cloudSaveKidFromDash('${p.id}')"
-            style="background:#e8f4fd;color:#1565c0;border:none;border-radius:50px;padding:4px 12px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
-            ${isAr?'☁️ احفظ من هذا الجهاز':'☁️ Save (on this iPad)'}
+          <button onclick="showKidQR('${p.id}')"
+            style="background:linear-gradient(135deg,#5c6bc0,#3949ab);color:white;border:none;border-radius:50px;padding:7px 16px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
+            📱 ${isAr?'عرض رمز QR':'Show QR Code'}
           </button>
-          <button onclick="toggleKidCloudConnect('${p.id}')"
-            style="background:#f3f4f6;color:#555;border:none;border-radius:50px;padding:4px 12px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:${isAr?'var(--fa)':'var(--fe)'}">
-            ${isAr?'📥 أدخل الرمز':'📥 Enter Code'}
+          <button onclick="hideKidQR('${p.id}')"
+            style="background:#f3f4f6;color:#888;border:none;border-radius:50px;padding:7px 12px;font-size:.8rem;font-weight:900;cursor:pointer">
+            ✕
           </button>
         </div>
-        <!-- Cloud code display box (shown after save) -->
-        <div id="cloud-code-box-${p.id}" style="display:${localStorage.getItem(_kidCloudKey(p.id))?'block':'none'};margin-top:8px;background:#f0f7ff;border:1.5px solid #bbdefb;border-radius:12px;padding:10px 12px;direction:ltr">
-          <div style="font-size:.7rem;color:#1565c0;font-weight:900;margin-bottom:4px">${isAr?'📋 رمز السحابة — أرسله لنفسك مرة واحدة:':'📋 Cloud Code — send to yourself once:'}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div id="cloud-code-text-${p.id}" style="flex:1;font-family:monospace;font-size:.72rem;color:#333;word-break:break-all;background:white;border-radius:8px;padding:6px 10px;border:1px solid #ddd;user-select:all">
-              ${localStorage.getItem(_kidCloudKey(p.id)) || ''}
-            </div>
-            <button onclick="copyKidCode('${p.id}')" id="copy-btn-${p.id}"
-              style="background:#1565c0;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:900;cursor:pointer;white-space:nowrap;flex-shrink:0">
-              📋
-            </button>
-          </div>
-        </div>
-        <div id="cloud-connect-row-${p.id}" style="display:none;margin-top:7px;gap:6px;direction:${isAr?'rtl':'ltr'}">
-          <input id="cloud-inp-${p.id}" placeholder="${isAr?'رمز السحابة...':'Paste Cloud Code here'}" type="text"
-            style="flex:1;border:1.5px solid #ddd;border-radius:50px;padding:7px 14px;font-size:.78rem;outline:none;min-width:0;width:100%;box-sizing:border-box;margin-bottom:5px"/>
-          <button onclick="importKidByCode('${p.id}')" id="cloud-go-${p.id}"
-            style="background:#4caf50;color:white;border:none;border-radius:50px;padding:7px 18px;font-size:.78rem;font-weight:900;cursor:pointer">
-            ${isAr?'✓ تحميل':'✓ Load'}
-          </button>
+        <!-- QR code display box -->
+        <div id="cloud-code-box-${p.id}" style="display:none;margin-top:10px;background:#f0f4ff;border:1.5px solid #c5cae9;border-radius:14px;padding:14px 12px">
+          <div id="cloud-code-text-${p.id}"></div>
         </div>
       </div>`;
   }).join('');
 
   _updateCloudHeader();
-  // Auto-refresh each connected kid's data from cloud
-  PROFILES.forEach(p => {
-    const cid = localStorage.getItem(_kidCloudKey(p.id));
-    if (cid) cloudLoadKid(p.id, cid, false);
-  });
-
   showScreen('screen-parent');
 }
 
@@ -2629,166 +2601,81 @@ function exportReport(profileId) {
 }
 
 // ================================================================
-//  CLOUD SYNC — per-kid JSONBlob (free, no account required)
+//  QR SYNC — scan on phone to import progress (no cloud needed)
 // ================================================================
-const JBLOB_API = 'https://jsonblob.com/api/jsonBlob';
-let _cloudSaveTimers = {};   // profileId → timer
 
-function _kidCloudKey(profileId) { return 'ls_cloud_id_' + profileId; }
-
-function _kidData(profileId) {
-  const d = {};
-  ['ls_','ls_sessions_','ls_streak_','ls_badges_'].forEach(pfx => {
-    const v = localStorage.getItem(pfx + profileId);
-    if (v) d[pfx + profileId] = v;
-  });
-  return d;
+function _kidSyncUrl(profileId) {
+  const d = { id: profileId };
+  const prog    = localStorage.getItem('ls_' + profileId);
+  const badges  = localStorage.getItem('ls_badges_' + profileId);
+  const streak  = localStorage.getItem('ls_streak_' + profileId);
+  const sessions= localStorage.getItem('ls_sessions_' + profileId);
+  if (prog)     d.p = prog;
+  if (badges)   d.k = badges;
+  if (streak)   d.t = streak;
+  if (sessions) d.s = sessions;
+  return location.origin + location.pathname + '#kid-sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
 }
 
-async function cloudSaveKid(profileId, manual) {
-  const data = _kidData(profileId);
-  if (!Object.keys(data).length) {
-    if (manual) alert(parentLang === 'ar' ? 'لا توجد بيانات للحفظ بعد.' : 'No progress yet to save.');
+function showKidQR(profileId) {
+  const prog = localStorage.getItem('ls_' + profileId);
+  if (!prog) {
+    alert(parentLang === 'ar' ? 'لا يوجد تقدم بعد لهذا الطفل.' : 'No progress yet for this kid. Play some games first!');
     return;
   }
-  const key = _kidCloudKey(profileId);
-  const id  = localStorage.getItem(key);
-  _setKidCloudBadge(profileId, 'saving');
-  try {
-    const res = await fetch(id ? `${JBLOB_API}/${id}` : JBLOB_API, {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) {
-      if (!id) {
-        const newId = (res.headers.get('Location') || '').split('/').pop();
-        if (newId) localStorage.setItem(key, newId);
-      }
-      _setKidCloudBadge(profileId, 'saved');
-      if (manual) _showKidCodeBox(profileId);
-    } else { _setKidCloudBadge(profileId, 'error'); }
-  } catch(e) { _setKidCloudBadge(profileId, 'offline'); }
-  _updateCloudHeader();
+  const syncUrl = _kidSyncUrl(profileId);
+  const qrSrc   = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=' + encodeURIComponent(syncUrl);
+  const box = document.getElementById('cloud-code-box-' + profileId);
+  const txt = document.getElementById('cloud-code-text-' + profileId);
+  if (!box || !txt) return;
+  box.style.display = 'block';
+  txt.innerHTML = `
+    <div style="text-align:center">
+      <img src="${qrSrc}" style="width:200px;height:200px;display:block;margin:0 auto;border-radius:8px" alt="QR Code" />
+      <div style="font-size:.72rem;color:#555;margin-top:6px;font-weight:700">
+        ${parentLang === 'ar' ? '📷 امسح بكاميرا هاتفك' : '📷 Scan with your phone camera'}
+      </div>
+      <div style="font-size:.65rem;color:#aaa;margin-top:2px">
+        ${parentLang === 'ar' ? 'يفتح لوحة الوالدين تلقائياً' : 'Opens Parent Dashboard automatically'}
+      </div>
+    </div>`;
 }
 
-async function cloudLoadKid(profileId, blobId, showAlert) {
-  if (!blobId) return false;
-  try {
-    const res = await fetch(`${JBLOB_API}/${blobId.trim()}`, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) {
-      if (showAlert) alert(parentLang === 'ar' ? '❌ الرمز غير صحيح، تحقق منه وأعد المحاولة.' : '❌ Code not found. Double-check and try again.');
-      return false;
-    }
-    const data = await res.json();
-    Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
-    localStorage.setItem(_kidCloudKey(profileId), blobId.trim());
-    _setKidCloudBadge(profileId, 'saved');
-    _updateCloudHeader();
-    if (showAlert) {
-      const p = PROFILES.find(pr => pr.id === profileId);
-      alert(parentLang === 'ar'
-        ? `✅ تم تحميل بيانات ${p.nameAr}!`
-        : `✅ ${p.nameEn}'s data loaded! It will auto-refresh from now on.`);
-    }
-    showParentDashboard();
-    return true;
-  } catch(e) {
-    if (showAlert) alert(parentLang === 'ar' ? '⚡ تعذر الاتصال.' : '⚡ Connection failed. Check your internet.');
-    return false;
-  }
+function hideKidQR(profileId) {
+  const box = document.getElementById('cloud-code-box-' + profileId);
+  if (box) box.style.display = 'none';
 }
 
-function scheduleCloudSave() {
-  if (!activeProfile) return;
-  const pid = activeProfile.id;
-  clearTimeout(_cloudSaveTimers[pid]);
-  _cloudSaveTimers[pid] = setTimeout(() => cloudSaveKid(pid, false), 2000);
-}
-
-function _setKidCloudBadge(profileId, status) {
-  const el = document.getElementById('cloud-badge-' + profileId);
-  if (!el) return;
-  const isAr = parentLang === 'ar';
-  const map = {
-    saved:  { icon: '☁️', label: isAr ? 'متزامن'    : 'Synced',   color: '#e8f5e9', text: '#2e7d32' },
-    saving: { icon: '☁️', label: isAr ? 'جارٍ…'      : 'Saving…',  color: '#fffde7', text: '#f57f17' },
-    offline:{ icon: '⚡', label: isAr ? 'غير متصل'   : 'Offline',  color: '#fff3e0', text: '#e65100' },
-    error:  { icon: '❌', label: isAr ? 'خطأ'        : 'Error',    color: '#ffebee', text: '#c62828' },
-    none:   { icon: '🔗', label: isAr ? 'اربط السحابة': 'Connect',  color: '#f3f4f6', text: '#888'    },
-  };
-  const s = map[status] || map.none;
-  el.innerHTML = `${s.icon} ${s.label}`;
-  el.style.background = s.color;
-  el.style.color = s.text;
-}
+function scheduleCloudSave() { /* no-op — using QR sync */ }
 
 function _updateCloudHeader() {
   const el = $('cloud-header-status');
   if (!el) return;
-  const connected = PROFILES.filter(p => localStorage.getItem(_kidCloudKey(p.id))).length;
   const isAr = parentLang === 'ar';
-  el.textContent = connected === 0
-    ? (isAr ? 'غير مربوط' : 'Not connected')
-    : connected === PROFILES.length
-      ? (isAr ? `✅ كل الأطفال مربوطون` : `✅ All ${PROFILES.length} kids synced`)
-      : (isAr ? `${connected}/${PROFILES.length} مربوطون` : `${connected}/${PROFILES.length} connected`);
+  el.textContent = isAr ? 'امسح QR من هاتفك' : 'Scan QR from your phone';
 }
 
-function toggleKidCloudConnect(profileId) {
-  const row = document.getElementById('cloud-connect-row-' + profileId);
-  if (!row) return;
-  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
-}
-
-async function importKidByCode(profileId) {
-  const inp = document.getElementById('cloud-inp-' + profileId);
-  const btn = document.getElementById('cloud-go-' + profileId);
-  if (!inp) return;
-  const code = inp.value.trim();
-  if (!code) return;
-  btn.textContent = '…';
-  await cloudLoadKid(profileId, code, true);
-  btn.textContent = '✓';
-}
-
-async function cloudSaveKidFromDash(profileId) {
-  await cloudSaveKid(profileId, true);
-}
-
-function _showKidCodeBox(profileId) {
-  const code = localStorage.getItem(_kidCloudKey(profileId)) || '';
-  const box  = document.getElementById('cloud-code-box-' + profileId);
-  const txt  = document.getElementById('cloud-code-text-' + profileId);
-  if (box)  box.style.display = 'block';
-  if (txt)  txt.textContent = code;
-}
-
-function toggleKidCodeBox(profileId) {
-  const box = document.getElementById('cloud-code-box-' + profileId);
-  if (!box) return;
-  const hasCode = !!localStorage.getItem(_kidCloudKey(profileId));
-  if (!hasCode) return;
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
-}
-
-function copyKidCode(profileId) {
-  const code = localStorage.getItem(_kidCloudKey(profileId)) || '';
-  if (!code) return;
-  const btn = document.getElementById('copy-btn-' + profileId);
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(code).then(() => {
-      if (btn) { btn.textContent = '✅'; setTimeout(() => { btn.textContent = '📋'; }, 1800); }
-    });
-  } else {
-    const inp = document.getElementById('cloud-code-text-' + profileId);
-    if (inp) { const r = document.createRange(); r.selectNode(inp); window.getSelection().removeAllRanges(); window.getSelection().addRange(r); }
-    if (btn) { btn.textContent = '✅'; setTimeout(() => { btn.textContent = '📋'; }, 1800); }
-  }
+function checkKidSyncImport() {
+  const hash = location.hash;
+  if (!hash.startsWith('#kid-sync=')) return;
+  try {
+    const d = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#kid-sync='.length)))));
+    if (!d.id || !PROFILES.find(p => p.id === d.id)) return;
+    if (d.p) localStorage.setItem('ls_' + d.id, d.p);
+    if (d.k) localStorage.setItem('ls_badges_' + d.id, d.k);
+    if (d.t) localStorage.setItem('ls_streak_' + d.id, d.t);
+    if (d.s) localStorage.setItem('ls_sessions_' + d.id, d.s);
+    history.replaceState(null, '', location.pathname + location.search);
+    const profile = PROFILES.find(p => p.id === d.id);
+    setTimeout(() => {
+      alert(`✅ ${profile.nameEn}'s data imported!\nYou can now view their report.`);
+      showParentDashboard();
+    }, 300);
+  } catch(e) {}
 }
 
 // ================================================================
-//  DATA SYNC (cross-device via shareable URL — fallback)
+//  DATA SYNC (cross-device via shareable URL)
 // ================================================================
 
 function exportSyncData() {
@@ -2799,42 +2686,34 @@ function exportSyncData() {
       if (val) data[prefix + p.id] = val;
     });
   });
-  const noDataMsg = parentLang === 'ar' ? 'لا توجد بيانات للتصدير.' : 'No progress data to export yet.';
-  if (Object.keys(data).length === 0) { alert(noDataMsg); return; }
+  if (Object.keys(data).length === 0) {
+    alert(parentLang === 'ar' ? 'لا توجد بيانات للتصدير.' : 'No progress data to export yet.');
+    return;
+  }
   try {
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
     const url = location.origin + location.pathname + '#sync=' + encoded;
     if (navigator.share) {
       navigator.share({ title: 'Kids Game — Progress Data', url }).catch(() => {});
     } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => {
-        const msg = parentLang === 'ar'
-          ? '✅ تم نسخ الرابط!\nافتحه على جهاز الأهل لرؤية التقارير.'
-          : '✅ Link copied!\nOpen it on your other device to view progress.';
-        alert(msg);
-      });
+      navigator.clipboard.writeText(url).then(() => alert(parentLang === 'ar' ? '✅ تم نسخ الرابط!' : '✅ Link copied!'));
     } else {
-      const lbl = parentLang === 'ar' ? 'انسخ هذا الرابط وافتحه على جهازك الآخر:' : 'Copy this link and open it on your other device:';
-      prompt(lbl, url);
+      prompt(parentLang === 'ar' ? 'انسخ الرابط:' : 'Copy this link:', url);
     }
-  } catch(e) { alert('Error generating sync link.'); }
+  } catch(e) {}
 }
 
 function checkSyncImport() {
   const hash = location.hash;
   if (!hash.startsWith('#sync=')) return;
   try {
-    const encoded = hash.slice('#sync='.length);
-    const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    const data = JSON.parse(decodeURIComponent(escape(atob(hash.slice('#sync='.length)))));
     const keys = Object.keys(data);
-    if (keys.length === 0) return;
+    if (!keys.length) return;
     keys.forEach(k => localStorage.setItem(k, data[k]));
     history.replaceState(null, '', location.pathname + location.search);
-    setTimeout(() => {
-      alert('✅ Progress data imported!\nYou can now view all reports on this device.');
-      showParentDashboard();
-    }, 400);
-  } catch(e) { /* silent fail — corrupted hash */ }
+    setTimeout(() => { alert('✅ Progress imported!'); showParentDashboard(); }, 400);
+  } catch(e) {}
 }
 
 // ================================================================
@@ -2854,8 +2733,8 @@ document.getElementById('app-title').addEventListener('click', () => {
   }
 });
 
-// Import synced data if URL hash contains encoded progress
 checkSyncImport();
+checkKidSyncImport();
 
 // Auto-select profile via ?kid= URL param — hide 2P button for single-kid links
 const _kidParam = new URLSearchParams(window.location.search).get('kid');
