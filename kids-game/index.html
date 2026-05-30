@@ -3258,6 +3258,13 @@ document.getElementById('app-title').addEventListener('click', () => {
 checkSyncImport();
 checkKidSyncImport();
 
+// On boot: push any existing local data to Firebase so nothing is lost
+if (_cloudBase()) {
+  PROFILES.forEach(p => {
+    if (localStorage.getItem('ls_' + p.id)) cloudSaveKid(p.id);
+  });
+}
+
 // Auto-select profile via ?kid= URL param — hide 2P button for single-kid links
 const _kidParam = new URLSearchParams(window.location.search).get('kid');
 if (_kidParam && PROFILES.find(p => p.id === _kidParam)) {
