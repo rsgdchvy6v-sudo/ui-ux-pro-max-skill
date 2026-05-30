@@ -31,7 +31,9 @@
     }
     body {
       font-family: var(--fe);
-      background: linear-gradient(150deg, #667eea 0%, #764ba2 55%, #f953c6 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 35%, #f953c6 70%, #ff6b9d 100%);
+      background-size: 300% 300%;
+      animation: gradShift 18s ease infinite;
       min-height: 100vh; min-height: 100dvh;
       overflow-x: hidden;
     }
@@ -74,11 +76,14 @@
 
     .profiles-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px;
                      width: 100%; max-width: 720px; }
-    .profile-card { background: white; border-radius: 26px; padding: 22px 14px 18px;
-                    text-align: center; cursor: pointer; box-shadow: var(--shadow);
-                    transition: transform .13s; border: 4px solid transparent;
-                    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    .profile-card { background: rgba(255,255,255,.94); border-radius: 26px; padding: 22px 14px 18px;
+                    text-align: center; cursor: pointer;
+                    box-shadow: 0 8px 32px rgba(0,0,0,.16), 0 2px 8px rgba(255,255,255,.3) inset;
+                    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                    transition: transform .13s, box-shadow .15s; border: 2px solid rgba(255,255,255,.6);
+                    display: flex; flex-direction: column; align-items: center; gap: 5px;
                     min-height: 165px; }
+    .profile-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,.2); }
     .profile-card:active { transform: scale(.94); }
     .p-avatar   { font-size: 3rem; line-height: 1; }
     .p-name-en  { font-size: 1.3rem; font-weight: 900; }
@@ -86,6 +91,9 @@
     .p-meta     { font-size: .78rem; color: #aaa; font-weight: 700; }
     .p-level    { font-size: .88rem; font-weight: 900; color: var(--purple); }
     .p-stars    { font-size: .82rem; font-weight: 900; color: var(--star); }
+    .p-streak   { font-size: .78rem; font-weight: 900; color: #F7971E; }
+    .p-badges   { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+    .p-badge    { font-size: 1rem; line-height: 1; }
 
     /* ===== LANGUAGE SCREEN ===== */
     #screen-lang { justify-content: center; }
@@ -133,10 +141,13 @@
 
     .subjects-grid { display: grid; grid-template-columns: repeat(2,1fr);
                      gap: 14px; width: 100%; max-width: 720px; }
-    .subject-card { background: white; border-radius: 24px; padding: 26px 14px 22px;
-                    text-align: center; cursor: pointer; box-shadow: var(--shadow);
-                    transition: transform .13s; display: flex; flex-direction: column;
-                    align-items: center; gap: 10px; min-height: 148px; border: 3px solid transparent; }
+    .subject-card { background: rgba(255,255,255,.93); border-radius: 24px; padding: 26px 14px 22px;
+                    text-align: center; cursor: pointer;
+                    box-shadow: 0 6px 24px rgba(0,0,0,.13), 0 2px 6px rgba(255,255,255,.25) inset;
+                    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                    transition: transform .13s, box-shadow .15s; display: flex; flex-direction: column;
+                    align-items: center; gap: 10px; min-height: 148px; border: 2px solid rgba(255,255,255,.55); }
+    .subject-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,.18); }
     .subject-card:active { transform: scale(.94); }
     .s-icon    { font-size: 2.8rem; }
     .s-name-en { font-size: 1.05rem; font-weight: 900; }
@@ -237,6 +248,64 @@
     .confetti-bit { position:absolute; top:-16px; border-radius:2px; animation: fall linear forwards; }
 
     /* ===== KEYFRAMES ===== */
+    /* ===== BADGE TOAST ===== */
+    .badge-toast {
+      position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:linear-gradient(135deg,#FFD200,#F7971E); color:#333;
+      border-radius:50px; padding:12px 22px; font-weight:900; font-size:1rem;
+      display:flex; align-items:center; gap:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,.22); z-index:9999;
+      opacity:0; transition:opacity .3s, transform .3s; pointer-events:none;
+    }
+    .badge-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ===== MEMORY GAME ===== */
+    .memory-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:8px; width:100%; max-width:340px; margin:4px auto 0;
+    }
+    .mem-card { aspect-ratio:1; perspective:600px; cursor:pointer; }
+    .mem-inner {
+      width:100%; height:100%; position:relative; transform-style:preserve-3d;
+      transition:transform .35s cubic-bezier(.4,0,.2,1); border-radius:12px;
+    }
+    .mem-card.flipped .mem-inner, .mem-card.matched .mem-inner { transform:rotateY(180deg); }
+    .mem-front, .mem-back {
+      position:absolute; width:100%; height:100%; backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      border-radius:12px; display:flex; align-items:center; justify-content:center;
+    }
+    .mem-front { background:linear-gradient(135deg,#667eea,#764ba2); color:white; font-size:1.5rem; }
+    .mem-back  { background:white; border:3px solid #ddd; font-size:2rem; transform:rotateY(180deg); }
+    .mem-card.matched .mem-back { background:#e8f5e9; border-color:#4caf50; animation:matchPop .35s ease; }
+
+    /* ===== NUMBER ORDER GAME ===== */
+    .numorder-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:10px; width:100%; max-width:280px; margin:8px auto 0;
+    }
+    .num-btn {
+      background:white; border:3px solid #ddd; border-radius:16px;
+      font-size:1.8rem; font-weight:900; height:70px; cursor:pointer;
+      transition:all .2s; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 3px 10px rgba(0,0,0,.08);
+    }
+    .num-btn:active { transform:scale(.88); }
+    .num-btn.tapped { background:#e8f5e9; border-color:#4caf50; color:#2e7d32; opacity:.6; pointer-events:none; }
+    .num-btn.wrong-num { animation:shakeX .3s ease; border-color:#f44336; background:#ffebee; }
+
+    /* ===== PUZZLE SECTION LABEL ===== */
+    .section-label {
+      width:100%; max-width:720px; margin-top:6px;
+      display:flex; align-items:center; gap:10px; color:rgba(255,255,255,.9);
+    }
+    .section-label::before, .section-label::after {
+      content:''; flex:1; height:1px; background:rgba(255,255,255,.3);
+    }
+    .section-label span { font-weight:900; font-size:1rem; white-space:nowrap; }
+
+    @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+    @keyframes matchPop  { 0%{transform:rotateY(180deg) scale(1)} 50%{transform:rotateY(180deg) scale(1.15)} 100%{transform:rotateY(180deg) scale(1)} }
     @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
     @keyframes pulseOk  { 0%{transform:scale(1)} 40%{transform:scale(1.1)} 100%{transform:scale(1)} }
     @keyframes shakeX   { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
@@ -316,6 +385,8 @@
     <span class="ar-only ar">اختر المادة 🎓</span>
   </div>
   <div class="subjects-grid" id="subjects-grid"><!-- JS --></div>
+  <div class="section-label"><span class="en-only">🧩 Puzzle Games</span><span class="ar-only ar">🧩 ألعاب الألغاز</span></div>
+  <div class="subjects-grid" id="puzzles-grid"><!-- JS --></div>
 </div>
 
 <!-- ============================================================
@@ -391,6 +462,7 @@
   </div>
 </div>
 
+<!-- BADGE TOAST placeholder (created dynamically) -->
 <!-- CONFETTI -->
 <div id="confetti-overlay"></div>
 
@@ -412,15 +484,25 @@ const PROFILES = [
 ];
 
 const SUBJECTS = [
-  { id:'math',     en:'Numbers & Math',   ar:'الأرقام والرياضيات', emoji:'🔢' },
-  { id:'letters',  en:'Letters',          ar:'الحروف',             emoji:'🔤' },
-  { id:'animals',  en:'Animals',          ar:'الحيوانات',          emoji:'🦁' },
-  { id:'colors',   en:'Colors & Shapes',  ar:'الألوان والأشكال',  emoji:'🎨' },
-  { id:'words',    en:'Words',            ar:'الكلمات',            emoji:'📖' },
-  { id:'patterns', en:'Patterns',         ar:'الأنماط',            emoji:'🧩' },
+  { id:'math',      en:'Numbers & Math',   ar:'الأرقام والرياضيات', emoji:'🔢' },
+  { id:'letters',   en:'Letters',          ar:'الحروف',             emoji:'🔤' },
+  { id:'animals',   en:'Animals',          ar:'الحيوانات',          emoji:'🦁' },
+  { id:'colors',    en:'Colors & Shapes',  ar:'الألوان والأشكال',  emoji:'🎨' },
+  { id:'words',     en:'Words',            ar:'الكلمات',            emoji:'📖' },
+  { id:'patterns',  en:'Patterns',         ar:'الأنماط',            emoji:'🧩' },
+  { id:'opposites', en:'Opposites',        ar:'الأضداد',            emoji:'↔️' },
+  { id:'body',      en:'Body Parts',       ar:'أجزاء الجسم',       emoji:'🫁' },
 ];
 
-const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2'];
+const PUZZLES = [
+  { id:'memory',   en:'Memory Flip',    ar:'لعبة الذاكرة',  emoji:'🃏' },
+  { id:'missing',  en:'Missing Number', ar:'الرقم المفقود', emoji:'🔍' },
+  { id:'numorder', en:'Number Order',   ar:'ترتيب الأرقام', emoji:'🔢' },
+  { id:'oddout',   en:'Odd One Out',    ar:'الغريب عنهم',   emoji:'🧐' },
+];
+
+const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2','#e91e63','#00838f'];
+const PUZZLE_COLORS  = ['#8e24aa','#f57c00','#0288d1','#388e3c'];
 
 const ANIMALS = [
   { emoji:'🐱', ar:'قطة',    en:'Cat'       },
@@ -518,6 +600,59 @@ const PATTERN_ELEMS = {
   fruits:  ['🍎','🍌','🍇','🍊','🍓'],
 };
 
+const OPPOSITES_DATA = [
+  { emoji1:'☀️', emoji2:'🌙', en:['Day','Night'],   ar:['نهار','ليل']    },
+  { emoji1:'🔥', emoji2:'❄️', en:['Hot','Cold'],    ar:['حار','بارد']    },
+  { emoji1:'🐘', emoji2:'🐁', en:['Big','Small'],   ar:['كبير','صغير']   },
+  { emoji1:'🐢', emoji2:'🐇', en:['Slow','Fast'],   ar:['بطيء','سريع']   },
+  { emoji1:'😊', emoji2:'😢', en:['Happy','Sad'],   ar:['سعيد','حزين']   },
+  { emoji1:'⬆️', emoji2:'⬇️', en:['Up','Down'],     ar:['فوق','تحت']     },
+  { emoji1:'🌞', emoji2:'🌚', en:['Light','Dark'],  ar:['فاتح','غامق']   },
+  { emoji1:'📖', emoji2:'📕', en:['Open','Closed'], ar:['مفتوح','مغلق']  },
+  { emoji1:'🔊', emoji2:'🤫', en:['Loud','Quiet'],  ar:['صاخب','هادئ']   },
+  { emoji1:'🧒', emoji2:'👴', en:['Young','Old'],   ar:['صغير','كبير']   },
+  { emoji1:'🌧️', emoji2:'☀️', en:['Wet','Dry'],     ar:['مبلل','جاف']    },
+  { emoji1:'🌑', emoji2:'🌕', en:['Dark','Bright'], ar:['مظلم','مشرق']   },
+];
+
+const BODY_PARTS = [
+  { emoji:'👁️', en:'Eye',     ar:'عين'   },
+  { emoji:'👂', en:'Ear',     ar:'أذن'   },
+  { emoji:'👃', en:'Nose',    ar:'أنف'   },
+  { emoji:'👄', en:'Mouth',   ar:'فم'    },
+  { emoji:'✋', en:'Hand',    ar:'يد'    },
+  { emoji:'🦷', en:'Tooth',   ar:'سن'    },
+  { emoji:'🦵', en:'Leg',     ar:'ساق'   },
+  { emoji:'🦶', en:'Foot',    ar:'قدم'   },
+  { emoji:'💪', en:'Arm',     ar:'ذراع'  },
+  { emoji:'🫀', en:'Heart',   ar:'قلب'   },
+  { emoji:'🧠', en:'Brain',   ar:'دماغ'  },
+  { emoji:'👅', en:'Tongue',  ar:'لسان'  },
+];
+
+const ODD_OUT_DATA = [
+  { items:['🍎','🍊','🍌','🚗'], oddIdx:3, instrEn:'Which is NOT a fruit?',       instrAr:'أي واحد ليس فاكهة؟'       },
+  { items:['🐱','🐶','🐸','🍕'], oddIdx:3, instrEn:'Which is NOT an animal?',     instrAr:'أي واحد ليس حيواناً؟'     },
+  { items:['✈️','🚗','🚢','🍌'], oddIdx:3, instrEn:'Which cannot carry people?',  instrAr:'أي واحد لا ينقل الناس؟'   },
+  { items:['📚','✏️','📏','🌊'], oddIdx:3, instrEn:'Which is NOT a school item?', instrAr:'أي واحد ليس أداة مدرسية؟' },
+  { items:['🔴','🔵','🟡','🐘'], oddIdx:3, instrEn:'Which is NOT a color?',       instrAr:'أي واحد ليس لوناً؟'       },
+  { items:['🌹','🌷','🌸','🔑'], oddIdx:3, instrEn:'Which is NOT a flower?',      instrAr:'أي واحد ليس زهرة؟'        },
+  { items:['🍕','🍔','🌮','🚀'], oddIdx:3, instrEn:'Which is NOT food?',          instrAr:'أي واحد ليس طعاماً؟'      },
+  { items:['🌊','🏖️','🐠','🏔️'], oddIdx:3, instrEn:'Which is NOT at the beach?', instrAr:'أي واحد ليس في الشاطئ؟'   },
+  { items:['1️⃣','2️⃣','3️⃣','🐶'], oddIdx:3, instrEn:'Which is NOT a number?',     instrAr:'أي واحد ليس رقماً؟'       },
+  { items:['🎸','🎹','🎺','🍕'], oddIdx:3, instrEn:'Which is NOT an instrument?', instrAr:'أي واحد ليس آلة موسيقية؟'  },
+];
+
+const BADGES = [
+  { id:'first',    emoji:'🎮', en:'First Game!',  ar:'أول لعبة',   req:(p)=>p.games>=1   },
+  { id:'games5',   emoji:'🌟', en:'5 Games',      ar:'5 ألعاب',    req:(p)=>p.games>=5   },
+  { id:'games20',  emoji:'🏅', en:'20 Games',     ar:'20 لعبة',    req:(p)=>p.games>=20  },
+  { id:'star10',   emoji:'⭐', en:'10 Stars',     ar:'10 نجوم',    req:(p)=>p.stars>=10  },
+  { id:'star50',   emoji:'💫', en:'50 Stars',     ar:'50 نجمة',    req:(p)=>p.stars>=50  },
+  { id:'streak3',  emoji:'🔥', en:'3-Day Streak', ar:'3 أيام',     req:(p,s)=>s>=3       },
+  { id:'champion', emoji:'🏆', en:'Champion!',    ar:'بطل',        req:(p)=>p.stars>=100 },
+];
+
 const COUNT_EMOJIS = [
   { e:'⭐', enP:'stars',       ar:'نجوم'      },
   { e:'🍎', enP:'apples',      ar:'تفاحات'    },
@@ -610,6 +745,101 @@ function saveSession(id, session) {
 function loadSessions(id) {
   try { return JSON.parse(localStorage.getItem('ls_sessions_' + id) || '[]'); }
   catch(e) { return []; }
+}
+
+function loadStreak(id) {
+  try { return JSON.parse(localStorage.getItem('ls_streak_'+id)||'{"count":0,"lastDate":""}'); }
+  catch(e) { return {count:0,lastDate:''}; }
+}
+function updateStreak(id) {
+  const today = new Date().toISOString().slice(0,10);
+  const s = loadStreak(id);
+  const yest = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if (s.lastDate===today) return s.count;
+  s.count = (s.lastDate===yest) ? s.count+1 : 1;
+  s.lastDate = today;
+  try { localStorage.setItem('ls_streak_'+id, JSON.stringify(s)); } catch(e){}
+  return s.count;
+}
+
+function loadBadges(id) {
+  try { return JSON.parse(localStorage.getItem('ls_badges_'+id)||'[]'); }
+  catch(e) { return []; }
+}
+function checkBadges(id) {
+  const p = loadProg(id);
+  const streak = loadStreak(id).count;
+  const owned = loadBadges(id);
+  const gained = [];
+  for (const b of BADGES) {
+    if (!owned.includes(b.id) && b.req(p, streak)) { gained.push(b); owned.push(b.id); }
+  }
+  if (gained.length) {
+    try { localStorage.setItem('ls_badges_'+id, JSON.stringify(owned)); } catch(e){}
+    gained.forEach((b,i) => setTimeout(()=>showBadgeToast(b), i*600));
+  }
+}
+function showBadgeToast(badge) {
+  const t = document.createElement('div');
+  t.className = 'badge-toast';
+  t.style.fontFamily = gameLang==='ar' ? 'var(--fa)' : 'var(--fe)';
+  t.innerHTML = `<span style="font-size:1.5rem">${badge.emoji}</span><span>${gameLang==='ar'?badge.ar:badge.en}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),400); },2800);
+}
+
+// ================================================================
+//  SOUND EFFECTS (Web Audio API)
+// ================================================================
+let _audioCtx = null;
+function _getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return _audioCtx;
+}
+function playSound(type) {
+  try {
+    const ctx = _getAudioCtx();
+    if (type==='correct') {
+      [[523,0],[659,.1],[784,.2]].forEach(([f,t])=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
+        g.gain.setValueAtTime(.25,ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.32);
+        o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.32);
+      });
+    } else if (type==='wrong') {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sawtooth';o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(320,ctx.currentTime);
+      o.frequency.linearRampToValueAtTime(200,ctx.currentTime+.28);
+      g.gain.setValueAtTime(.18,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.32);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+.32);
+    } else if (type==='flip') {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.frequency.value=880;o.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(.1,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.1);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+.1);
+    } else if (type==='match') {
+      [[659,0],[784,.1],[1047,.22]].forEach(([f,t])=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
+        g.gain.setValueAtTime(.2,ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.25);
+        o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.25);
+      });
+    } else if (type==='levelup') {
+      [523,659,784,1047].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
+        g.gain.setValueAtTime(.22,ctx.currentTime+i*.12);
+        g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.12+.25);
+        o.start(ctx.currentTime+i*.12);o.stop(ctx.currentTime+i*.12+.25);
+      });
+    }
+  } catch(e){}
 }
 
 function getLevel(stars) {
@@ -730,17 +960,25 @@ function goMenu()     { renderMenu();     showScreen('screen-menu');     }
 
 function renderProfiles() {
   $('profiles-grid').innerHTML = PROFILES.map(p => {
-    const prog  = loadProg(p.id);
-    const lv    = getLevel(prog.stars);
+    const prog   = loadProg(p.id);
+    const lv     = getLevel(prog.stars);
+    const streak = loadStreak(p.id);
+    const badges = loadBadges(p.id);
+    const streakHtml = streak.count >= 2
+      ? `<div class="p-streak">🔥 ${streak.count}-day streak</div>` : '';
+    const badgesHtml = badges.length
+      ? `<div class="p-badges">${badges.slice(0,5).map(id=>{const b=BADGES.find(x=>x.id===id);return b?`<span class="p-badge">${b.emoji}</span>`:''}).join('')}</div>` : '';
     return `
       <div class="profile-card" onclick="selectProfile('${p.id}')"
-        style="border-color:${p.color}33;background:linear-gradient(135deg,#fff 60%,${p.color}18)">
+        style="border-color:${p.color}44">
         <div class="p-avatar">${p.avatar}</div>
         <div class="p-name-en" style="color:${p.color}">${p.nameEn}</div>
         <div class="p-name-ar">${p.nameAr}</div>
         <div class="p-meta">${p.gradeEn}</div>
         <div class="p-level">${lv[3]} ${lv[1]}</div>
         ${prog.stars > 0 ? `<div class="p-stars">⭐ ${prog.stars}</div>` : ''}
+        ${streakHtml}
+        ${badgesHtml}
       </div>`;
   }).join('');
 }
@@ -807,10 +1045,19 @@ function renderMenu() {
 
   $('subjects-grid').innerHTML = SUBJECTS.map((s, i) => `
     <div class="subject-card" onclick="startGame('${s.id}')"
-      style="border-color:${SUBJECT_COLORS[i]}44;background:linear-gradient(135deg,#fff 55%,${SUBJECT_COLORS[i]}18)">
+      style="border-color:${SUBJECT_COLORS[i]}55">
       <div class="s-icon">${s.emoji}</div>
       <div class="s-name-en" style="color:${SUBJECT_COLORS[i]};font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
         ${gameLang === 'en' ? s.en : s.ar}
+      </div>
+    </div>`).join('');
+
+  $('puzzles-grid').innerHTML = PUZZLES.map((p, i) => `
+    <div class="subject-card" onclick="startGame('${p.id}')"
+      style="border-color:${PUZZLE_COLORS[i]}55">
+      <div class="s-icon">${p.emoji}</div>
+      <div class="s-name-en" style="color:${PUZZLE_COLORS[i]};font-family:${gameLang==='ar'?'var(--fa)':'var(--fe)'}">
+        ${gameLang === 'en' ? p.en : p.ar}
       </div>
     </div>`).join('');
 }
@@ -1086,6 +1333,234 @@ function svgShape(key, fill, size) {
   }
 }
 
+function makeOppositeQ() {
+  const pair = OPPOSITES_DATA[rand(0, OPPOSITES_DATA.length-1)];
+  const askFirst = Math.random() < 0.5;
+  const srcEmoji = askFirst ? pair.emoji1 : pair.emoji2;
+  const srcWord  = askFirst ? (gameLang==='en'?pair.en[0]:pair.ar[0]) : (gameLang==='en'?pair.en[1]:pair.ar[1]);
+  const ansWord  = askFirst ? (gameLang==='en'?pair.en[1]:pair.ar[1]) : (gameLang==='en'?pair.en[0]:pair.ar[0]);
+  const wrongs = shuffle(OPPOSITES_DATA.filter(p=>p!==pair)).slice(0,3)
+    .map(p => gameLang==='en' ? p.en[rand(0,1)] : p.ar[rand(0,1)]);
+  const choices = shuffle([ansWord, ...wrongs]);
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?'What is the opposite?':'ما الضد؟'}</div>
+           <div class="q-emoji">${srcEmoji}</div>
+           <div class="q-word${gameLang==='ar'?' ar':''}">${srcWord}</div>`,
+    choices: choices.map(w=>({label:w, sub:'', bigAr:gameLang==='ar'})),
+    correct: choices.indexOf(ansWord),
+    audio: gameLang==='en'
+      ? [{text:`What is the opposite of ${srcWord}?`, lang:'en-US'}]
+      : [{text:`ما ضد كلمة ${srcWord}؟`, lang:'ar-SA'}],
+  };
+}
+
+function makeBodyQ() {
+  const pool = shuffle([...BODY_PARTS]);
+  const tgt  = pool[0];
+  const choices = shuffle([tgt, ...pool.slice(1,4)]);
+  if (gameLang==='en') return {
+    html: `<div class="q-instr">What part of the body is this?</div><div class="q-emoji">${tgt.emoji}</div>`,
+    choices: choices.map(b=>({label:b.en, sub:''})),
+    correct: choices.indexOf(tgt),
+    audio: [{text:'What part of the body is this?', lang:'en-US'}],
+  };
+  return {
+    html: `<div class="q-instr ar">ما هذا الجزء من الجسم؟</div><div class="q-emoji">${tgt.emoji}</div>`,
+    choices: choices.map(b=>({label:b.ar, sub:'', bigAr:true})),
+    correct: choices.indexOf(tgt),
+    audio: [{text:'ما هذا الجزء من الجسم؟', lang:'ar-SA'}],
+  };
+}
+
+function makeMissingNumQ() {
+  const age = activeProfile.age;
+  let a, b, ans, pool, opDisplay;
+  if (age <= 3) {
+    a=rand(1,3); b=rand(1,4-a); ans=a+b; opDisplay='+';
+  } else if (age <= 5) {
+    if (Math.random()<0.6) { a=rand(2,7); b=rand(2,7); ans=a+b; opDisplay='+'; }
+    else { a=rand(4,10); b=rand(1,a-1); ans=a-b; opDisplay='−'; }
+  } else {
+    if (Math.random()<0.5) { a=rand(5,15); b=rand(3,12); ans=a+b; opDisplay='+'; }
+    else { a=rand(8,20); b=rand(2,a-1); ans=a-b; opDisplay='−'; }
+  }
+  pool = shuffle([b, ...uniqueWrongs(b, Math.max(1,b-4), b+4, 3)]);
+  const instrEn='Find the missing number!', instrAr='أوجد الرقم المفقود!';
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEn:instrAr}</div>
+           <div class="q-math">${a} ${opDisplay} <span style="color:var(--purple);font-size:3.2rem">?</span> = ${ans}</div>`,
+    choices: pool.map(n=>({label:String(n), sub:''})),
+    correct: pool.indexOf(b),
+    audio: gameLang==='en'?[{text:instrEn,lang:'en-US'}]:[{text:instrAr,lang:'ar-SA'}],
+  };
+}
+
+function makeOddOutQ() {
+  const d = ODD_OUT_DATA[rand(0, ODD_OUT_DATA.length-1)];
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?d.instrEn:d.instrAr}</div>`,
+    choices: d.items.map((e,i)=>({label:e, sub:'', idx:i})),
+    correct: d.oddIdx,
+    audio: gameLang==='en'?[{text:d.instrEn,lang:'en-US'}]:[{text:d.instrAr,lang:'ar-SA'}],
+  };
+}
+
+// ================================================================
+//  MEMORY GAME
+// ================================================================
+let _memCards=[], _memFlipped=[], _memMatched=0, _memTotal=0, _memMoves=0, _memLock=false;
+
+function startMemoryGame() {
+  const numPairs = activeProfile.age<=3 ? 4 : activeProfile.age<=5 ? 5 : 6;
+  const items = shuffle([...ANIMALS]).slice(0, numPairs);
+  const cards = [];
+  items.forEach((a,i)=>{
+    cards.push({pairId:i, emoji:a.emoji, flipped:false, matched:false});
+    cards.push({pairId:i, emoji:a.emoji, flipped:false, matched:false});
+  });
+  _memCards=shuffle(cards); _memFlipped=[]; _memMatched=0; _memTotal=numPairs; _memMoves=0; _memLock=false;
+  activeSubject = PUZZLES.find(p=>p.id==='memory');
+  lastSubjectId = 'memory';
+  sessionScore = 0; currentSession = [];
+  $('gs-en').textContent = 'Memory Flip'; $('gs-ar').textContent = 'لعبة الذاكرة';
+  $('score-display').textContent = '0'; $('progress-fill').style.width = '0%';
+  showScreen('screen-game');
+  renderMemoryBoard();
+}
+
+function renderMemoryBoard() {
+  $('choices-grid').innerHTML = ''; $('choices-grid').style.display = 'none';
+  $('feedback').classList.remove('show');
+  const inE='Find all matching pairs!', inA='ابحث عن كل الأزواج!';
+  $('question-card').innerHTML = `
+    <div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?inE:inA}</div>
+    <div style="display:flex;gap:18px;font-size:.8rem;font-weight:900;color:#aaa;margin:2px 0 4px">
+      <span>🎯 ${_memMoves} ${gameLang==='en'?'moves':'حركة'}</span>
+      <span>✅ ${_memMatched}/${_memTotal} ${gameLang==='en'?'pairs':'أزواج'}</span>
+    </div>
+    <div class="memory-grid" id="memory-grid"></div>`;
+  $('progress-fill').style.width = ((_memMatched/_memTotal)*100)+'%';
+  const grid = $('memory-grid');
+  _memCards.forEach((card,idx)=>{
+    const div = document.createElement('div');
+    div.className = 'mem-card'+(card.flipped||card.matched?' flipped':'')+(card.matched?' matched':'');
+    div.innerHTML = `<div class="mem-inner"><div class="mem-front">❓</div><div class="mem-back">${card.emoji}</div></div>`;
+    if (!card.matched) div.addEventListener('click',()=>onMemoryTap(idx));
+    grid.appendChild(div);
+  });
+  if (_memMatched===0&&_memMoves===0) speakSeq([{text:gameLang==='en'?inE:inA, lang:gameLang==='en'?'en-US':'ar-SA'}]);
+}
+
+function onMemoryTap(idx) {
+  if (_memLock) return;
+  const card = _memCards[idx];
+  if (card.matched||card.flipped||_memFlipped.includes(idx)) return;
+  card.flipped=true; _memFlipped.push(idx);
+  playSound('flip'); renderMemoryBoard();
+  if (_memFlipped.length===2) {
+    _memMoves++; _memLock=true;
+    const [i1,i2] = _memFlipped;
+    if (_memCards[i1].pairId===_memCards[i2].pairId) {
+      _memCards[i1].matched=true; _memCards[i2].matched=true;
+      _memMatched++; _memFlipped=[]; _memLock=false;
+      playSound('match'); sessionScore++; $('score-display').textContent=sessionScore;
+      renderMemoryBoard();
+      if (_memMatched===_memTotal) setTimeout(()=>showSpecialResults('memory',_memTotal,3), 700);
+    } else {
+      setTimeout(()=>{
+        _memCards[i1].flipped=false; _memCards[i2].flipped=false;
+        _memFlipped=[]; _memLock=false; renderMemoryBoard();
+      }, 900);
+    }
+  }
+}
+
+// ================================================================
+//  NUMBER ORDER GAME
+// ================================================================
+let _numList=[], _numNext=1, _numDone=[];
+
+function startNumorderGame() {
+  const n = activeProfile.age<=3 ? 4 : activeProfile.age<=5 ? 5 : 6;
+  _numList = shuffle(Array.from({length:n},(_,i)=>i+1));
+  _numNext=1; _numDone=[];
+  activeSubject = PUZZLES.find(p=>p.id==='numorder');
+  lastSubjectId = 'numorder'; sessionScore=0; currentSession=[];
+  $('gs-en').textContent='Number Order'; $('gs-ar').textContent='ترتيب الأرقام';
+  $('score-display').textContent='0'; $('progress-fill').style.width='0%';
+  showScreen('screen-game'); renderNumorderBoard();
+}
+
+function renderNumorderBoard() {
+  $('choices-grid').innerHTML=''; $('choices-grid').style.display='none';
+  $('feedback').classList.remove('show');
+  const inE='Tap numbers in order: 1, 2, 3…', inA='اضغط الأرقام بالترتيب: 1، 2، 3…';
+  $('question-card').innerHTML = `
+    <div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?inE:inA}</div>
+    <div style="font-size:.85rem;color:#bbb;font-weight:700;margin-bottom:6px">${gameLang==='en'?'Next: '+_numNext:'التالي: '+_numNext}</div>
+    <div class="numorder-grid" id="numorder-grid"></div>`;
+  $('progress-fill').style.width=((_numDone.length/_numList.length)*100)+'%';
+  const grid = $('numorder-grid');
+  _numList.forEach(num=>{
+    const btn = document.createElement('button');
+    btn.className = 'num-btn'+(_numDone.includes(num)?' tapped':'');
+    btn.textContent = num; btn.disabled = _numDone.includes(num);
+    btn.addEventListener('click',()=>onNumorderTap(num));
+    grid.appendChild(btn);
+  });
+  if (_numDone.length===0) speakSeq([{text:gameLang==='en'?inE:inA, lang:gameLang==='en'?'en-US':'ar-SA'}]);
+}
+
+function onNumorderTap(num) {
+  if (num===_numNext) {
+    playSound('correct'); _numDone.push(num); _numNext++; sessionScore++;
+    $('score-display').textContent=sessionScore;
+    if (_numDone.length===_numList.length) setTimeout(()=>showSpecialResults('numorder',_numList.length,3), 600);
+    else renderNumorderBoard();
+  } else {
+    playSound('wrong');
+    const btn = [...document.querySelectorAll('#numorder-grid .num-btn')].find(b=>+b.textContent===num);
+    if (btn) { btn.classList.add('wrong-num'); setTimeout(()=>btn.classList.remove('wrong-num'),400); }
+  }
+}
+
+// ================================================================
+//  SPECIAL GAME RESULTS
+// ================================================================
+function showSpecialResults(gameId, total, stars) {
+  const subj = PUZZLES.find(p=>p.id===gameId)||{en:'Puzzle',ar:'لغز',emoji:'🧩'};
+  const prevProg = loadProg(activeProfile.id);
+  const prevLevel = getLevel(prevProg.stars);
+  saveProg(activeProfile.id, stars);
+  const streak = updateStreak(activeProfile.id);
+  checkBadges(activeProfile.id);
+  saveSession(activeProfile.id, {
+    ts:Date.now(),
+    dateStr:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+    timeStr:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    subject:gameId, subjectEn:subj.en, subjectAr:subj.ar, subjectEmoji:subj.emoji,
+    lang:gameLang, score:total, total, stars, qa:[],
+  });
+  const newProg = loadProg(activeProfile.id);
+  const newLevel = getLevel(newProg.stars);
+  const didLevelUp = LEVELS.indexOf(newLevel) > LEVELS.indexOf(prevLevel);
+  $('res-emoji').textContent = '🏆';
+  $('res-title-en').textContent = gameLang==='en' ? 'Amazing Work!' : 'عمل مذهل!';
+  $('res-title-en').className = gameLang==='ar' ? 'res-title-en ar' : 'res-title-en';
+  $('res-title-ar').textContent = '';
+  $('res-score').textContent = gameLang==='en' ? `All ${total} done! 🎉` : `تم ${total} بنجاح! 🎉`;
+  const row=$('res-stars'); row.innerHTML='';
+  for (let i=0;i<3;i++){const sp=document.createElement('span');sp.className='star-item lit';sp.style.animationDelay=i*.18+'s';sp.textContent='⭐';row.appendChild(sp);}
+  const lub=$('levelup-badge');
+  if (didLevelUp){
+    lub.textContent=gameLang==='en'?`${newLevel[3]} Level Up! → ${newLevel[1]}`:`${newLevel[3]} ارتقيت مستوى! → ${newLevel[2]}`;
+    lub.classList.add('show');
+    setTimeout(()=>playSound('levelup'),300);
+  } else lub.classList.remove('show');
+  showScreen('screen-results');
+  launchConfetti(true);
+}
+
 function generateQuestions(subjectId, age) {
   const out = [];
   for (let i = 0; i < 10; i++) {
@@ -1094,8 +1569,12 @@ function generateQuestions(subjectId, age) {
       case 'letters':  out.push(makeLetterQ());     break;
       case 'animals':  out.push(makeAnimalQ());     break;
       case 'colors':   out.push(makeColorShapeQ()); break;
-      case 'words':    out.push(makeWordQ());        break;
-      case 'patterns': out.push(makePatternQ());    break;
+      case 'words':     out.push(makeWordQ());        break;
+      case 'patterns':  out.push(makePatternQ());    break;
+      case 'opposites': out.push(makeOppositeQ());   break;
+      case 'body':      out.push(makeBodyQ());       break;
+      case 'missing':   out.push(makeMissingNumQ()); break;
+      case 'oddout':    out.push(makeOddOutQ());     break;
     }
   }
   return out;
@@ -1106,12 +1585,19 @@ function generateQuestions(subjectId, age) {
 // ================================================================
 
 function startGame(subjectId) {
-  activeSubject = SUBJECTS.find(s => s.id === subjectId);
+  if (subjectId==='memory')   { startMemoryGame();   return; }
+  if (subjectId==='numorder') { startNumorderGame(); return; }
+
+  // Restore choices-grid if coming from a special game
+  $('choices-grid').style.display = '';
+
+  activeSubject = SUBJECTS.find(s=>s.id===subjectId) || PUZZLES.find(p=>p.id===subjectId);
   lastSubjectId = subjectId;
   questions     = generateQuestions(subjectId, activeProfile.age);
   qIdx          = 0;
   sessionScore  = 0;
   locked        = false;
+  currentSession = [];
 
   $('gs-en').textContent = activeSubject.en;
   $('gs-ar').textContent = activeSubject.ar;
@@ -1167,6 +1653,7 @@ function onAnswer(selected) {
 
   const q    = questions[qIdx];
   const ok   = selected === q.correct;
+  playSound(ok ? 'correct' : 'wrong');
   document.querySelectorAll('.choice-btn').forEach((b, i) => {
     b.classList.add('dim');
     if (i === q.correct) b.classList.add('correct');
@@ -1220,6 +1707,8 @@ function showResults() {
   const prevLevel = getLevel(prevProg.stars);
 
   saveProg(activeProfile.id, earned);
+  updateStreak(activeProfile.id);
+  checkBadges(activeProfile.id);
 
   // Save session record
   const now = new Date();
@@ -1274,6 +1763,7 @@ function showResults() {
       ? `${newLevel[3]} Level Up! → ${newLevel[1]}`
       : `${newLevel[3]} ارتقيت مستوى! → ${newLevel[2]}`;
     lub.classList.add('show');
+    setTimeout(()=>playSound('levelup'), 300);
   } else {
     lub.classList.remove('show');
   }
@@ -1282,7 +1772,11 @@ function showResults() {
   if (pct >= 0.9) launchConfetti(true);
 }
 
-function playAgain() { startGame(lastSubjectId); }
+function playAgain() {
+  if (lastSubjectId==='memory')   startMemoryGame();
+  else if (lastSubjectId==='numorder') startNumorderGame();
+  else startGame(lastSubjectId);
+}
 
 // ================================================================
 //  CONFETTI
