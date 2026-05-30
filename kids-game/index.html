@@ -1183,23 +1183,18 @@ function _pickVoice(lang) {
   const pool   = _voices.filter(v => v.lang.startsWith(prefix));
   if (!pool.length) return null;
   const prefs  = VOICE_PREFS[prefix]?.[gender] || [];
-  // 1. Preferred name + Enhanced/Premium quality (most natural on iOS)
-  const enhanced = pool.find(v => {
-    const n = v.name.toLowerCase();
-    return prefs.some(p => n.includes(p)) && (n.includes('enhanced') || n.includes('premium'));
-  });
-  if (enhanced) return enhanced;
-  // 2. Any Enhanced/Premium voice in this language
-  const anyEnhanced = pool.find(v => {
-    const n = v.name.toLowerCase();
-    return n.includes('enhanced') || n.includes('premium');
-  });
-  if (anyEnhanced) return anyEnhanced;
-  // 3. Preferred name (standard quality)
-  const pref = pool.find(v => prefs.some(n => v.name.toLowerCase().includes(n)));
-  if (pref) return pref;
-  // 4. First available voice for the language
-  return pool[0];
+  // Try preferred names — Enhanced/Premium quality first, then standard
+  for (const quality of ['enhanced', 'premium', '']) {
+    for (const name of prefs) {
+      const found = pool.find(v => {
+        const n = v.name.toLowerCase();
+        return n.includes(name) && (quality === '' || n.includes(quality));
+      });
+      if (found) return found;
+    }
+  }
+  // Fall back to the voice iOS marks as default for this language
+  return pool.find(v => v.default) || null;
 }
 
 function _cleanText(text) {
