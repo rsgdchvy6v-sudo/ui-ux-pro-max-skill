@@ -1159,14 +1159,15 @@ if (window.speechSynthesis) {
 }
 
 // Voice name preferences per language + gender
+// Prefer Enhanced/Premium iOS voices — they sound natural, not robotic
 const VOICE_PREFS = {
   ar: {
     female: ['layla'],
     male:   ['maged', 'tarik'],
   },
   en: {
-    female: ['samantha', 'karen', 'tessa', 'moira', 'allison', 'ava', 'fiona', 'victoria', 'susan'],
-    male:   ['alex', 'daniel', 'fred', 'oliver', 'thomas', 'lee'],
+    female: ['zoe', 'nicky', 'ava', 'allison', 'samantha', 'karen', 'tessa', 'moira', 'fiona', 'victoria'],
+    male:   ['aaron', 'rishi', 'daniel', 'alex', 'oliver', 'thomas', 'lee'],
   },
 };
 
@@ -1177,8 +1178,23 @@ function _pickVoice(lang) {
   const pool   = _voices.filter(v => v.lang.startsWith(prefix));
   if (!pool.length) return null;
   const prefs  = VOICE_PREFS[prefix]?.[gender] || [];
-  // try preferred gender first, fall back to any voice in that language
-  return pool.find(v => prefs.some(n => v.name.toLowerCase().includes(n))) || pool[0];
+  // 1. Preferred name + Enhanced/Premium quality (most natural on iOS)
+  const enhanced = pool.find(v => {
+    const n = v.name.toLowerCase();
+    return prefs.some(p => n.includes(p)) && (n.includes('enhanced') || n.includes('premium'));
+  });
+  if (enhanced) return enhanced;
+  // 2. Any Enhanced/Premium voice in this language
+  const anyEnhanced = pool.find(v => {
+    const n = v.name.toLowerCase();
+    return n.includes('enhanced') || n.includes('premium');
+  });
+  if (anyEnhanced) return anyEnhanced;
+  // 3. Preferred name (standard quality)
+  const pref = pool.find(v => prefs.some(n => v.name.toLowerCase().includes(n)));
+  if (pref) return pref;
+  // 4. First available voice for the language
+  return pool[0];
 }
 
 function _cleanText(text) {
@@ -1198,8 +1214,8 @@ function speakSeq(parts) {
     const p    = parts[i++];
     const utt  = new SpeechSynthesisUtterance(_cleanText(p.text));
     utt.lang   = p.lang  || 'en-US';
-    utt.rate   = p.rate  || 1.0;
-    utt.pitch  = p.pitch || 1.2;
+    utt.rate   = p.rate  || 1.15;
+    utt.pitch  = p.pitch || 1.0;
     utt.volume = 1;
     const voice = _pickVoice(utt.lang);
     if (voice) utt.voice = voice;
