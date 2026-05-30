@@ -567,6 +567,7 @@ const SUBJECTS = [
   { id:'body',      en:'Body Parts',       ar:'أجزاء الجسم',       emoji:'🫁' },
   { id:'time',      en:'Telling Time',     ar:'قراءة الساعة',      emoji:'⏰' },
   { id:'spelling',  en:'Spelling',         ar:'التهجئة',            emoji:'✍️' },
+  { id:'sight',     en:'Sight Words',      ar:'الكلمات البصرية',   emoji:'👁️' },
 ];
 
 const PUZZLES = [
@@ -578,8 +579,21 @@ const PUZZLES = [
   { id:'sequence', en:'What\'s First?', ar:'ماذا يأتي أولاً؟', emoji:'📖' },
 ];
 
-const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2','#e91e63','#00838f','#d84315','#1565c0'];
+const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2','#e91e63','#00838f','#d84315','#1565c0','#5c6bc0'];
 const PUZZLE_COLORS  = ['#8e24aa','#f57c00','#0288d1','#388e3c','#6a1b9a','#827717'];
+
+const SIGHT_WORDS = {
+  en: {
+    nursery: ['I','a','the','and','to','is','in','it','me','my','no','go','do','at','up','on','we','see'],
+    kg1:     ['are','be','can','he','her','his','how','if','like','look','not','she','so','was','what','you','here','one','two','too'],
+    grade1:  ['about','after','again','before','big','come','did','from','get','has','just','know','little','make','more','now','old','over','run','some','them','then','they','very','want','went','when','will','with','would'],
+  },
+  ar: {
+    nursery: ['في','من','على','لا','نعم','هو','هي','أنا','و','أو','هذا','هنا'],
+    kg1:     ['إلى','عن','مع','هذه','ذلك','نحن','هم','هل','كيف','كان','له','ما'],
+    grade1:  ['ماذا','لماذا','متى','أين','لكن','ثم','قبل','بعد','كل','أي','عند','بين'],
+  }
+};
 
 const ANIMALS = [
   { emoji:'🐱', ar:'قطة',    en:'Cat'       },
@@ -1656,6 +1670,29 @@ function makeSequenceQ() {
   };
 }
 
+function makeSightWordQ() {
+  const lang = gameLang === 'en' ? 'en' : 'ar';
+  const level = activeProfile.age <= 3 ? 'nursery' : activeProfile.age <= 5 ? 'kg1' : 'grade1';
+  const pool = SIGHT_WORDS[lang][level];
+  const allWords = [...SIGHT_WORDS[lang].nursery, ...SIGHT_WORDS[lang].kg1, ...SIGHT_WORDS[lang].grade1];
+  const correct = pool[rand(0, pool.length - 1)];
+  const distractors = shuffle(allWords.filter(w => w !== correct)).slice(0, 3);
+  const choices = shuffle([correct, ...distractors]);
+  const instrEn = 'Which word do you see?';
+  const instrAr = 'ما هذه الكلمة؟';
+  const instr = lang === 'en' ? instrEn : instrAr;
+  const isAr = lang === 'ar';
+  return {
+    html: `<div class="q-instr${isAr?' ar':''}">${instr}</div>
+           <div style="background:linear-gradient(135deg,#5c6bc0,#3949ab);border-radius:20px;padding:22px 36px;margin:10px auto;display:inline-block;max-width:90%">
+             <span style="font-size:3rem;font-weight:900;color:#fff;letter-spacing:2px;${isAr?'font-family:Tajawal,sans-serif;font-size:2.8rem':''}">${correct}</span>
+           </div>`,
+    choices: choices.map(w => ({ label: w, sub: '' })),
+    correct: choices.indexOf(correct),
+    audio: [{ text: instr, lang: lang === 'en' ? 'en-US' : 'ar-SA' }, { text: correct, lang: lang === 'en' ? 'en-US' : 'ar-SA' }],
+  };
+}
+
 // ================================================================
 //  MEMORY GAME
 // ================================================================
@@ -1830,6 +1867,7 @@ function generateQuestions(subjectId, age) {
       case 'spelling':  out.push(makeSpellingQ());   break;
       case 'scramble':  out.push(makeScrambleQ());   break;
       case 'sequence':  out.push(makeSequenceQ());   break;
+      case 'sight':     out.push(makeSightWordQ());  break;
     }
   }
   return out;
