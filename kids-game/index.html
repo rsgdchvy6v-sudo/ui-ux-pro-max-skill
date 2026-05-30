@@ -1154,8 +1154,13 @@ if (window.speechSynthesis) {
 }
 
 // Cloud sync config (Firebase Realtime Database)
-let cloudDbUrl  = localStorage.getItem('ls_cloud_url') || '';
-let cloudFamily = localStorage.getItem('ls_cloud_fam') || '';
+const _DEFAULT_DB  = 'https://kids-game-ipad-default-rtdb.europe-west1.firebasedatabase.app';
+const _DEFAULT_FAM = 'family';
+let cloudDbUrl  = localStorage.getItem('ls_cloud_url') || _DEFAULT_DB;
+let cloudFamily = localStorage.getItem('ls_cloud_fam') || _DEFAULT_FAM;
+// Persist defaults on first run so the setup card shows as "connected"
+if (!localStorage.getItem('ls_cloud_url')) localStorage.setItem('ls_cloud_url', cloudDbUrl);
+if (!localStorage.getItem('ls_cloud_fam')) localStorage.setItem('ls_cloud_fam', cloudFamily);
 let _skipCloudRefresh = false;
 
 // Voice name preferences per language + gender
