@@ -1153,6 +1153,11 @@ if (window.speechSynthesis) {
   window.speechSynthesis.onvoiceschanged = _loadVoices;
 }
 
+// Cloud sync config (Firebase Realtime Database)
+let cloudDbUrl  = localStorage.getItem('ls_cloud_url') || '';
+let cloudFamily = localStorage.getItem('ls_cloud_fam') || '';
+let _skipCloudRefresh = false;
+
 // Voice name preferences per language + gender
 // Prefer Enhanced/Premium iOS voices — they sound natural, not robotic
 const VOICE_PREFS = {
@@ -2000,6 +2005,7 @@ function showSpecialResults(gameId, total, stars) {
   const prevProg = loadProg(activeProfile.id);
   const prevLevel = getLevel(prevProg.stars);
   saveProg(activeProfile.id, stars);
+  cloudSaveKid(activeProfile.id);
   const streak = updateStreak(activeProfile.id);
   checkBadges(activeProfile.id);
   saveSession(activeProfile.id, {
@@ -2199,6 +2205,7 @@ function showResults() {
   const prevLevel = getLevel(prevProg.stars);
 
   saveProg(activeProfile.id, earned);
+  cloudSaveKid(activeProfile.id);
   updateStreak(activeProfile.id);
   checkBadges(activeProfile.id);
 
@@ -2390,6 +2397,8 @@ function show2PHandover(nextPlayer, callback) {
 function show2PResults() {
   saveProg(activeProfile.id, Math.ceil(_2pP1Score/2));
   saveProg(player2Profile.id, Math.ceil(_2pP2Score/2));
+  cloudSaveKid(activeProfile.id);
+  cloudSaveKid(player2Profile.id);
 
   const p1Wins = _2pP1Score > _2pP2Score;
   const tie    = _2pP1Score === _2pP2Score;
@@ -2501,7 +2510,7 @@ function showParentDashboard() {
   $('parent-lang-btn').textContent = parentLang === 'en' ? 'AR | عر' : 'EN';
   $('parent-lang-btn').style.fontFamily = isAr ? 'var(--fa)' : 'var(--fe)';
   const grid = $('parent-grid');
-  grid.innerHTML = PROFILES.map(p => {
+  grid.innerHTML = _buildCloudCard(isAr) + PROFILES.map(p => {
     const prog  = loadProg(p.id);
     const lv    = getLevel(prog.stars);
     const lvIdx = LEVELS.indexOf(lv);
@@ -2572,6 +2581,7 @@ function showParentDashboard() {
   }).join('');
 
   showScreen('screen-parent');
+  if (_cloudBase() && !_skipCloudRefresh) _cloudRefreshCards();
 }
 
 function resetProgress(profileId) {
@@ -2849,7 +2859,150 @@ function hideKidQR(profileId) {
   if (box) box.style.display = 'none';
 }
 
-function scheduleCloudSave() { /* no-op — using AirDrop/QR sync */ }
+// ================================================================
+//  FIREBASE REALTIME DATABASE — cloud sync
+// ================================================================
+
+function _cloudBase() {
+  if (!cloudDbUrl || !cloudFamily) return null;
+  return cloudDbUrl.replace(/\/+$/, '') + '/f/' + encodeURIComponent(cloudFamily);
+}
+
+async function cloudSaveKid(kidId) {
+  const base = _cloudBase();
+  if (!base) return;
+  const payload = {
+    p: localStorage.getItem('ls_' + kidId) || '',
+    b: localStorage.getItem('ls_badges_' + kidId) || '',
+    t: localStorage.getItem('ls_streak_' + kidId) || '',
+    s: localStorage.getItem('ls_sessions_' + kidId) || '',
+    u: Date.now(),
+  };
+  try {
+    await fetch(base + '/' + kidId + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch(e) {}
+}
+
+async function cloudLoadAll() {
+  const base = _cloudBase();
+  if (!base) return false;
+  try {
+    const res = await fetch(base + '.json');
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data) return false;
+    PROFILES.forEach(p => {
+      const d = data[p.id];
+      if (!d) return;
+      if (d.p) localStorage.setItem('ls_' + p.id, d.p);
+      if (d.b) localStorage.setItem('ls_badges_' + p.id, d.b);
+      if (d.t) localStorage.setItem('ls_streak_' + p.id, d.t);
+      if (d.s) localStorage.setItem('ls_sessions_' + p.id, d.s);
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+function saveCloudConfig(url, fam) {
+  cloudDbUrl  = url.trim().replace(/\/+$/, '');
+  cloudFamily = fam.trim();
+  localStorage.setItem('ls_cloud_url', cloudDbUrl);
+  localStorage.setItem('ls_cloud_fam', cloudFamily);
+}
+
+async function connectCloud() {
+  const urlEl = $('cloud-url-input');
+  const famEl = $('cloud-fam-input');
+  const msgEl = $('cloud-setup-msg');
+  const url = (urlEl ? urlEl.value : '') || '';
+  const fam = (famEl ? famEl.value : '') || '';
+  const isAr = parentLang === 'ar';
+  if (!url || !fam) {
+    if (msgEl) msgEl.textContent = isAr ? '⚠️ يرجى تعبئة الحقلين.' : '⚠️ Please fill in both fields.';
+    return;
+  }
+  if (msgEl) msgEl.textContent = isAr ? '🔄 جارٍ الاختبار…' : '🔄 Testing connection…';
+  const testUrl = url.replace(/\/+$/, '') + '/f/' + encodeURIComponent(fam) + '/ping.json';
+  try {
+    const res = await fetch(testUrl, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: '"ok"' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    saveCloudConfig(url, fam);
+    if (msgEl) msgEl.textContent = '✅';
+    setTimeout(() => showParentDashboard(), 400);
+  } catch(e) {
+    if (msgEl) msgEl.textContent = isAr
+      ? '❌ فشل الاتصال. تحقق من رابط Firebase وأن قواعد القاعدة تسمح بالقراءة والكتابة.'
+      : '❌ Could not connect. Check your Firebase URL and that database rules allow read/write.';
+  }
+}
+
+function disconnectCloud() {
+  cloudDbUrl = ''; cloudFamily = '';
+  localStorage.removeItem('ls_cloud_url');
+  localStorage.removeItem('ls_cloud_fam');
+  showParentDashboard();
+}
+
+async function _cloudRefreshCards() {
+  const statusEl = $('cloud-sync-status');
+  if (statusEl) { statusEl.textContent = '🔄'; statusEl.style.color = '#888'; }
+  const ok = await cloudLoadAll();
+  // Only re-render if parent screen is still active
+  if (!document.getElementById('screen-parent').classList.contains('active')) return;
+  _skipCloudRefresh = true;
+  showParentDashboard();
+  _skipCloudRefresh = false;
+  const el2 = $('cloud-sync-status');
+  if (el2) {
+    el2.textContent = ok ? '✅' : '❌';
+    el2.style.color  = ok ? '#11998e' : '#e55';
+  }
+}
+
+function _buildCloudCard(isAr) {
+  const ff = isAr ? 'var(--fa)' : 'var(--fe)';
+  if (cloudDbUrl && cloudFamily) {
+    return `<div style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-radius:16px;padding:14px 18px;border:2px solid #a5d6a7;direction:${isAr?'rtl':'ltr'};margin-bottom:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="font-weight:900;font-size:.9rem;color:#2e7d32;font-family:${ff}">
+          ☁️ ${isAr?'مزامنة سحابية':'Cloud Sync'}
+          <span id="cloud-sync-status" style="font-size:.8rem;font-weight:700;color:#11998e;margin-${isAr?'right':'left'}:6px">✅</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="_cloudRefreshCards()" style="background:#e8f5e9;border:1.5px solid #4caf50;color:#2e7d32;border-radius:50px;padding:4px 12px;font-size:.75rem;font-weight:900;cursor:pointer;font-family:${ff}">
+            🔄 ${isAr?'تحديث':'Refresh'}
+          </button>
+          <button onclick="disconnectCloud()" style="background:#fff0f0;border:1.5px solid #ffb3b3;color:#e55;border-radius:50px;padding:4px 12px;font-size:.75rem;font-weight:900;cursor:pointer;font-family:${ff}">
+            ${isAr?'قطع':'Disconnect'}
+          </button>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:#555;margin-top:4px;font-family:${ff}">${isAr?'الرمز: ':'Code: '}<strong>${cloudFamily}</strong></div>
+    </div>`;
+  }
+  return `<div style="background:linear-gradient(135deg,#e3f2fd,#f3e5f5);border-radius:16px;padding:16px 18px;border:2px dashed #90caf9;direction:${isAr?'rtl':'ltr'};margin-bottom:4px">
+    <div style="font-weight:900;font-size:.95rem;color:#1565c0;margin-bottom:6px;font-family:${ff}">☁️ ${isAr?'ربط المزامنة السحابية':'Connect Cloud Sync'}</div>
+    <div style="font-size:.78rem;color:#555;margin-bottom:10px;line-height:1.5;font-family:${ff}">
+      ${isAr
+        ? 'أنشئ مشروع Firebase مجاني، انسخ رابط قاعدة البيانات، ثم اختر رمز عائلة لمشاركة التقدم على جميع الأجهزة.'
+        : 'Create a free Firebase project, copy the Realtime Database URL, then pick a family code to share progress across all iPads and your iPhone.'}
+    </div>
+    <input id="cloud-url-input" type="url" placeholder="https://your-project-default-rtdb.firebaseio.com"
+      value="${cloudDbUrl}"
+      style="width:100%;box-sizing:border-box;border:1.5px solid #90caf9;border-radius:10px;padding:8px 10px;font-size:.78rem;margin-bottom:8px;direction:ltr;outline:none;font-family:monospace">
+    <input id="cloud-fam-input" type="text" placeholder="${isAr?'رمز العائلة مثلاً: AlAli2025':'Family code e.g. AlAli2025'}"
+      value="${cloudFamily}"
+      style="width:100%;box-sizing:border-box;border:1.5px solid #90caf9;border-radius:10px;padding:8px 10px;font-size:.78rem;margin-bottom:10px;font-family:${ff};outline:none">
+    <button onclick="connectCloud()" style="background:linear-gradient(135deg,#1565c0,#42a5f5);color:white;border:none;border-radius:50px;padding:9px 24px;font-weight:900;font-size:.85rem;cursor:pointer;font-family:${ff}">
+      ${isAr?'اتصل':'Connect'}
+    </button>
+    <div id="cloud-setup-msg" style="margin-top:8px;font-size:.78rem;font-family:${ff}"></div>
+  </div>`;
+}
 
 function _updateCloudHeader() {
   const el = $('cloud-header-status');
@@ -3048,6 +3201,7 @@ function finishStory() {
 
   // Save progress
   saveProg(activeProfile.id, earnedStars);
+  cloudSaveKid(activeProfile.id);
   saveSession(activeProfile.id, {
     ts: Date.now(),
     dateStr: new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }),
