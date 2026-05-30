@@ -492,6 +492,8 @@ const SUBJECTS = [
   { id:'patterns',  en:'Patterns',         ar:'الأنماط',            emoji:'🧩' },
   { id:'opposites', en:'Opposites',        ar:'الأضداد',            emoji:'↔️' },
   { id:'body',      en:'Body Parts',       ar:'أجزاء الجسم',       emoji:'🫁' },
+  { id:'time',      en:'Telling Time',     ar:'قراءة الساعة',      emoji:'⏰' },
+  { id:'spelling',  en:'Spelling',         ar:'التهجئة',            emoji:'✍️' },
 ];
 
 const PUZZLES = [
@@ -499,10 +501,12 @@ const PUZZLES = [
   { id:'missing',  en:'Missing Number', ar:'الرقم المفقود', emoji:'🔍' },
   { id:'numorder', en:'Number Order',   ar:'ترتيب الأرقام', emoji:'🔢' },
   { id:'oddout',   en:'Odd One Out',    ar:'الغريب عنهم',   emoji:'🧐' },
+  { id:'scramble', en:'Word Scramble',  ar:'كلمة مختلطة',   emoji:'🔀' },
+  { id:'sequence', en:'What\'s First?', ar:'ماذا يأتي أولاً؟', emoji:'📖' },
 ];
 
-const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2','#e91e63','#00838f'];
-const PUZZLE_COLORS  = ['#8e24aa','#f57c00','#0288d1','#388e3c'];
+const SUBJECT_COLORS = ['#667eea','#FF6B9D','#11998e','#F7971E','#0097a7','#7b1fa2','#e91e63','#00838f','#d84315','#1565c0'];
+const PUZZLE_COLORS  = ['#8e24aa','#f57c00','#0288d1','#388e3c','#6a1b9a','#827717'];
 
 const ANIMALS = [
   { emoji:'🐱', ar:'قطة',    en:'Cat'       },
@@ -641,6 +645,32 @@ const ODD_OUT_DATA = [
   { items:['🌊','🏖️','🐠','🏔️'], oddIdx:3, instrEn:'Which is NOT at the beach?', instrAr:'أي واحد ليس في الشاطئ؟'   },
   { items:['1️⃣','2️⃣','3️⃣','🐶'], oddIdx:3, instrEn:'Which is NOT a number?',     instrAr:'أي واحد ليس رقماً؟'       },
   { items:['🎸','🎹','🎺','🍕'], oddIdx:3, instrEn:'Which is NOT an instrument?', instrAr:'أي واحد ليس آلة موسيقية؟'  },
+];
+
+const SPELLING_DATA = [
+  { emoji:'🐱', word:'CAT',    ar:'قطة',   level:1, opts:['CAT','CET','CAP','COT'],      arOpts:['قطة','قتة','كطة','قطط']      },
+  { emoji:'🐶', word:'DOG',    ar:'كلب',   level:1, opts:['DOG','BOG','DOB','DEG'],      arOpts:['كلب','كبل','كلم','كبب']      },
+  { emoji:'☀️', word:'SUN',    ar:'شمس',   level:1, opts:['SUN','SON','SAN','BUN'],      arOpts:['شمس','شمص','سمس','شمش']      },
+  { emoji:'🌙', word:'MOON',   ar:'قمر',   level:1, opts:['MOON','MOAN','NOON','BOON'],  arOpts:['قمر','قمم','قرم','قام']      },
+  { emoji:'⭐', word:'STAR',   ar:'نجمة',  level:1, opts:['STAR','SCAR','STAY','SPAR'],  arOpts:['نجمة','نجمم','نجبة','نمجة']  },
+  { emoji:'🏠', word:'HOUSE',  ar:'بيت',   level:2, opts:['HOUSE','HORSE','HOISE','HAUSE'], arOpts:['بيت','بيث','بيك','بيد']   },
+  { emoji:'🚗', word:'CAR',    ar:'سيارة', level:1, opts:['CAR','BAR','CAN','JAR'],      arOpts:['سيارة','سيادة','صيارة','سيارر'] },
+  { emoji:'📚', word:'BOOK',   ar:'كتاب',  level:1, opts:['BOOK','BOCK','BOKE','BOOP'],  arOpts:['كتاب','كتاپ','كتاد','كتام']  },
+  { emoji:'🌳', word:'TREE',   ar:'شجرة',  level:2, opts:['TREE','FREE','TREK','TREW'],  arOpts:['شجرة','شجرر','شجزة','شجره']  },
+  { emoji:'🐟', word:'FISH',   ar:'سمكة',  level:1, opts:['FISH','FIST','DISH','FASH'],  arOpts:['سمكة','سمكك','سمجة','سمكه']  },
+  { emoji:'🍎', word:'APPLE',  ar:'تفاحة', level:2, opts:['APPLE','APPEL','APPAL','APLE'], arOpts:['تفاحة','تفاجة','تفاخة','تافحة'] },
+  { emoji:'🌺', word:'FLOWER', ar:'زهرة',  level:2, opts:['FLOWER','FLWER','FLOWRE','FLOWR'], arOpts:['زهرة','زهره','زهرر','زهزة'] },
+];
+
+const SEQUENCE_DATA = [
+  { steps:['🥚','🐣','🐥','🐔'], instrEn:'What comes FIRST in a chicken\'s life?', instrAr:'ماذا يأتي أولاً في حياة الدجاجة؟', firstIdx:0 },
+  { steps:['🌱','🌿','🌳','🍂'], instrEn:'What comes FIRST as a tree grows?',       instrAr:'ماذا يأتي أولاً في نمو الشجرة؟',    firstIdx:0 },
+  { steps:['🍼','🧒','👦','👨'], instrEn:'Who is the YOUNGEST?',                    instrAr:'من هو الأصغر سناً؟',                  firstIdx:0 },
+  { steps:['1️⃣','2️⃣','3️⃣','4️⃣'], instrEn:'Which number comes FIRST?',            instrAr:'أي رقم يأتي أولاً؟',                 firstIdx:0 },
+  { steps:['🌱','🌺','🥀','💐'], instrEn:'What is a flower\'s FIRST stage?',        instrAr:'ما أولى مراحل الزهرة؟',               firstIdx:0 },
+  { steps:['😴','🌅','🦷','🍳'], instrEn:'What do you do FIRST in the morning?',   instrAr:'ماذا تفعل أولاً في الصباح؟',          firstIdx:1 },
+  { steps:['☁️','🌧️','🌈','☀️'], instrEn:'What comes BEFORE rain?',               instrAr:'ماذا يأتي قبل المطر؟',                firstIdx:0 },
+  { steps:['🥚','🍳','🍽️','😋'], instrEn:'What comes FIRST when making breakfast?',instrAr:'ماذا يأتي أولاً لتحضير الفطور؟',      firstIdx:0 },
 ];
 
 const BADGES = [
@@ -1313,6 +1343,44 @@ function makePatternQ() {
   };
 }
 
+function svgClock(hour, minute, size) {
+  const cx=50, cy=50, S=size||120;
+  const toRad = a => a * Math.PI / 180;
+  const hAngle = (hour%12)*30 + minute*0.5 - 90;
+  const mAngle = minute*6 - 90;
+  const hx = (cx + 24*Math.cos(toRad(hAngle))).toFixed(1);
+  const hy = (cy + 24*Math.sin(toRad(hAngle))).toFixed(1);
+  const mx = (cx + 36*Math.cos(toRad(mAngle))).toFixed(1);
+  const my = (cy + 36*Math.sin(toRad(mAngle))).toFixed(1);
+  const ticks = Array.from({length:12},(_,i)=>{
+    const a=toRad(i*30-90);
+    const big=i%3===0;
+    const r1=big?40:42, r2=46;
+    return `<line x1="${(cx+r1*Math.cos(a)).toFixed(1)}" y1="${(cy+r1*Math.sin(a)).toFixed(1)}"
+                  x2="${(cx+r2*Math.cos(a)).toFixed(1)}" y2="${(cy+r2*Math.sin(a)).toFixed(1)}"
+                  stroke="${big?'#555':'#bbb'}" stroke-width="${big?2:1.2}"/>`;
+  }).join('');
+  const labels = [[12,0,-14],[3,14,1],[6,0,16],[9,-14,1]].map(([n,dx,dy])=>
+    `<text x="${cx+dx}" y="${cy+dy+1}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="900" fill="#444">${n}</text>`
+  ).join('');
+  return `<svg width="${S}" height="${S}" viewBox="0 0 100 100">
+    <circle cx="${cx}" cy="${cy}" r="48" fill="#f8f8ff" stroke="#ddd" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy}" r="46" fill="white"/>
+    ${ticks}${labels}
+    <line x1="${cx}" y1="${cy}" x2="${hx}" y2="${hy}" stroke="#333" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${mx}" y2="${my}" stroke="#667eea" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="3.5" fill="#333"/>
+  </svg>`;
+}
+
+function scrambleWord(word) {
+  if (word.length <= 2) return word;
+  const arr = word.split('');
+  let out, tries = 0;
+  do { out = shuffle([...arr]).join(''); tries++; } while (out === word && tries < 12);
+  return out;
+}
+
 function svgShape(key, fill, size) {
   const s = size, f = fill;
   switch(key) {
@@ -1402,6 +1470,104 @@ function makeOddOutQ() {
     choices: d.items.map((e,i)=>({label:e, sub:'', idx:i})),
     correct: d.oddIdx,
     audio: gameLang==='en'?[{text:d.instrEn,lang:'en-US'}]:[{text:d.instrAr,lang:'ar-SA'}],
+  };
+}
+
+function makeTimeQ() {
+  const age = activeProfile.age;
+  let hour, minute;
+  if (age <= 3) {
+    hour = rand(1,12); minute = 0;
+  } else if (age <= 5) {
+    hour = rand(1,12); minute = Math.random()<0.5 ? 0 : 30;
+  } else {
+    hour = rand(1,12); minute = [0,15,30,45][rand(0,3)];
+  }
+  const fmt = (h,m) => `${h}:${String(m).padStart(2,'0')}`;
+  const correct = fmt(hour, minute);
+  const wrongs = [];
+  let tries = 0;
+  while (wrongs.length < 3 && tries++ < 60) {
+    let wh, wm;
+    if (age<=3) { wh=rand(1,12); wm=0; }
+    else if (age<=5) { wh=rand(1,12); wm=Math.random()<0.5?0:30; }
+    else { wh=rand(1,12); wm=[0,15,30,45][rand(0,3)]; }
+    const ws=fmt(wh,wm);
+    if (ws!==correct && !wrongs.includes(ws)) wrongs.push(ws);
+  }
+  const choices = shuffle([correct, ...wrongs]);
+  const instrEn='What time does the clock show?', instrAr='ماذا تُظهر الساعة؟';
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?instrEn:instrAr}</div>
+           <div style="display:flex;justify-content:center;margin:6px 0">${svgClock(hour,minute,120)}</div>`,
+    choices: choices.map(t=>({label:t, sub:''})),
+    correct: choices.indexOf(correct),
+    audio: gameLang==='en'?[{text:instrEn, lang:'en-US'}]:[{text:instrAr, lang:'ar-SA'}],
+  };
+}
+
+function makeSpellingQ() {
+  const maxLvl = activeProfile.age<=3 ? 1 : 2;
+  const pool = shuffle(SPELLING_DATA.filter(s=>s.level<=maxLvl));
+  const item = pool[0];
+  if (gameLang==='en') {
+    const choices = [...item.opts];
+    return {
+      html: `<div class="q-instr">Choose the correct spelling!</div>
+             <div class="q-emoji">${item.emoji}</div>`,
+      choices: choices.map(w=>({label:w, sub:''})),
+      correct: choices.indexOf(item.word),
+      audio: [{text:`Choose the correct spelling for ${item.word}`, lang:'en-US'}],
+    };
+  }
+  const choices = [...item.arOpts];
+  return {
+    html: `<div class="q-instr ar">اختر الهجاء الصحيح!</div>
+           <div class="q-emoji">${item.emoji}</div>`,
+    choices: choices.map(w=>({label:w, sub:'', bigAr:true})),
+    correct: choices.indexOf(item.ar),
+    audio: [{text:'اختر الهجاء الصحيح', lang:'ar-SA'}],
+  };
+}
+
+function makeScrambleQ() {
+  const maxLvl = activeProfile.age<=3 ? 1 : 2;
+  const pool = shuffle(SPELLING_DATA.filter(s=>s.level<=maxLvl));
+  const item = pool[0];
+  if (gameLang==='en') {
+    const scrambled = scrambleWord(item.word);
+    const choices = [...item.opts];
+    return {
+      html: `<div class="q-instr">Unscramble the letters!</div>
+             <div class="q-emoji">${item.emoji}</div>
+             <div class="q-word" style="letter-spacing:5px;color:var(--purple);font-size:2.2rem">${scrambled}</div>`,
+      choices: choices.map(w=>({label:w, sub:''})),
+      correct: choices.indexOf(item.word),
+      audio: [{text:'Unscramble the letters to find the word', lang:'en-US'}],
+    };
+  }
+  // Arabic: just show emoji and ask for correct spelling (scrambling Arabic script is visually confusing)
+  const choices = [...item.arOpts];
+  return {
+    html: `<div class="q-instr ar">أيٌّ هو الهجاء الصحيح؟</div>
+           <div class="q-emoji">${item.emoji}</div>`,
+    choices: choices.map(w=>({label:w, sub:'', bigAr:true})),
+    correct: choices.indexOf(item.ar),
+    audio: [{text:'أيٌّ هو الهجاء الصحيح؟', lang:'ar-SA'}],
+  };
+}
+
+function makeSequenceQ() {
+  const s = SEQUENCE_DATA[rand(0, SEQUENCE_DATA.length-1)];
+  const correct = s.steps[s.firstIdx];
+  const choices = shuffle([...s.steps]);
+  const stepsHtml = choices.map(e=>`<span style="font-size:2.2rem">${e}</span>`).join(' ');
+  return {
+    html: `<div class="q-instr${gameLang==='ar'?' ar':''}">${gameLang==='en'?s.instrEn:s.instrAr}</div>
+           <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:8px 0">${stepsHtml}</div>`,
+    choices: choices.map(e=>({label:e, sub:''})),
+    correct: choices.indexOf(correct),
+    audio: gameLang==='en'?[{text:s.instrEn, lang:'en-US'}]:[{text:s.instrAr, lang:'ar-SA'}],
   };
 }
 
@@ -1575,6 +1741,10 @@ function generateQuestions(subjectId, age) {
       case 'body':      out.push(makeBodyQ());       break;
       case 'missing':   out.push(makeMissingNumQ()); break;
       case 'oddout':    out.push(makeOddOutQ());     break;
+      case 'time':      out.push(makeTimeQ());       break;
+      case 'spelling':  out.push(makeSpellingQ());   break;
+      case 'scramble':  out.push(makeScrambleQ());   break;
+      case 'sequence':  out.push(makeSequenceQ());   break;
     }
   }
   return out;
