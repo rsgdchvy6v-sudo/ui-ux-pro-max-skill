@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const customer = getCustomer(interaction.customerId);
     return {
       interaction,
-      customer: customer ? viewCustomer(customer, actor.user.role, actor.viewAsAgent) : null,
+      customer: customer ? viewCustomer(customer) : null,
     };
   });
   return NextResponse.json({ waiting });

@@ -727,23 +727,3 @@ export function setInteractionStatus(
   });
   return diff;
 }
-
-export function logSecurityView(
-  actorUserId: string,
-  actionType: "VIEW_AS_AGENT_TOGGLED" | "VIEW_FULL_SENSITIVE_DATA",
-  customerId: string | undefined,
-  summary: string
-): AuditLogEntry {
-  const actor = getUser(actorUserId);
-  return addAudit({
-    actorUserId,
-    actorRole: actor?.role ?? "MANAGER",
-    actionType,
-    entityType: "CUSTOMER",
-    entityId: customerId ?? "N/A",
-    customerId,
-    summary,
-    channel: "MANAGER_UI",
-    severity: "SECURITY",
-  });
-}

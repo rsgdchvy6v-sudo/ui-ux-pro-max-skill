@@ -51,23 +51,17 @@ export default function TimelineTabs({ timeline }: { timeline: TimelineEventView
       <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
         {filtered.length === 0 && <p className="text-stone-400 text-sm text-center py-6">No events in this category.</p>}
         {filtered.map((event) => (
-          <div
-            key={event.id}
-            className={`rounded-lg border border-l-4 p-3 text-sm ${
-              event.redacted ? "border-gold-300 border-l-gold-500 bg-gold-50" : "border-stone-200 border-l-brand-400 bg-cream-50"
-            }`}
-          >
+          <div key={event.id} className="rounded-lg border border-l-4 border-stone-200 border-l-brand-400 bg-cream-50 p-3 text-sm">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span>{typeIcon[event.type]}</span>
                 <span className="font-medium text-stone-800">{event.title}</span>
-                {event.redacted && <span className="pill bg-gold-200 text-gold-800">Redacted</span>}
               </div>
               <span className="text-xs font-medium text-gold-700 shrink-0" title={formatDateTime(event.createdAt)}>
                 {timeAgo(event.createdAt)}
               </span>
             </div>
-            <p className={`mt-1 ${event.redacted ? "italic text-gold-700" : "text-stone-600"}`}>{event.details}</p>
+            <p className="mt-1 text-stone-600">{event.details}</p>
             <div className="text-xs text-stone-400 mt-1">Source: {event.source}</div>
           </div>
         ))}

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     .sort((a, b) => new Date(a.appointment?.datetime ?? 0).getTime() - new Date(b.appointment?.datetime ?? 0).getTime())
     .map((interaction) => {
       const customer = getCustomer(interaction.customerId);
-      return { interaction, customer: customer ? viewCustomer(customer, actor.user.role, actor.viewAsAgent) : null };
+      return { interaction, customer: customer ? viewCustomer(customer) : null };
     });
 
   return NextResponse.json({ appointments });

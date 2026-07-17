@@ -22,6 +22,6 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    customers: customers.map((c) => viewCustomer(c, actor.user.role, actor.viewAsAgent)),
+    customers: customers.map((c) => viewCustomer(c)),
   });
 }

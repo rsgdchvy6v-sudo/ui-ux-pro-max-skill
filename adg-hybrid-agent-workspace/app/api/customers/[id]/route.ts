@@ -12,8 +12,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   if (!customer) return notFound("Customer not found.");
 
   return NextResponse.json({
-    customer: viewCustomer(customer, actor.user.role, actor.viewAsAgent),
-    timeline: viewTimeline(listTimelineForCustomer(customer.customerId), actor.user.role, actor.viewAsAgent),
+    customer: viewCustomer(customer),
+    timeline: viewTimeline(listTimelineForCustomer(customer.customerId)),
     coreApplications: getCoreApplicationsByCustomer(customer.customerId),
   });
 }

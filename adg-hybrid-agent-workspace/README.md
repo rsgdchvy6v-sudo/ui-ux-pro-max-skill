@@ -2,8 +2,9 @@
 
 A runnable local demo of a single **Interaction Card** workspace for a hybrid
 (physical + virtual) government/enterprise service desk, with role-based
-login (Agent vs Manager), approval workflows, audit logging, and role-based
-data masking.
+login (Agent vs Manager), approval workflows, and audit logging. All
+customer data (Emirates ID, contact details, full timeline including
+sensitive events) is shown in full to every role — there is no data masking.
 
 Everything runs locally against an in-memory mock backend — there are no
 external calls. All "connectors" (ServiceNow, M365, CRM, Sprinklr, Core
@@ -48,10 +49,11 @@ No passwords — pick a user on the login screen:
 | Sara Al Mazrouei | AG-002 | Agent |
 | Khalifa Aldhaheri | MGR-001 | Manager |
 
-The top-right user menu shows name, role, and presence. Managers get a
-**"View as Agent"** toggle next to the user menu that switches their own view
-to masked/agent-level visibility, for demoing `VisibilityPolicy` without
-logging out.
+Login is a two-step "PIN" flow: pick an agent profile from the dropdown,
+enter the security PIN (a fixed simulation PIN — shown right on the screen),
+then **Authenticate Session**. No real credentials are checked.
+
+The top-right user menu shows name, role, and presence.
 
 ## Where things live
 
@@ -59,8 +61,7 @@ logging out.
 lib/types.ts                 All shared TypeScript data models
 lib/seed.ts                  Seed data (customers, interactions, timeline, core apps, approvals, audit)
 lib/store.ts                 In-memory "database" + all state-mutating business logic + audit logging
-lib/visibilityPolicy.ts       Central VisibilityPolicy: (role, fieldName, value) -> masked/unmasked
-lib/view.ts                  Shapes Customer/TimelineEvent into masked "view" objects for API responses
+lib/view.ts                  Thin pass-through shaping of Customer/TimelineEvent for API responses
 lib/copilotEngine.ts          Local rule-based AI Copilot (summary / eligibility / pending / next steps)
 lib/connectors/*.ts           Mocked ServiceNow / M365 / CRM / Sprinklr / CoreApp / Kiosk / Queue / Approvals / Audit
 app/api/**                    Route handlers — every mutation writes an AuditLogEntry
@@ -69,22 +70,12 @@ components/interaction-card/  Interaction Card UI: header, session controls, tim
 components/manager/           Manager Dashboard tabs
 ```
 
-### Role-based data visibility
+### Data visibility
 
-`lib/visibilityPolicy.ts` exports `applyVisibility(role, fieldName, value)` —
-the single place that decides whether an Emirates ID, UID, email, phone, or
-sensitive timeline detail is shown in full or masked. Every API route that
-returns customer or timeline data routes it through this helper (via
-`lib/view.ts`) before sending it to the browser, so masking is enforced
-server-side, not just hidden in the UI.
-
-- Manager → always full values.
-- Agent → masked Emirates ID/UID/email/phone, and timeline events flagged
-  `sensitivity: "SENSITIVE"` are redacted to a fixed notice.
-- Manager + "View as Agent" toggle → the same masking rules as Agent, so you
-  can demo the masking behavior without switching users. Toggling it (and any
-  explicit "Log Sensitive Data Access" click on the Interaction Card) writes a
-  `SECURITY`-severity audit entry.
+There is no masking: Agents and Managers both see full Emirates ID, UID,
+phone, email, and every timeline event (including ones flagged
+`sensitivity: "SENSITIVE"` in the seed data — that field is retained purely
+as classification metadata, it no longer hides anything).
 
 ### Audit logging
 
@@ -92,10 +83,10 @@ Every mutating action (`lib/store.ts`) writes an `AuditLogEntry` with
 `before`/`after` snapshots where relevant: kiosk check-ins, token
 call/start/complete, interaction status changes, approval requests and
 decisions (plus the resulting Interaction/CoreApplication change), reassigns,
-priority overrides, force-calls, and "view full sensitive data" events. All of
-this is browsable in **Manager Dashboard → Audit Log** with filters (actor,
-date range, action type, entity type, severity) and an expandable
-before/after JSON diff per entry.
+priority overrides, and force-calls. All of this is browsable in
+**Manager Dashboard → Audit Log** with filters (actor, date range, action
+type, entity type, severity) and an expandable before/after JSON diff per
+entry.
 
 ## Seed data snapshot
 
@@ -110,9 +101,10 @@ before/after JSON diff per entry.
   Transfer).
 - 5 approval requests: 3 pending, 1 approved, 1 rejected, covering all 5
   approval types agents can request.
-- 18 pre-seeded audit log entries covering system events, approval decisions,
-  and manager security actions, so the Audit Log filters/diff viewer have
-  something to show immediately on first load.
+- 18 pre-seeded audit log entries covering system events and approval
+  decisions (including two illustrative `SECURITY`-severity entries), so the
+  Audit Log filters/diff viewer have something to show immediately on first
+  load.
 
 ## Demo scripts
 
@@ -190,16 +182,10 @@ before/after JSON diff per entry.
    through the approval workflow that agents use).
 6. **Approvals Inbox** — approve/reject the remaining pending requests with
    notes.
-7. Toggle **View as Agent** (top bar) — customer identifiers on any
-   Interaction Card now show masked, agent-level values; toggling logs a
-   `SECURITY` audit entry. Toggle it back off.
-8. Open an Interaction Card for a customer with sensitive timeline events
-   (e.g. Rashid Al Nuaimi) and click **Log Sensitive Data Access** — this
-   writes another `SECURITY` audit entry.
-9. **Audit Log** — filter by actor, action type, entity type, severity, and
+7. **Audit Log** — filter by actor, action type, entity type, severity, and
    date range; expand **Show before/after diff** on a few entries.
-10. **Reports** — counts by channel (physical/virtual), by type
-    (appointment/walk-in), and by status.
+8. **Reports** — counts by channel (physical/virtual), by type
+   (appointment/walk-in), and by status.
 
 ## Notes on scope
 

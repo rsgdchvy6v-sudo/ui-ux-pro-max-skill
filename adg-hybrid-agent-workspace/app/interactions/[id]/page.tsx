@@ -70,7 +70,7 @@ export default function InteractionCardPage() {
 
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <CustomerHeader bundle={bundle} onChanged={refresh} />
+          <CustomerHeader bundle={bundle} />
           <InteractionHeader bundle={bundle} onChanged={refresh} />
           <SessionControls bundle={bundle} onChanged={refresh} />
           <TimelineTabs timeline={bundle.timeline} />

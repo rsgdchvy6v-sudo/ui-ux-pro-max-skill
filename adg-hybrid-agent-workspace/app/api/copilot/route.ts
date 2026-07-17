@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
   const customer = getCustomer(interaction.customerId);
   if (!customer) return notFound("Customer not found.");
 
-  const customerView = viewCustomer(customer, actor.user.role, actor.viewAsAgent);
-  const timelineViews = viewTimeline(listTimelineForCustomer(customer.customerId), actor.user.role, actor.viewAsAgent);
+  const customerView = viewCustomer(customer);
+  const timelineViews = viewTimeline(listTimelineForCustomer(customer.customerId));
   const coreApp = getCoreApplicationByInteraction(interactionId);
 
   const output = generateCopilotOutput({

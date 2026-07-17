@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       const assignedAgent = interaction.assignedTo ? getUser(interaction.assignedTo) : undefined;
       return {
         interaction,
-        customer: customer ? viewCustomer(customer, actor.user.role, actor.viewAsAgent) : null,
+        customer: customer ? viewCustomer(customer) : null,
         assignedAgentName: assignedAgent?.name ?? null,
       };
     });

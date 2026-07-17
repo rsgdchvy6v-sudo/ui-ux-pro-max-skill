@@ -1,37 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useApi } from "@/hooks/useApi";
-import { useToast } from "@/contexts/ToastContext";
 import { InteractionBundle } from "@/app/interactions/[id]/page";
 
-export default function CustomerHeader({ bundle, onChanged }: { bundle: InteractionBundle; onChanged: () => void }) {
-  const { currentUser, viewAsAgent } = useAuth();
-  const { call } = useApi();
-  const { show } = useToast();
-  const [logged, setLogged] = useState(false);
+export default function CustomerHeader({ bundle }: { bundle: InteractionBundle }) {
   const { customer } = bundle;
-
-  const isRealManager = currentUser?.role === "MANAGER" && !viewAsAgent;
-
-  async function logSensitiveAccess() {
-    try {
-      await call("/api/audit/security-view", {
-        method: "POST",
-        body: JSON.stringify({
-          actionType: "VIEW_FULL_SENSITIVE_DATA",
-          customerId: customer.customerId,
-          summary: `${currentUser?.name} viewed full unmasked identifiers and sensitive timeline details for ${customer.name}.`,
-        }),
-      });
-      setLogged(true);
-      show("Access to full sensitive data logged in the audit trail.", "success");
-      onChanged();
-    } catch (e) {
-      show(e instanceof Error ? e.message : "Failed to log access.", "error");
-    }
-  }
 
   return (
     <div className="card p-4">
@@ -65,19 +37,6 @@ export default function CustomerHeader({ bundle, onChanged }: { bundle: Interact
             </div>
           </div>
         </div>
-
-        {isRealManager && (
-          <button
-            className={`btn-secondary shrink-0 ${logged ? "opacity-60" : ""}`}
-            onClick={logSensitiveAccess}
-            title="Logs a SECURITY-severity audit entry for viewing this customer's unmasked data"
-          >
-            {logged ? "Access logged ✓" : "Log Sensitive Data Access"}
-          </button>
-        )}
-        {customer.masked && (
-          <span className="pill bg-gold-100 text-gold-700 shrink-0">Masked view (Agent)</span>
-        )}
       </div>
     </div>
   );

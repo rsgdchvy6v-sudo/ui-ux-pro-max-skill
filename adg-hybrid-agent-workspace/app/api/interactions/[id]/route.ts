@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const customer = getCustomer(interaction.customerId);
   if (!customer) return notFound("Customer not found.");
 
-  const timeline = viewTimeline(listTimelineForCustomer(customer.customerId), actor.user.role, actor.viewAsAgent);
+  const timeline = viewTimeline(listTimelineForCustomer(customer.customerId));
   const coreApp = getCoreApplicationByInteraction(interaction.interactionId);
   const approvals = listApprovals().filter((a) => a.interactionId === interaction.interactionId);
 
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   return NextResponse.json({
     interaction,
-    customer: viewCustomer(customer, actor.user.role, actor.viewAsAgent),
+    customer: viewCustomer(customer),
     timeline,
     coreApp: coreApp ?? null,
     approvals,

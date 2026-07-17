@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useApi } from "@/hooks/useApi";
-import { useToast } from "@/contexts/ToastContext";
 
 const navItems = [
   { href: "/interactions", label: "Interactions" },
@@ -15,31 +13,12 @@ const navItems = [
 ];
 
 export default function TopBar() {
-  const { currentUser, viewAsAgent, setViewAsAgent, logout } = useAuth();
-  const { call } = useApi();
-  const { show } = useToast();
+  const { currentUser, logout } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (!currentUser) return null;
   const isManager = currentUser.role === "MANAGER";
-
-  async function handleToggleViewAsAgent() {
-    const next = !viewAsAgent;
-    setViewAsAgent(next);
-    try {
-      await call("/api/audit/security-view", {
-        method: "POST",
-        body: JSON.stringify({
-          actionType: "VIEW_AS_AGENT_TOGGLED",
-          summary: `Khalifa Aldhaheri ${next ? "enabled" : "disabled"} 'View as Agent' impersonation mode.`,
-        }),
-      });
-    } catch {
-      // best-effort logging; UI state already switched
-    }
-    show(next ? "Viewing as Agent — sensitive fields are now masked." : "Full Manager view restored.", "info");
-  }
 
   return (
     <header className="bg-brand-700 sticky top-0 z-40 shadow-sm">
@@ -76,18 +55,6 @@ export default function TopBar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {isManager && (
-            <label className="flex items-center gap-2 text-xs font-medium text-brand-50 bg-brand-800 rounded-full px-3 py-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={viewAsAgent}
-                onChange={handleToggleViewAsAgent}
-                className="accent-gold-400"
-              />
-              View as Agent
-            </label>
-          )}
-
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -101,7 +68,6 @@ export default function TopBar() {
               <div className="absolute right-0 mt-1 w-56 card p-2 text-sm text-stone-700">
                 <div className="px-2 py-1.5 text-stone-500">
                   {currentUser.userId} · {currentUser.presence}
-                  {viewAsAgent && <div className="text-gold-600 font-medium mt-0.5">Impersonating: Agent view</div>}
                 </div>
                 <button
                   onClick={() => {

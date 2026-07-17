@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function useApi() {
-  const { currentUser, viewAsAgent } = useAuth();
+  const { currentUser } = useAuth();
 
   const call = useCallback(
     async (path: string, options: RequestInit = {}) => {
@@ -13,7 +13,6 @@ export function useApi() {
         ...((options.headers as Record<string, string>) ?? {}),
       };
       if (currentUser) headers["x-user-id"] = currentUser.userId;
-      headers["x-view-as-agent"] = String(viewAsAgent);
 
       const res = await fetch(path, { ...options, headers });
       const data = await res.json().catch(() => ({}));
@@ -22,8 +21,8 @@ export function useApi() {
       }
       return data;
     },
-    [currentUser, viewAsAgent]
+    [currentUser]
   );
 
-  return { call, currentUser, viewAsAgent };
+  return { call, currentUser };
 }

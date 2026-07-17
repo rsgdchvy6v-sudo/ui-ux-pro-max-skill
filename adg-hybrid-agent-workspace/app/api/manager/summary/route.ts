@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     .filter((i) => ["ARRIVED", "CALLED", "IN_SERVICE"].includes(i.status))
     .map((interaction) => {
       const customer = getCustomer(interaction.customerId);
-      return { interaction, customer: customer ? viewCustomer(customer, actor.user.role, actor.viewAsAgent) : null };
+      return { interaction, customer: customer ? viewCustomer(customer) : null };
     });
 
   const statusCounts: Record<string, number> = {};

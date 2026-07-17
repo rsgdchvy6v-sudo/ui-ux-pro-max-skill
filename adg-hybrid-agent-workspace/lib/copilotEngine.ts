@@ -1,6 +1,4 @@
-// Local, rule-based "AI Copilot" — no external calls. Consumes already-masked
-// views (CustomerView / TimelineEventView) so it can never leak identifiers or
-// sensitive details that VisibilityPolicy has redacted for the current viewer.
+// Local, rule-based "AI Copilot" — no external calls.
 import { CoreApplication, Interaction } from "./types";
 import { CustomerView, TimelineEventView } from "./view";
 
@@ -32,11 +30,6 @@ export function generateCopilotOutput(params: {
     summary.push(
       `${complaintEvents.length} prior complaint(s) on file${resolved.length ? `, ${resolved.length} resolved` : ""}.`
     );
-  }
-
-  const sensitiveCount = recentEvents.filter((e) => e.redacted).length;
-  if (sensitiveCount > 0) {
-    summary.push(`${sensitiveCount} sensitive timeline event(s) are redacted for your role — ask a manager for full details if needed.`);
   }
 
   if (coreApp) {
