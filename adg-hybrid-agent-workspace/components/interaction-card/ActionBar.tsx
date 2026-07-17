@@ -4,6 +4,7 @@ import { useState } from "react";
 import { InteractionBundle } from "@/app/interactions/[id]/page";
 import { useApi } from "@/hooks/useApi";
 import { useToast } from "@/contexts/ToastContext";
+import Drawer from "@/components/Drawer";
 
 type ModalKey = "update" | "requestDocs" | "upload" | "followup" | "notify" | "close" | null;
 
@@ -14,7 +15,7 @@ export default function ActionBar({ bundle, onChanged }: { bundle: InteractionBu
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-30">
         <div className="max-w-[1600px] mx-auto px-4 py-2.5 flex flex-wrap gap-2 justify-center">
           <button className="btn-secondary" onClick={() => setModal("update")} disabled={!coreApp}>
             Update Application
@@ -44,17 +45,6 @@ export default function ActionBar({ bundle, onChanged }: { bundle: InteractionBu
       {modal === "notify" && <SendNotificationModal bundle={bundle} onClose={() => setModal(null)} onChanged={onChanged} />}
       {modal === "close" && <CloseInteractionModal bundle={bundle} onClose={() => setModal(null)} onChanged={onChanged} />}
     </>
-  );
-}
-
-function ModalShell({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-        <h4 className="font-semibold text-slate-900 mb-3">{title}</h4>
-        {children}
-      </div>
-    </div>
   );
 }
 
@@ -106,10 +96,10 @@ function UpdateApplicationModal({
   }
 
   return (
-    <ModalShell title="Update Application" onClose={onClose}>
-      <div className="text-sm space-y-3">
+    <Drawer title="Update Application" onClose={onClose} footer={<button className="btn-ghost" onClick={onClose}>Close</button>}>
+      <div className="text-sm space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Case status</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Case status</label>
           <div className="flex gap-2">
             <input value={status} onChange={(e) => setStatus(e.target.value)} className="input" />
             <button className="btn-primary shrink-0" disabled={busy} onClick={saveStatus}>
@@ -118,12 +108,12 @@ function UpdateApplicationModal({
           </div>
         </div>
         <div>
-          <div className="font-medium text-slate-800 mb-1">Pending steps</div>
+          <span className="section-label">Pending steps</span>
           {bundle.coreApp?.pendingSteps.length ? (
             <ul className="space-y-1.5">
               {bundle.coreApp.pendingSteps.map((s) => (
-                <li key={s} className="flex items-center justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5">
-                  <span className="text-slate-700">{s}</span>
+                <li key={s} className="flex items-center justify-between gap-2 rounded-md bg-cream-100 px-2 py-1.5">
+                  <span className="text-stone-700">{s}</span>
                   <button className="btn-ghost text-xs" disabled={busy} onClick={() => completeStep(s)}>
                     Mark complete
                   </button>
@@ -131,16 +121,11 @@ function UpdateApplicationModal({
               ))}
             </ul>
           ) : (
-            <p className="text-slate-400">No pending steps.</p>
+            <p className="text-stone-400">No pending steps.</p>
           )}
         </div>
       </div>
-      <div className="flex justify-end mt-4">
-        <button className="btn-ghost" onClick={onClose}>
-          Close
-        </button>
-      </div>
-    </ModalShell>
+    </Drawer>
   );
 }
 
@@ -169,18 +154,23 @@ function RequestDocsModal({ bundle, onClose, onChanged }: { bundle: InteractionB
   }
 
   return (
-    <ModalShell title="Request Documents" onClose={onClose}>
-      <label className="block text-xs font-medium text-slate-600 mb-1">Document name</label>
-      <input value={docName} onChange={(e) => setDocName(e.target.value)} className="input mb-4" placeholder="e.g. Salary Certificate" />
-      <div className="flex justify-end gap-2">
-        <button className="btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn-primary" disabled={busy} onClick={submit}>
-          Send Request
-        </button>
-      </div>
-    </ModalShell>
+    <Drawer
+      title="Request Documents"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-primary" disabled={busy} onClick={submit}>
+            Send Request
+          </button>
+        </>
+      }
+    >
+      <label className="block text-xs font-medium text-stone-600 mb-1">Document name</label>
+      <input value={docName} onChange={(e) => setDocName(e.target.value)} className="input" placeholder="e.g. Salary Certificate" />
+    </Drawer>
   );
 }
 
@@ -210,11 +200,24 @@ function UploadDocumentModal({ bundle, onClose, onChanged }: { bundle: Interacti
   }
 
   return (
-    <ModalShell title="Upload Document" onClose={onClose}>
+    <Drawer
+      title="Upload Document"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-primary" disabled={busy || !docName} onClick={submit}>
+            Upload
+          </button>
+        </>
+      }
+    >
       {outstanding.length ? (
         <>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Which document (simulated upload)?</label>
-          <select value={docName} onChange={(e) => setDocName(e.target.value)} className="input mb-4">
+          <label className="block text-xs font-medium text-stone-600 mb-1">Which document (simulated upload)?</label>
+          <select value={docName} onChange={(e) => setDocName(e.target.value)} className="input">
             {outstanding.map((d) => (
               <option key={d.name} value={d.name}>
                 {d.name} ({d.status})
@@ -223,17 +226,9 @@ function UploadDocumentModal({ bundle, onClose, onChanged }: { bundle: Interacti
           </select>
         </>
       ) : (
-        <p className="text-sm text-slate-400 mb-4">All required documents are already on file.</p>
+        <p className="text-sm text-stone-400">All required documents are already on file.</p>
       )}
-      <div className="flex justify-end gap-2">
-        <button className="btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn-primary" disabled={busy || !docName} onClick={submit}>
-          Upload
-        </button>
-      </div>
-    </ModalShell>
+    </Drawer>
   );
 }
 
@@ -271,33 +266,38 @@ function ScheduleFollowupModal({ bundle, onClose, onChanged }: { bundle: Interac
   }
 
   return (
-    <ModalShell title="Schedule Follow-up" onClose={onClose}>
+    <Drawer
+      title="Schedule Follow-up"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-primary" disabled={busy} onClick={submit}>
+            Schedule
+          </button>
+        </>
+      }
+    >
       <div className="space-y-3 text-sm">
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Mode</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Mode</label>
           <select value={mode} onChange={(e) => setMode(e.target.value as "PHYSICAL" | "VIRTUAL")} className="input">
             <option value="PHYSICAL">Physical</option>
             <option value="VIRTUAL">Virtual</option>
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Service</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Service</label>
           <input value={serviceName} onChange={(e) => setServiceName(e.target.value)} className="input" />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Date &amp; time</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Date &amp; time</label>
           <input type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} className="input" />
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
-        <button className="btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn-primary" disabled={busy} onClick={submit}>
-          Schedule
-        </button>
-      </div>
-    </ModalShell>
+    </Drawer>
   );
 }
 
@@ -327,23 +327,34 @@ function SendNotificationModal({ bundle, onClose, onChanged }: { bundle: Interac
   }
 
   return (
-    <ModalShell title="Send Notification" onClose={onClose}>
-      <label className="block text-xs font-medium text-slate-600 mb-1">Channel</label>
-      <select value={channel} onChange={(e) => setChannel(e.target.value as "EMAIL" | "CHAT")} className="input mb-3">
-        <option value="EMAIL">Email</option>
-        <option value="CHAT">SMS / Chat</option>
-      </select>
-      <label className="block text-xs font-medium text-slate-600 mb-1">Message</label>
-      <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className="input mb-4" />
-      <div className="flex justify-end gap-2">
-        <button className="btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn-primary" disabled={busy} onClick={submit}>
-          Send
-        </button>
+    <Drawer
+      title="Send Notification"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-primary" disabled={busy} onClick={submit}>
+            Send
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Channel</label>
+          <select value={channel} onChange={(e) => setChannel(e.target.value as "EMAIL" | "CHAT")} className="input">
+            <option value="EMAIL">Email</option>
+            <option value="CHAT">SMS / Chat</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Message</label>
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className="input" />
+        </div>
       </div>
-    </ModalShell>
+    </Drawer>
   );
 }
 
@@ -370,18 +381,23 @@ function CloseInteractionModal({ bundle, onClose, onChanged }: { bundle: Interac
   }
 
   return (
-    <ModalShell title="Close Interaction" onClose={onClose}>
-      <p className="text-sm text-slate-600 mb-4">
+    <Drawer
+      title="Close Interaction"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-danger" disabled={busy} onClick={submit}>
+            Confirm Close
+          </button>
+        </>
+      }
+    >
+      <p className="text-sm text-stone-600">
         This will mark interaction <span className="font-mono">{bundle.interaction.interactionId}</span> as COMPLETED.
       </p>
-      <div className="flex justify-end gap-2">
-        <button className="btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn-danger" disabled={busy} onClick={submit}>
-          Confirm Close
-        </button>
-      </div>
-    </ModalShell>
+    </Drawer>
   );
 }

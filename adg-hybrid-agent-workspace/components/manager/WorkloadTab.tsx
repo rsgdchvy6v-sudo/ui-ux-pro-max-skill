@@ -12,7 +12,7 @@ export default function WorkloadTab() {
     call("/api/manager/summary").then(setSummary);
   }, [call]);
 
-  if (!summary) return <p className="text-slate-400 p-4">Loading…</p>;
+  if (!summary) return <p className="text-stone-400 p-4">Loading…</p>;
 
   return (
     <div className="grid sm:grid-cols-2 gap-4">
@@ -20,8 +20,8 @@ export default function WorkloadTab() {
         <div key={w.agent.userId} className="card p-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="font-semibold text-slate-900">{w.agent.name}</div>
-              <div className="text-xs text-slate-500">{w.agent.userId}</div>
+              <div className="font-semibold text-stone-900">{w.agent.name}</div>
+              <div className="text-xs text-stone-500">{w.agent.userId}</div>
             </div>
             <span className="pill bg-emerald-100 text-emerald-700">{w.agent.presence}</span>
           </div>
@@ -39,9 +39,9 @@ export default function WorkloadTab() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-2">
-      <div className="text-lg font-bold text-slate-900">{value}</div>
-      <div className="text-[11px] text-slate-500">{label}</div>
+    <div className="stat-tile !p-2">
+      <div className="stat-value !text-lg">{value}</div>
+      <div className="stat-label !text-[11px] !mt-0.5">{label}</div>
     </div>
   );
 }

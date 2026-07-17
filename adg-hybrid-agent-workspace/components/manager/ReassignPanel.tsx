@@ -58,23 +58,23 @@ export default function ReassignPanel() {
     }
   }
 
-  if (loading) return <p className="text-slate-400 p-4">Loading…</p>;
+  if (loading) return <p className="text-stone-400 p-4">Loading…</p>;
 
   return (
-    <div className="card divide-y divide-slate-100">
-      {items.length === 0 && <p className="p-4 text-slate-400 text-sm">No open interactions.</p>}
+    <div className="card divide-y divide-stone-100">
+      {items.length === 0 && <p className="p-4 text-stone-400 text-sm">No open interactions.</p>}
       {items.map(({ interaction, customer, assignedAgentName }) => (
         <div key={interaction.interactionId} className="p-3 flex items-center justify-between gap-3 flex-wrap text-sm">
           <div className="min-w-[180px]">
             <Link href={`/interactions/${interaction.interactionId}`} className="font-medium text-brand-700 hover:underline">
               {customer?.name}
             </Link>
-            <div className="text-xs text-slate-500 mt-0.5">
+            <div className="text-xs text-stone-500 mt-0.5">
               {interaction.serviceName} · <StatusPill status={interaction.status} />
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-500">Assigned: {assignedAgentName ?? "Unassigned"}</span>
+            <span className="text-xs text-stone-500">Assigned: {assignedAgentName ?? "Unassigned"}</span>
             <select
               className="input w-auto"
               value={interaction.assignedTo ?? ""}

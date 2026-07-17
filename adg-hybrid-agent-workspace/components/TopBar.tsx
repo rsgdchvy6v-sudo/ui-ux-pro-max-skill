@@ -42,10 +42,10 @@ export default function TopBar() {
   }
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <header className="bg-brand-700 sticky top-0 z-40 shadow-sm">
       <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6">
-          <span className="font-bold text-brand-700 text-sm tracking-tight whitespace-nowrap">
+          <span className="font-bold text-gold-300 text-sm tracking-tight whitespace-nowrap">
             ADG Hybrid Workspace
           </span>
           <nav className="flex items-center gap-1">
@@ -55,8 +55,8 @@ export default function TopBar() {
                 href={item.href}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
                   pathname.startsWith(item.href)
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "bg-brand-800 text-white"
+                    : "text-brand-100 hover:bg-brand-600"
                 }`}
               >
                 {item.label}
@@ -66,7 +66,7 @@ export default function TopBar() {
               <Link
                 href="/manager"
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  pathname.startsWith("/manager") ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-100"
+                  pathname.startsWith("/manager") ? "bg-brand-800 text-white" : "text-brand-100 hover:bg-brand-600"
                 }`}
               >
                 Manager Dashboard
@@ -77,12 +77,12 @@ export default function TopBar() {
 
         <div className="flex items-center gap-3">
           {isManager && (
-            <label className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-100 rounded-full px-3 py-1.5 cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs font-medium text-brand-50 bg-brand-800 rounded-full px-3 py-1.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={viewAsAgent}
                 onChange={handleToggleViewAsAgent}
-                className="accent-brand-600"
+                className="accent-gold-400"
               />
               View as Agent
             </label>
@@ -91,24 +91,24 @@ export default function TopBar() {
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-100"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-brand-600"
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-sm font-medium">{currentUser.name}</span>
-              <span className="pill bg-slate-200 text-slate-700">{currentUser.role}</span>
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-sm font-medium text-white">{currentUser.name}</span>
+              <span className="pill bg-brand-800 text-gold-200">{currentUser.role}</span>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-1 w-56 card p-2 text-sm">
-                <div className="px-2 py-1.5 text-slate-500">
+              <div className="absolute right-0 mt-1 w-56 card p-2 text-sm text-stone-700">
+                <div className="px-2 py-1.5 text-stone-500">
                   {currentUser.userId} · {currentUser.presence}
-                  {viewAsAgent && <div className="text-amber-600 font-medium mt-0.5">Impersonating: Agent view</div>}
+                  {viewAsAgent && <div className="text-gold-600 font-medium mt-0.5">Impersonating: Agent view</div>}
                 </div>
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     logout();
                   }}
-                  className="w-full text-left px-2 py-1.5 rounded-md hover:bg-slate-100 text-rose-600"
+                  className="w-full text-left px-2 py-1.5 rounded-md hover:bg-stone-100 text-rose-600"
                 >
                   Log out
                 </button>

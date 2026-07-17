@@ -36,28 +36,28 @@ export default function CopilotPanel({ bundle, onChanged }: { bundle: Interactio
     <div className="space-y-4">
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-slate-900">AI Copilot</h3>
+          <span className="section-label !mb-0 !border-b-0 !pb-0">AI Copilot</span>
           <button className="btn-primary" onClick={generate} disabled={loading}>
             {loading ? "Generating…" : output ? "Regenerate" : "Generate Summary"}
           </button>
         </div>
 
-        <div className="flex gap-1 mb-3 border-b border-slate-200 pb-2">
+        <div className="flex gap-1 mb-3 border-b border-stone-200 pb-2">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`pill ${tab === t ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+              className={`pill ${tab === t ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}
             >
               {t}
             </button>
           ))}
         </div>
 
-        {!output && <p className="text-sm text-slate-400 py-6 text-center">Click "Generate Summary" to run the local AI Copilot.</p>}
+        {!output && <p className="text-sm text-stone-400 py-6 text-center">Click "Generate Summary" to run the local AI Copilot.</p>}
 
         {output && tab === "Summary" && (
-          <ul className="text-sm text-slate-700 space-y-1.5 list-disc list-inside">
+          <ul className="text-sm text-stone-700 space-y-1.5 list-disc list-inside">
             {output.summary.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
@@ -70,19 +70,19 @@ export default function CopilotPanel({ bundle, onChanged }: { bundle: Interactio
               {output.eligibility.isEligible ? "Eligible" : "Not eligible"}
             </p>
             {output.eligibility.reasons.length > 0 ? (
-              <ul className="list-disc list-inside text-slate-600 space-y-1">
+              <ul className="list-disc list-inside text-stone-600 space-y-1">
                 {output.eligibility.reasons.map((r, i) => (
                   <li key={i}>{r}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-slate-400">No blocking reasons on file.</p>
+              <p className="text-stone-400">No blocking reasons on file.</p>
             )}
           </div>
         )}
 
         {output && tab === "Next Steps" && (
-          <ol className="text-sm text-slate-700 space-y-1.5 list-decimal list-inside">
+          <ol className="text-sm text-stone-700 space-y-1.5 list-decimal list-inside">
             {output.nextSteps.map((s, i) => (
               <li key={i}>{s}</li>
             ))}
@@ -92,33 +92,33 @@ export default function CopilotPanel({ bundle, onChanged }: { bundle: Interactio
         {output && tab === "Pending" && (
           <div className="text-sm space-y-3">
             <div>
-              <div className="font-medium text-slate-800">Missing documents</div>
+              <div className="font-medium text-stone-800">Missing documents</div>
               {output.pending.missingDocs.length ? (
-                <ul className="list-disc list-inside text-slate-600">
+                <ul className="list-disc list-inside text-stone-600">
                   {output.pending.missingDocs.map((d) => (
                     <li key={d}>{d}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-slate-400">None</p>
+                <p className="text-stone-400">None</p>
               )}
             </div>
             <div>
-              <div className="font-medium text-slate-800">Invalid documents</div>
+              <div className="font-medium text-stone-800">Invalid documents</div>
               {output.pending.invalidDocs.length ? (
-                <ul className="list-disc list-inside text-slate-600">
+                <ul className="list-disc list-inside text-stone-600">
                   {output.pending.invalidDocs.map((d) => (
                     <li key={d}>{d}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-slate-400">None</p>
+                <p className="text-stone-400">None</p>
               )}
             </div>
             {output.pending.waivedDocs.length > 0 && (
               <div>
-                <div className="font-medium text-slate-800">Waived documents</div>
-                <ul className="list-disc list-inside text-slate-600">
+                <div className="font-medium text-stone-800">Waived documents</div>
+                <ul className="list-disc list-inside text-stone-600">
                   {output.pending.waivedDocs.map((d) => (
                     <li key={d}>{d}</li>
                   ))}
@@ -126,15 +126,15 @@ export default function CopilotPanel({ bundle, onChanged }: { bundle: Interactio
               </div>
             )}
             <div>
-              <div className="font-medium text-slate-800">Pending steps</div>
+              <div className="font-medium text-stone-800">Pending steps</div>
               {output.pending.pendingSteps.length ? (
-                <ul className="list-disc list-inside text-slate-600">
+                <ul className="list-disc list-inside text-stone-600">
                   {output.pending.pendingSteps.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-slate-400">None</p>
+                <p className="text-stone-400">None</p>
               )}
             </div>
           </div>

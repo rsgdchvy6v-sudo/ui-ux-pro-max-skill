@@ -50,7 +50,7 @@ export default function InteractionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">{title}</h1>
+        <h1 className="text-xl font-bold text-stone-900">{title}</h1>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -61,14 +61,14 @@ export default function InteractionsPage() {
             className={`pill border ${
               statusFilter.includes(s)
                 ? "bg-brand-600 text-white border-brand-600"
-                : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
+                : "bg-white text-stone-600 border-stone-300 hover:bg-stone-50"
             }`}
           >
             {s.replace("_", " ")}
           </button>
         ))}
         {statusFilter.length > 0 && (
-          <button onClick={() => setStatusFilter([])} className="text-xs text-slate-500 underline ml-1">
+          <button onClick={() => setStatusFilter([])} className="text-xs text-stone-500 underline ml-1">
             Clear filters
           </button>
         )}
@@ -77,7 +77,7 @@ export default function InteractionsPage() {
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-slate-500 border-b border-slate-200">
+            <tr className="text-left text-stone-500 border-b border-stone-200">
               <th className="px-4 py-3 font-medium">Customer</th>
               <th className="px-4 py-3 font-medium">Service</th>
               <th className="px-4 py-3 font-medium">Mode</th>
@@ -91,30 +91,30 @@ export default function InteractionsPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-stone-400">
                   Loading…
                 </td>
               </tr>
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-stone-400">
                   No interactions match the current filters.
                 </td>
               </tr>
             )}
             {!loading &&
               items.map(({ interaction, customer, assignedAgentName }) => (
-                <tr key={interaction.interactionId} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr key={interaction.interactionId} className="border-b border-stone-100 hover:bg-stone-50">
                   <td className="px-4 py-3">
                     <Link href={`/interactions/${interaction.interactionId}`} className="font-medium text-brand-700 hover:underline">
                       {customer?.name ?? "Unknown"}
                     </Link>
-                    <div className="text-xs text-slate-400">{customer?.emiratesId}</div>
+                    <div className="text-xs text-stone-400">{customer?.emiratesId}</div>
                   </td>
                   <td className="px-4 py-3">
                     {interaction.serviceName}
-                    <div className="text-xs text-slate-400">{interaction.interactionId} · {interaction.type}</div>
+                    <div className="text-xs text-stone-400">{interaction.interactionId} · {interaction.type}</div>
                   </td>
                   <td className="px-4 py-3">
                     <ModePill mode={interaction.mode} />
@@ -128,8 +128,8 @@ export default function InteractionsPage() {
                   <td className="px-4 py-3">
                     <SlaTimer seconds={interaction.slaSecondsRemaining} status={interaction.status} />
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{assignedAgentName ?? "Unassigned"}</td>
-                  <td className="px-4 py-3 text-slate-400 text-xs">{formatDateTime(interaction.updatedAt)}</td>
+                  <td className="px-4 py-3 text-stone-600">{assignedAgentName ?? "Unassigned"}</td>
+                  <td className="px-4 py-3 text-stone-400 text-xs">{formatDateTime(interaction.updatedAt)}</td>
                 </tr>
               ))}
           </tbody>

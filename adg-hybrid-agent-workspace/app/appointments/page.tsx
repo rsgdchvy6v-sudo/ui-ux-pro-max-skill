@@ -67,13 +67,13 @@ export default function AppointmentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Appointment Simulator</h1>
-        <p className="text-sm text-slate-500">Simulates a customer booking a physical or virtual appointment via the mobile app.</p>
+        <h1 className="text-xl font-bold text-stone-900">Appointment Simulator</h1>
+        <p className="text-sm text-stone-500">Simulates a customer booking a physical or virtual appointment via the mobile app.</p>
       </div>
 
       <div className="card p-5 grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Customer</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Customer</label>
           <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="input">
             {customers.map((c) => (
               <option key={c.customerId} value={c.customerId}>
@@ -83,18 +83,18 @@ export default function AppointmentsPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Mode</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Mode</label>
           <select value={mode} onChange={(e) => setMode(e.target.value as "PHYSICAL" | "VIRTUAL")} className="input">
             <option value="PHYSICAL">Physical</option>
             <option value="VIRTUAL">Virtual</option>
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Service</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Service</label>
           <input value={serviceName} onChange={(e) => setServiceName(e.target.value)} className="input" />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Date &amp; time</label>
+          <label className="block text-xs font-medium text-stone-600 mb-1">Date &amp; time</label>
           <input type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} className="input" />
         </div>
         <div className="sm:col-span-2">
@@ -105,17 +105,17 @@ export default function AppointmentsPage() {
       </div>
 
       <div>
-        <h2 className="font-semibold text-slate-800 mb-2">All Appointments</h2>
-        <div className="card divide-y divide-slate-100">
-          {loading && <p className="p-4 text-slate-400 text-sm">Loading…</p>}
-          {!loading && appointments.length === 0 && <p className="p-4 text-slate-400 text-sm">No appointments yet.</p>}
+        <h2 className="font-semibold text-stone-800 mb-2">All Appointments</h2>
+        <div className="card divide-y divide-stone-100">
+          {loading && <p className="p-4 text-stone-400 text-sm">Loading…</p>}
+          {!loading && appointments.length === 0 && <p className="p-4 text-stone-400 text-sm">No appointments yet.</p>}
           {appointments.map(({ interaction, customer }) => (
             <div key={interaction.interactionId} className="p-3 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <Link href={`/interactions/${interaction.interactionId}`} className="font-medium text-brand-700 hover:underline">
                   {customer?.name}
                 </Link>
-                <div className="text-xs text-slate-500 mt-0.5">
+                <div className="text-xs text-stone-500 mt-0.5">
                   {interaction.serviceName} · {interaction.appointment && formatDateTime(interaction.appointment.datetime)}
                 </div>
               </div>

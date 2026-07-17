@@ -64,14 +64,14 @@ export default function SessionControls({ bundle, onChanged }: { bundle: Interac
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-slate-900">Session Controls</h3>
-        <span className="pill bg-slate-100 text-slate-600">{interaction.mode === "PHYSICAL" ? "Physical visit" : "Virtual session"}</span>
+        <span className="section-label !mb-0 !border-b-0 !pb-0">Session Controls</span>
+        <span className="pill bg-stone-100 text-stone-600">{interaction.mode === "PHYSICAL" ? "Physical visit" : "Virtual session"}</span>
       </div>
 
       {interaction.appointment && (
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 mb-3 text-sm">
-          <div className="font-medium text-slate-800 mb-1">Appointment</div>
-          <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 text-slate-600">
+        <div className="rounded-lg bg-stone-50 border border-stone-200 p-3 mb-3 text-sm">
+          <div className="font-medium text-stone-800 mb-1">Appointment</div>
+          <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 text-stone-600">
             <span>Reference: <span className="font-mono">{interaction.appointment.referenceNo}</span></span>
             <span>When: {formatDateTime(interaction.appointment.datetime)}</span>
             <span>Booked via: {interaction.appointment.bookedVia}</span>
@@ -90,11 +90,11 @@ export default function SessionControls({ bundle, onChanged }: { bundle: Interac
       )}
 
       {interaction.mode === "PHYSICAL" ? (
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm space-y-2">
-          <div className="font-medium text-slate-800">Queue Token</div>
+        <div className="rounded-lg bg-stone-50 border border-stone-200 p-3 text-sm space-y-2">
+          <div className="font-medium text-stone-800">Queue Token</div>
           {interaction.queue ? (
-            <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 text-slate-600">
-              <span>Token: <span className="font-mono font-semibold text-slate-900">{interaction.queue.token}</span></span>
+            <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 text-stone-600">
+              <span>Token: <span className="font-mono font-semibold text-stone-900">{interaction.queue.token}</span></span>
               <span>Counter: {interaction.queue.counter ?? "—"}</span>
               <span>Checked in: {interaction.queue.checkedInAt ? formatDateTime(interaction.queue.checkedInAt) : "—"}</span>
               <span>Called: {interaction.queue.calledAt ? formatDateTime(interaction.queue.calledAt) : "—"}</span>
@@ -105,11 +105,11 @@ export default function SessionControls({ bundle, onChanged }: { bundle: Interac
               )}
             </div>
           ) : (
-            <p className="text-slate-400">No queue token yet — check in via Kiosk.</p>
+            <p className="text-stone-400">No queue token yet — check in via Kiosk.</p>
           )}
         </div>
       ) : (
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm text-slate-600">
+        <div className="rounded-lg bg-stone-50 border border-stone-200 p-3 text-sm text-stone-600">
           Virtual session — use Join/Start/Complete controls below. No physical counter required.
         </div>
       )}

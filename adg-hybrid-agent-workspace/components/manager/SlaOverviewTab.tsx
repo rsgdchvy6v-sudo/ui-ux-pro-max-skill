@@ -14,15 +14,15 @@ export default function SlaOverviewTab() {
     call("/api/manager/summary").then(setSummary);
   }, [call]);
 
-  if (!summary) return <p className="text-slate-400 p-4">Loading…</p>;
+  if (!summary) return <p className="text-stone-400 p-4">Loading…</p>;
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
       <div className="card p-4">
-        <h3 className="font-semibold text-slate-900 mb-3">SLA by Status</h3>
+        <h3 className="font-semibold text-stone-900 mb-3">SLA by Status</h3>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-slate-500 border-b border-slate-200">
+            <tr className="text-left text-stone-500 border-b border-stone-200">
               <th className="py-2">Status</th>
               <th className="py-2">Count</th>
               <th className="py-2">Avg SLA</th>
@@ -31,7 +31,7 @@ export default function SlaOverviewTab() {
           </thead>
           <tbody>
             {summary.slaByStatus.map((row) => (
-              <tr key={row.status} className="border-b border-slate-100">
+              <tr key={row.status} className="border-b border-stone-100">
                 <td className="py-2">
                   <StatusPill status={row.status} />
                 </td>
@@ -47,10 +47,10 @@ export default function SlaOverviewTab() {
       </div>
 
       <div className="card p-4">
-        <h3 className="font-semibold text-slate-900 mb-3">SLA by Agent</h3>
+        <h3 className="font-semibold text-stone-900 mb-3">SLA by Agent</h3>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-slate-500 border-b border-slate-200">
+            <tr className="text-left text-stone-500 border-b border-stone-200">
               <th className="py-2">Agent</th>
               <th className="py-2">Avg SLA</th>
               <th className="py-2">Breached</th>
@@ -58,7 +58,7 @@ export default function SlaOverviewTab() {
           </thead>
           <tbody>
             {summary.slaByAgent.map((row) => (
-              <tr key={row.agent.userId} className="border-b border-slate-100">
+              <tr key={row.agent.userId} className="border-b border-stone-100">
                 <td className="py-2">{row.agent.name}</td>
                 <td className="py-2 font-mono">{secondsToClock(row.avgSlaSeconds)}</td>
                 <td className="py-2">

@@ -51,7 +51,7 @@ export default function InteractionCardPage() {
     refresh();
   }, [refresh]);
 
-  if (loading) return <div className="text-center text-slate-400 py-16">Loading interaction…</div>;
+  if (loading) return <div className="text-center text-stone-400 py-16">Loading interaction…</div>;
   if (error || !bundle)
     return (
       <div className="card p-8 text-center">
@@ -64,7 +64,7 @@ export default function InteractionCardPage() {
 
   return (
     <div className="space-y-4 pb-24">
-      <button onClick={() => router.push("/interactions")} className="text-sm text-slate-500 hover:underline">
+      <button onClick={() => router.push("/interactions")} className="text-sm text-stone-500 hover:underline">
         ← Back to Interactions
       </button>
 

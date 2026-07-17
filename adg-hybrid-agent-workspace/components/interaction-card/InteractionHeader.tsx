@@ -22,10 +22,10 @@ export default function InteractionHeader({ bundle }: { bundle: InteractionBundl
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-bold text-slate-900">{interaction.serviceName}</h3>
-            <span className="text-xs text-slate-400 font-mono">{interaction.interactionId}</span>
+            <h3 className="font-bold text-stone-900">{interaction.serviceName}</h3>
+            <span className="text-xs text-stone-400 font-mono">{interaction.interactionId}</span>
           </div>
-          <div className="text-xs text-slate-500 mt-1">
+          <div className="text-xs text-stone-500 mt-1">
             {interaction.type === "APPOINTMENT" ? "Appointment" : "Walk-in"} · Created {formatDateTime(interaction.createdAt)}
           </div>
         </div>

@@ -8,15 +8,15 @@ function BarList({ title, data, total }: { title: string; data: Record<string, n
   const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
   return (
     <div className="card p-4">
-      <h3 className="font-semibold text-slate-900 mb-3">{title}</h3>
+      <h3 className="font-semibold text-stone-900 mb-3">{title}</h3>
       <div className="space-y-2">
         {entries.map(([key, count]) => (
           <div key={key}>
-            <div className="flex justify-between text-xs text-slate-500 mb-0.5">
+            <div className="flex justify-between text-xs text-stone-500 mb-0.5">
               <span>{key.replace(/_/g, " ")}</span>
               <span>{count}</span>
             </div>
-            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-2 rounded-full bg-stone-100 overflow-hidden">
               <div className="h-full bg-brand-500 rounded-full" style={{ width: `${total ? (count / total) * 100 : 0}%` }} />
             </div>
           </div>
@@ -34,7 +34,7 @@ export default function ReportsTab() {
     call("/api/manager/summary").then(setSummary);
   }, [call]);
 
-  if (!summary) return <p className="text-slate-400 p-4">Loading…</p>;
+  if (!summary) return <p className="text-stone-400 p-4">Loading…</p>;
 
   return (
     <div className="grid md:grid-cols-3 gap-4">

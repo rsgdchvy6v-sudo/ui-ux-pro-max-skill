@@ -6,6 +6,7 @@ import { useApi } from "@/hooks/useApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { ApprovalType, Priority, User } from "@/lib/types";
+import Drawer from "@/components/Drawer";
 
 const TYPE_LABELS: Record<ApprovalType, string> = {
   PRIORITY_OVERRIDE: "Priority Override",
@@ -17,7 +18,7 @@ const TYPE_LABELS: Record<ApprovalType, string> = {
 };
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-700",
+  PENDING: "bg-gold-100 text-gold-800",
   APPROVED: "bg-emerald-100 text-emerald-700",
   REJECTED: "bg-rose-100 text-rose-700",
 };
@@ -116,7 +117,7 @@ export default function ApprovalsPanel({ bundle, onChanged }: { bundle: Interact
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-slate-900">Approval Requests</h3>
+        <span className="section-label !mb-0 !border-b-0 !pb-0">Approval Requests</span>
         {canRequest && (
           <button className="btn-secondary" onClick={() => setOpen(true)}>
             + Request Approval
@@ -124,82 +125,99 @@ export default function ApprovalsPanel({ bundle, onChanged }: { bundle: Interact
         )}
       </div>
 
-      {approvals.length === 0 && <p className="text-sm text-slate-400">No approval requests for this interaction.</p>}
+      {approvals.length === 0 && <p className="text-sm text-stone-400">No approval requests for this interaction.</p>}
       <div className="space-y-2">
         {approvals.map((a) => (
-          <div key={a.approvalId} className="rounded-lg border border-slate-200 p-2.5 text-sm">
+          <div key={a.approvalId} className="rounded-lg border border-stone-200 border-l-4 border-l-gold-400 p-2.5 text-sm">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-slate-800">{a.title}</span>
+              <span className="font-medium text-stone-800">{a.title}</span>
               <span className={`pill ${statusStyles[a.status]}`}>{a.status}</span>
             </div>
-            <div className="text-xs text-slate-500 mt-0.5">{TYPE_LABELS[a.type]}</div>
+            <div className="text-xs text-stone-500 mt-0.5">{TYPE_LABELS[a.type]}</div>
             {a.status !== "PENDING" && a.decisionNotes && (
-              <div className="text-xs text-slate-500 mt-1 italic">Manager notes: {a.decisionNotes}</div>
+              <div className="text-xs text-stone-500 mt-1 italic">Manager notes: {a.decisionNotes}</div>
             )}
           </div>
         ))}
       </div>
 
       {open && (
-        <div className="modal-backdrop" onClick={() => setOpen(false)}>
-          <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-            <h4 className="font-semibold text-slate-900 mb-3">Request Manager Approval</h4>
-
-            <label className="block text-xs font-medium text-slate-600 mb-1">Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value as ApprovalType)} className="input mb-3">
-              {(Object.keys(TYPE_LABELS) as ApprovalType[])
-                .filter((t) => t !== "MANAGER_REVIEW")
-                .map((t) => (
-                  <option key={t} value={t}>
-                    {TYPE_LABELS[t]}
-                  </option>
-                ))}
-            </select>
+        <Drawer
+          title="Request Manager Approval"
+          onClose={() => setOpen(false)}
+          footer={
+            <>
+              <button className="btn-ghost" onClick={() => setOpen(false)}>
+                Cancel
+              </button>
+              <button className="btn-primary" disabled={submitting} onClick={submit}>
+                {submitting ? "Submitting…" : "Submit Request"}
+              </button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Type</label>
+              <select value={type} onChange={(e) => setType(e.target.value as ApprovalType)} className="input">
+                {(Object.keys(TYPE_LABELS) as ApprovalType[])
+                  .filter((t) => t !== "MANAGER_REVIEW")
+                  .map((t) => (
+                    <option key={t} value={t}>
+                      {TYPE_LABELS[t]}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
             {type === "PRIORITY_OVERRIDE" && (
-              <>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1">
                   New priority (current: {interaction.priority})
                 </label>
-                <select value={targetPriority} onChange={(e) => setTargetPriority(e.target.value as Priority)} className="input mb-3">
+                <select value={targetPriority} onChange={(e) => setTargetPriority(e.target.value as Priority)} className="input">
                   <option value="LOW">LOW</option>
                   <option value="MEDIUM">MEDIUM</option>
                   <option value="HIGH">HIGH</option>
                 </select>
-              </>
+              </div>
             )}
 
             {type === "DOCUMENT_WAIVER" && (
               <>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Document to waive</label>
-                {problemDocs.length ? (
-                  <select value={docName} onChange={(e) => setDocName(e.target.value)} className="input mb-3">
-                    {problemDocs.map((d) => (
-                      <option key={d.name} value={d.name}>
-                        {d.name} ({d.status})
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <p className="text-sm text-slate-400 mb-3">No missing/invalid documents on this case.</p>
-                )}
-                <label className="block text-xs font-medium text-slate-600 mb-1">Waiver valid for (days)</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={expiryDays}
-                  onChange={(e) => setExpiryDays(Number(e.target.value))}
-                  className="input mb-3"
-                />
+                <div>
+                  <label className="block text-xs font-medium text-stone-600 mb-1">Document to waive</label>
+                  {problemDocs.length ? (
+                    <select value={docName} onChange={(e) => setDocName(e.target.value)} className="input">
+                      {problemDocs.map((d) => (
+                        <option key={d.name} value={d.name}>
+                          {d.name} ({d.status})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-sm text-stone-400">No missing/invalid documents on this case.</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-stone-600 mb-1">Waiver valid for (days)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={expiryDays}
+                    onChange={(e) => setExpiryDays(Number(e.target.value))}
+                    className="input"
+                  />
+                </div>
               </>
             )}
 
             {type === "FAST_TRACK" && (
-              <>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Steps to skip</label>
-                <div className="space-y-1 mb-3">
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1">Steps to skip</label>
+                <div className="space-y-1">
                   {(coreApp?.pendingSteps ?? []).map((s) => (
-                    <label key={s} className="flex items-center gap-2 text-sm text-slate-600">
+                    <label key={s} className="flex items-center gap-2 text-sm text-stone-600">
                       <input
                         type="checkbox"
                         checked={skipSteps.includes(s)}
@@ -210,15 +228,15 @@ export default function ApprovalsPanel({ bundle, onChanged }: { bundle: Interact
                       {s}
                     </label>
                   ))}
-                  {!coreApp?.pendingSteps.length && <p className="text-slate-400 text-sm">No pending steps to skip.</p>}
+                  {!coreApp?.pendingSteps.length && <p className="text-stone-400 text-sm">No pending steps to skip.</p>}
                 </div>
-              </>
+              </div>
             )}
 
             {type === "TRANSFER_APPROVAL" && (
-              <>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Transfer to</label>
-                <select value={toUserId} onChange={(e) => setToUserId(e.target.value)} className="input mb-3">
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1">Transfer to</label>
+                <select value={toUserId} onChange={(e) => setToUserId(e.target.value)} className="input">
                   <option value="">Select agent…</option>
                   {agents
                     .filter((a) => a.userId !== interaction.assignedTo)
@@ -228,34 +246,27 @@ export default function ApprovalsPanel({ bundle, onChanged }: { bundle: Interact
                       </option>
                     ))}
                 </select>
-              </>
+              </div>
             )}
 
             {type === "EXCEPTION_ELIGIBILITY" && coreApp && (
-              <p className="text-sm text-slate-500 mb-3">
+              <p className="text-sm text-stone-500">
                 Current blocking reasons: {coreApp.eligibility.reasons.join("; ") || "None on file"}
               </p>
             )}
 
-            <label className="block text-xs font-medium text-slate-600 mb-1">Justification</label>
-            <textarea
-              value={justification}
-              onChange={(e) => setJustification(e.target.value)}
-              rows={3}
-              className="input mb-4"
-              placeholder="Explain why this request should be approved…"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button className="btn-ghost" onClick={() => setOpen(false)}>
-                Cancel
-              </button>
-              <button className="btn-primary" disabled={submitting} onClick={submit}>
-                {submitting ? "Submitting…" : "Submit Request"}
-              </button>
+            <div>
+              <label className="block text-xs font-medium text-stone-600 mb-1">Justification</label>
+              <textarea
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+                rows={3}
+                className="input"
+                placeholder="Explain why this request should be approved…"
+              />
             </div>
           </div>
-        </div>
+        </Drawer>
       )}
     </div>
   );

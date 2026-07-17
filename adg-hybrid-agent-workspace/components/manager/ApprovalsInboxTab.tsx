@@ -16,7 +16,7 @@ const TYPE_LABELS: Record<ApprovalType, string> = {
 };
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-700",
+  PENDING: "bg-gold-100 text-gold-700",
   APPROVED: "bg-emerald-100 text-emerald-700",
   REJECTED: "bg-rose-100 text-rose-700",
 };
@@ -65,22 +65,22 @@ export default function ApprovalsInboxTab() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`pill ${filter === f ? "bg-brand-600 text-white" : "bg-white border border-slate-200 text-slate-600"}`}
+            className={`pill ${filter === f ? "bg-brand-600 text-white" : "bg-white border border-stone-200 text-stone-600"}`}
           >
             {f}
           </button>
         ))}
       </div>
 
-      <div className="card divide-y divide-slate-100">
-        {loading && <p className="p-4 text-slate-400 text-sm">Loading…</p>}
-        {!loading && filtered.length === 0 && <p className="p-4 text-slate-400 text-sm">No approval requests here.</p>}
+      <div className="card divide-y divide-stone-100">
+        {loading && <p className="p-4 text-stone-400 text-sm">Loading…</p>}
+        {!loading && filtered.length === 0 && <p className="p-4 text-stone-400 text-sm">No approval requests here.</p>}
         {filtered.map((a) => (
           <div key={a.approvalId} className="p-4 space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
-                <div className="font-medium text-slate-800">{a.title}</div>
-                <div className="text-xs text-slate-500">
+                <div className="font-medium text-stone-800">{a.title}</div>
+                <div className="text-xs text-stone-500">
                   {TYPE_LABELS[a.type]} · Requested by {a.requestedByUserId} ·{" "}
                   <Link href={`/interactions/${a.interactionId}`} className="text-brand-600 hover:underline">
                     {a.interactionId}
@@ -89,7 +89,7 @@ export default function ApprovalsInboxTab() {
               </div>
               <span className={`pill ${statusStyles[a.status]}`}>{a.status}</span>
             </div>
-            <p className="text-sm text-slate-600">{a.justification}</p>
+            <p className="text-sm text-stone-600">{a.justification}</p>
 
             {a.status === "PENDING" ? (
               <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export default function ApprovalsInboxTab() {
                 </button>
               </div>
             ) : (
-              <div className="text-xs text-slate-500 italic">
+              <div className="text-xs text-stone-500 italic">
                 Decided by {a.decidedByUserId} — {a.decisionNotes}
               </div>
             )}

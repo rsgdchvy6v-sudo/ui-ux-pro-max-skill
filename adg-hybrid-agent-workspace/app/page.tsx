@@ -27,14 +27,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-900 via-brand-700 to-brand-500 px-4">
       <div className="card w-full max-w-2xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">ADG Unified Hybrid Agent Workspace</h1>
-          <p className="text-slate-500 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-stone-900">ADG Unified Hybrid Agent Workspace</h1>
+          <p className="text-stone-500 mt-1 text-sm">
             Demo login — pick a user. No password required.
           </p>
         </div>
 
         {loading ? (
-          <p className="text-center text-slate-400">Loading users…</p>
+          <p className="text-center text-stone-400">Loading users…</p>
         ) : (
           <div className="grid sm:grid-cols-3 gap-4">
             {users.map((u) => (
@@ -50,8 +50,8 @@ export default function LoginPage() {
                     .slice(0, 2)
                     .join("")}
                 </div>
-                <div className="font-semibold text-slate-900">{u.name}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{u.userId}</div>
+                <div className="font-semibold text-stone-900">{u.name}</div>
+                <div className="text-xs text-stone-500 mt-0.5">{u.userId}</div>
                 <div className="mt-3 flex items-center gap-2">
                   <span
                     className={`pill ${

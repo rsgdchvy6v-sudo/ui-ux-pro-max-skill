@@ -31,14 +31,14 @@ export default function ManagerDashboardPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-900">Manager Dashboard</h1>
+      <h1 className="text-xl font-bold text-stone-900">Manager Dashboard</h1>
 
-      <div className="flex flex-wrap gap-1 border-b border-slate-200 pb-2">
+      <div className="flex flex-wrap gap-1 border-b border-stone-200 pb-2">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`pill ${tab === t ? "bg-brand-600 text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"}`}
+            className={`pill ${tab === t ? "bg-brand-600 text-white" : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-100"}`}
           >
             {t}
           </button>

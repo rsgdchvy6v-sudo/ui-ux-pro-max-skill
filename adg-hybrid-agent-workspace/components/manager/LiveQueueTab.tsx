@@ -45,11 +45,11 @@ export default function LiveQueueTab() {
     }
   }
 
-  if (loading || !summary) return <p className="text-slate-400 p-4">Loading…</p>;
+  if (loading || !summary) return <p className="text-stone-400 p-4">Loading…</p>;
 
   return (
-    <div className="card divide-y divide-slate-100">
-      <div className="p-3 grid grid-cols-12 gap-2 text-xs font-medium text-slate-500">
+    <div className="card divide-y divide-stone-100">
+      <div className="p-3 grid grid-cols-12 gap-2 text-xs font-medium text-stone-500">
         <div className="col-span-3">Customer</div>
         <div className="col-span-2">Service</div>
         <div className="col-span-1">Mode</div>
@@ -57,7 +57,7 @@ export default function LiveQueueTab() {
         <div className="col-span-2">Status</div>
         <div className="col-span-3">Force-call</div>
       </div>
-      {summary.liveQueue.length === 0 && <p className="p-4 text-slate-400 text-sm">Queue is empty.</p>}
+      {summary.liveQueue.length === 0 && <p className="p-4 text-stone-400 text-sm">Queue is empty.</p>}
       {summary.liveQueue.map(({ interaction, customer }) => (
         <ForceCallRow
           key={interaction.interactionId}
@@ -104,7 +104,7 @@ function ForceCallRow({
           {customerName}
         </Link>
       </div>
-      <div className="col-span-2 text-slate-600">{serviceName}</div>
+      <div className="col-span-2 text-stone-600">{serviceName}</div>
       <div className="col-span-1">
         <ModePill mode={mode} />
       </div>

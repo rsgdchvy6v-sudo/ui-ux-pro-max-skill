@@ -19,7 +19,7 @@ export default function Chrome({ children }: { children: ReactNode }) {
   }, [loading, currentUser, isLoginPage, router]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-slate-500">Loading…</div>;
+    return <div className="min-h-screen flex items-center justify-center text-stone-500">Loading…</div>;
   }
 
   if (isLoginPage || !currentUser) {

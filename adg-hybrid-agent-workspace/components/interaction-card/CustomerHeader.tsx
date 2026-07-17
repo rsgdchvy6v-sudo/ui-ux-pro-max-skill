@@ -42,15 +42,15 @@ export default function CustomerHeader({ bundle, onChanged }: { bundle: Interact
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-lg text-slate-900">{customer.name}</h2>
+              <h2 className="font-bold text-lg text-stone-900">{customer.name}</h2>
               {customer.flags.map((f) => (
                 <span key={f} className="pill bg-violet-100 text-violet-700">
                   {f}
                 </span>
               ))}
-              <span className="pill bg-slate-100 text-slate-600">{customer.segment}</span>
+              <span className="pill bg-stone-100 text-stone-600">{customer.segment}</span>
             </div>
-            <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
+            <div className="text-xs text-stone-500 mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
               <span>
                 Emirates ID: <span className="font-mono">{customer.emiratesId}</span>
               </span>
@@ -76,7 +76,7 @@ export default function CustomerHeader({ bundle, onChanged }: { bundle: Interact
           </button>
         )}
         {customer.masked && (
-          <span className="pill bg-amber-100 text-amber-700 shrink-0">Masked view (Agent)</span>
+          <span className="pill bg-gold-100 text-gold-700 shrink-0">Masked view (Agent)</span>
         )}
       </div>
     </div>

@@ -6,7 +6,7 @@ import { AuditLogEntry } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
 
 const severityStyles: Record<string, string> = {
-  INFO: "bg-slate-100 text-slate-600",
+  INFO: "bg-stone-100 text-stone-600",
   SECURITY: "bg-violet-100 text-violet-700",
   RISK: "bg-rose-100 text-rose-700",
 };
@@ -85,23 +85,23 @@ export default function AuditLogTab() {
         <input type="date" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
       </div>
 
-      <div className="card divide-y divide-slate-100">
-        {loading && <p className="p-4 text-slate-400 text-sm">Loading…</p>}
-        {!loading && entries.length === 0 && <p className="p-4 text-slate-400 text-sm">No audit entries match these filters.</p>}
+      <div className="card divide-y divide-stone-100">
+        {loading && <p className="p-4 text-stone-400 text-sm">Loading…</p>}
+        {!loading && entries.length === 0 && <p className="p-4 text-stone-400 text-sm">No audit entries match these filters.</p>}
         {entries.map((e) => (
           <div key={e.auditId} className="p-3 text-sm">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
-                <span className="font-medium text-slate-800">{e.actionType.replace(/_/g, " ")}</span>{" "}
-                <span className="text-xs text-slate-400">by {e.actorUserId} ({e.actorRole})</span>
+                <span className="font-medium text-stone-800">{e.actionType.replace(/_/g, " ")}</span>{" "}
+                <span className="text-xs text-stone-400">by {e.actorUserId} ({e.actorRole})</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`pill ${severityStyles[e.severity ?? "INFO"]}`}>{e.severity}</span>
-                <span className="text-xs text-slate-400">{formatDateTime(e.timestamp)}</span>
+                <span className="text-xs text-stone-400">{formatDateTime(e.timestamp)}</span>
               </div>
             </div>
-            <p className="text-slate-600 mt-1">{e.summary}</p>
-            <div className="text-xs text-slate-400 mt-1">
+            <p className="text-stone-600 mt-1">{e.summary}</p>
+            <div className="text-xs text-stone-400 mt-1">
               {e.entityType} · {e.entityId} · channel {e.channel}
             </div>
             {(e.before !== undefined || e.after !== undefined) && (
@@ -115,14 +115,14 @@ export default function AuditLogTab() {
             {expanded === e.auditId && (
               <div className="grid sm:grid-cols-2 gap-2 mt-2">
                 <div>
-                  <div className="text-xs font-medium text-slate-500 mb-1">Before</div>
-                  <pre className="text-xs bg-slate-50 border border-slate-200 rounded-md p-2 overflow-x-auto">
+                  <div className="text-xs font-medium text-stone-500 mb-1">Before</div>
+                  <pre className="text-xs bg-stone-50 border border-stone-200 rounded-md p-2 overflow-x-auto">
                     {JSON.stringify(e.before ?? null, null, 2)}
                   </pre>
                 </div>
                 <div>
-                  <div className="text-xs font-medium text-slate-500 mb-1">After</div>
-                  <pre className="text-xs bg-slate-50 border border-slate-200 rounded-md p-2 overflow-x-auto">
+                  <div className="text-xs font-medium text-stone-500 mb-1">After</div>
+                  <pre className="text-xs bg-stone-50 border border-stone-200 rounded-md p-2 overflow-x-auto">
                     {JSON.stringify(e.after ?? null, null, 2)}
                   </pre>
                 </div>

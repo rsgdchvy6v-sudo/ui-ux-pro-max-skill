@@ -78,22 +78,22 @@ export default function QueuePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Queue Simulator</h1>
-        <p className="text-sm text-slate-500">Issue, call, start, and complete physical queue tokens.</p>
+        <h1 className="text-xl font-bold text-stone-900">Queue Simulator</h1>
+        <p className="text-sm text-stone-500">Issue, call, start, and complete physical queue tokens.</p>
       </div>
 
       <section>
-        <h2 className="font-semibold text-slate-800 mb-2">Waiting ({waiting.length})</h2>
-        <div className="card divide-y divide-slate-100">
-          {loading && <p className="p-4 text-slate-400 text-sm">Loading…</p>}
-          {!loading && waiting.length === 0 && <p className="p-4 text-slate-400 text-sm">No customers waiting.</p>}
+        <h2 className="font-semibold text-stone-800 mb-2">Waiting ({waiting.length})</h2>
+        <div className="card divide-y divide-stone-100">
+          {loading && <p className="p-4 text-stone-400 text-sm">Loading…</p>}
+          {!loading && waiting.length === 0 && <p className="p-4 text-stone-400 text-sm">No customers waiting.</p>}
           {waiting.map(({ interaction, customer }) => (
             <div key={interaction.interactionId} className="p-3 flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <div className="font-medium text-slate-800">
-                  {customer?.name} <span className="text-xs text-slate-400 font-mono">· token {interaction.queue?.token}</span>
+                <div className="font-medium text-stone-800">
+                  {customer?.name} <span className="text-xs text-stone-400 font-mono">· token {interaction.queue?.token}</span>
                 </div>
-                <div className="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                <div className="text-xs text-stone-500 flex items-center gap-2 mt-0.5">
                   <ModePill mode={interaction.mode} />
                   <PriorityPill priority={interaction.priority} />
                   {interaction.serviceName}
@@ -121,17 +121,17 @@ export default function QueuePage() {
       </section>
 
       <section>
-        <h2 className="font-semibold text-slate-800 mb-2">My Active Tokens</h2>
-        <div className="card divide-y divide-slate-100">
-          {!loading && active.length === 0 && <p className="p-4 text-slate-400 text-sm">Nothing called or in service right now.</p>}
+        <h2 className="font-semibold text-stone-800 mb-2">My Active Tokens</h2>
+        <div className="card divide-y divide-stone-100">
+          {!loading && active.length === 0 && <p className="p-4 text-stone-400 text-sm">Nothing called or in service right now.</p>}
           {active.map(({ interaction, customer }) => (
             <div key={interaction.interactionId} className="p-3 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <Link href={`/interactions/${interaction.interactionId}`} className="font-medium text-brand-700 hover:underline">
                   {customer?.name}
                 </Link>{" "}
-                <span className="text-xs text-slate-400 font-mono">token {interaction.queue?.token}</span>
-                <div className="text-xs text-slate-500 mt-0.5">
+                <span className="text-xs text-stone-400 font-mono">token {interaction.queue?.token}</span>
+                <div className="text-xs text-stone-500 mt-0.5">
                   {interaction.queue?.counter ?? "—"} · <StatusPill status={interaction.status} />
                 </div>
               </div>

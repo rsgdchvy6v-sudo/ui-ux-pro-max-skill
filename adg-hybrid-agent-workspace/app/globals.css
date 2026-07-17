@@ -8,7 +8,7 @@ body {
 }
 
 body {
-  @apply bg-slate-100 text-slate-900;
+  @apply bg-cream-50 text-stone-800;
 }
 
 ::-webkit-scrollbar {
@@ -16,11 +16,11 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full;
+  @apply bg-stone-300 rounded-full;
 }
 
 .card {
-  @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+  @apply bg-white rounded-xl border border-stone-200 shadow-sm;
 }
 
 .btn {
@@ -30,26 +30,52 @@ body {
   @apply btn bg-brand-600 text-white hover:bg-brand-700;
 }
 .btn-secondary {
-  @apply btn bg-slate-100 text-slate-700 hover:bg-slate-200;
+  @apply btn bg-gold-50 text-gold-800 border border-gold-200 hover:bg-gold-100;
 }
 .btn-danger {
-  @apply btn bg-rose-600 text-white hover:bg-rose-700;
+  @apply btn bg-rose-700 text-white hover:bg-rose-800;
 }
 .btn-ghost {
-  @apply btn text-slate-600 hover:bg-slate-100;
+  @apply btn text-stone-500 hover:bg-stone-100;
 }
 
 .input {
-  @apply w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500;
+  @apply w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500;
 }
 
 .pill {
   @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold;
 }
 
-.modal-backdrop {
-  @apply fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4;
+/* Uppercase section label used at the top of card groups, e.g. "SESSION CONTROLS" */
+.section-label {
+  @apply text-xs font-bold tracking-wider uppercase text-gold-700 border-b border-stone-200 pb-2 mb-3 block;
 }
-.modal-panel {
-  @apply card w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto;
+
+/* Bold KPI tile, e.g. "14 / Citizens Served Today" */
+.stat-tile {
+  @apply rounded-xl border border-stone-200 bg-white p-4 text-center;
+}
+.stat-tile .stat-value {
+  @apply text-2xl font-bold text-stone-900;
+}
+.stat-tile .stat-label {
+  @apply text-xs text-stone-500 mt-1;
+}
+
+/* Right-side slide-over drawer, replacing centered modals */
+.drawer-backdrop {
+  @apply fixed inset-0 bg-stone-900/40 z-50;
+}
+.drawer-panel {
+  @apply fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col;
+}
+.drawer-header {
+  @apply flex items-center justify-between gap-3 bg-brand-700 text-white px-5 py-4;
+}
+.drawer-body {
+  @apply p-5 overflow-y-auto flex-1;
+}
+.drawer-footer {
+  @apply flex items-center justify-end gap-2 border-t border-stone-200 px-5 py-3;
 }
